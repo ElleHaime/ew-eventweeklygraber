@@ -215,7 +215,7 @@ class parserTask extends \Phalcon\CLI\Task
         	switch ($msg['type']) {
         		case 'friend_going_event':
         				foreach ($newEvents as $id => $ev) {
-                            if (!$this->cacheData->exists('member.friends.go.' . $msg['args'][2] . '.' . $id)) {
+                            if (!$this -> cacheData -> exists('member.friends.go.' . $msg['args'][2] . '.' . $id)) {
                                 $events = array('member_id' => $msg['args'][2],
                                    			 	'event_id' => $id);
                                 $obj = new \Models\EventMemberFriend();

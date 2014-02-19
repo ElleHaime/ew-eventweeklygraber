@@ -53,7 +53,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 continue;
             }
 
-            if ($query['name'] == 'friend_event' && !empty($friendsUid)) {
+            if ($query['name'] == 'friend_event' && isset($friendsUid) && !empty($friendsUid)) {
                 $start = $query['start'];
                 $limit = $query['limit'];
                 $fUids = implode(',', $friendsUid);
@@ -92,7 +92,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 continue;
             }
 
-            if ($query['name'] == 'friend_going_event' && !empty($friendsGoingUid)) {
+            if ($query['name'] == 'friend_going_event' && isset($friendsGoingUid) && !empty($friendsGoingUid)) {
                 $start = $query['start'];
                 $limit = $query['limit'];
                 $eChunked = array_chunk($friendsGoingUid, 100);
@@ -146,7 +146,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 continue;
             }
 
-            if ($query['name'] == 'user_going_event') {
+            if ($query['name'] == 'user_going_event' && isset($userGoingUid) && !empty($userGoingUid)) {
                 $start = $query['start'];
                 $limit = $query['limit'];
                 $eids = implode(',', $userGoingUid);
@@ -186,7 +186,8 @@ class harvesterTask extends \Phalcon\CLI\Task
                 continue;
             }
 
-            if ($query['name'] == 'page_event' && !empty($pagesUid)) {
+            if ($query['name'] == 'page_event' && isset($pagesUid) && !empty($pagesUid)) {
+
                 $start = $query['start'];
                 $limit = $query['limit'];
                 $pUids = implode(',', $pagesUid);
@@ -195,7 +196,6 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $pUids);
                     $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                     $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
 
                     if (count($result -> event) > 0) {
                         $this -> publishToBroker($result, $args, $query['name']);
