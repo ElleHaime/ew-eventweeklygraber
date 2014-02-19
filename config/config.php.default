@@ -1,0 +1,56 @@
+<?php
+
+$cfg = [
+	'database' => [
+		'adapter' => 'Mysql',
+		'host' => 'localhost',
+		'username' => 'root',
+		'password' => 'root',
+		'dbname' => 'ew',
+		'charset' => 'utf8'
+	],
+
+	'cache' => [
+		'adapter' => 'Memcache',
+		'cacheDir' => '',
+		'host' => '127.0.0.1',
+		'port' => '11211',
+		'persistent' => false,
+		'lifetime' => '84600'
+	],
+
+	'queue' => [
+		'adapter' => 'RabbitMQ',
+		'host' => 'localhost',
+		'vhost' => '/',
+		'port' => '5672',
+		'login' => 'guest',
+		'password' => 'guest',
+		'harvester' => [
+			'exchange' => 'amq.fanout',
+			'routing_key' => 'harvester'
+		],
+		'distributor' => [
+			'exchange' => 'amq.fanout',
+			'routing_key' => 'distributor'
+		]
+	],
+
+	'application' => [
+		'modelsDir' => APPLICATION_PATH . '/models',
+		'libraryDir' => APPLICATION_PATH . '/library',
+
+		'GeoIp2' => [
+            'userId' => 86277,
+            'licenseKey' => 'gAsqWYLrLpdh'
+        ],
+
+		'uploadDir' => '/var/www/EventWeekly/public/upload/',
+
+		'defautTask' => 'observer',
+		'defaultAction' => 'observe'
+	],
+
+	'daemon' => []
+
+];
