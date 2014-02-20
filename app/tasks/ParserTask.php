@@ -22,12 +22,16 @@ class parserTask extends \Phalcon\CLI\Task
 								  ]);
 		$this -> queue -> getQueue();
 
-		while ($envelope = $this -> queue -> getItem()) {
-			if($envelope) {
-				$this -> queue -> ackItem($envelope);
-				$this -> parse($envelope);
-			}
-		}
+		while (true) {
+            $envelope = $this -> queue -> getItem(); 
+
+            if($envelope) {
+                $this -> queue -> ackItem($envelope);
+                $this -> parse($envelope);
+            } else {
+                sleep(2);
+            }
+        }
 	}
 
 	protected function parse($message)

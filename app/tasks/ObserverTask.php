@@ -21,8 +21,8 @@ class observerTask extends \Phalcon\CLI\Task
 
 			foreach ($tasks as $task) {
 				$args = unserialize($task -> parameters);
-				$task -> state = Cron::STATE_HANDLING;
-				$task -> update();
+				//$task -> state = Cron::STATE_HANDLING;
+				$task -> delete();
 
 				$this -> console -> handle(['task' => 'harvester', 
 											'action' => 'harvest',

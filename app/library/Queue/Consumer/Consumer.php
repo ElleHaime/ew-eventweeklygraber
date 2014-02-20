@@ -20,6 +20,11 @@ class Consumer extends \Queue\Base
 		}
 	}
 
+	public function consumeItem($arg)
+	{
+		return $this -> queue -> consume($arg);
+	}
+
 	public function getItem()
 	{
 		return $this -> queue -> get();
