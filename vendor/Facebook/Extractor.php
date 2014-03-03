@@ -59,7 +59,7 @@ class Extractor
                   LIMIT $start, $lim',
                 'type' => 'final',
                 'start' => 0,
-                'limit' => 200,
+                'limit' => 50,
                 'patterns' => array('/\$start/',
                     '/\$lim/',
                     '/\$userUid/',
@@ -90,7 +90,7 @@ class Extractor
                     LIMIT $start, $lim',
                 'type' => 'final',
                 'start' => 0,
-                'limit' => 200,
+                'limit' => 50,
                 'patterns' => array('/\$start/',
                     '/\$lim/',
                     '/\$userUid/',
@@ -121,7 +121,7 @@ class Extractor
                     LIMIT $start, $lim',
                 'type' => 'final',
                 'start' => 0,
-                'limit' => 200,
+                'limit' => 50,
                 'patterns' => array('/\$start/',
                     '/\$lim/',
                     '/\$userUid/',
@@ -129,10 +129,10 @@ class Extractor
             ),
             array(
                 'order' => 8,
-                'name' => 'page_uid',
+                'name' => 'user_page_uid',
                 'query' => 'SELECT page_id
-              FROM page_fan
-              WHERE uid = $userUid',
+                      FROM page_admin
+                      WHERE uid = $userUid',
                 'type' => 'prepare',
                 'start' => false,
                 'limit' => false,
@@ -140,6 +140,33 @@ class Extractor
             ),
             array(
                 'order' => 9,
+                'name' => 'user_page_event',
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                    FROM event
+                    WHERE creator IN ($userPageUid)
+                    AND start_time > ' . $timelimit . ' 
+                    ORDER BY eid                  
+                    LIMIT $start, $lim',
+                'type' => 'final',
+                'start' => 0,
+                'limit' => 50,
+                'patterns' => array('/\$start/',
+                    '/\$lim/',
+                    '/\$userPageUid/')
+            ),
+            array(
+                'order' => 10,
+                'name' => 'page_uid',
+                'query' => 'SELECT page_id
+                      FROM page_fan
+                      WHERE uid = $userUid',
+                'type' => 'prepare',
+                'start' => false,
+                'limit' => false,
+                'patterns' => array('/\$userUid/')
+            ),
+            array(
+                'order' => 11,
                 'name' => 'page_event',
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
                     FROM event
@@ -149,7 +176,7 @@ class Extractor
                     LIMIT $start, $lim',
                 'type' => 'final',
                 'start' => 0,
-                'limit' => 200,
+                'limit' => 50,
                 'patterns' => array('/\$start/',
                     '/\$lim/',
                     '/\$userUid/',

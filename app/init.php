@@ -1,5 +1,3 @@
-#!/usr/bin/php
-
 <?php
 
 use Phalcon\DI\FactoryDefault\CLI as CliDI,
@@ -25,6 +23,7 @@ $di -> set('loader', [
 						'models' => APPLICATION_PATH . '/app/models',
 						'library' => APPLICATION_PATH . '/app/library',
 						'tasks' => APPLICATION_PATH . '/app/tasks',
+						'jobs' => APPLICATION_PATH . '/app/jobs',
 						'vendor' => APPLICATION_PATH . '/vendor']
 					]
 				 ]
@@ -40,6 +39,8 @@ $di -> set('loader', [
 						'Queue\Consumer' => APPLICATION_PATH . '/app/library/Queue/Consumer',
 						'Categoryzator' => APPLICATION_PATH . '/vendor/Categoryzator/',
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
+						'Jobs' => APPLICATION_PATH . '/app/jobs',
+						'Jobs\Parser' => APPLICATION_PATH . '/app/jobs/Parser',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
 						'Models' => APPLICATION_PATH . '/app/models']
@@ -114,29 +115,7 @@ $cache = new \Phalcon\Cache\Backend\Memcache($frontCache,
 $di -> set('cacheData', $cache);
 
 $arguments = array();
-$params = array();
 
-foreach($argv as $k => $arg) {
-	if($k == 1) {
- 		$arguments['task'] = $arg;
-	} elseif($k == 2) {
- 		$arguments['action'] = $arg;
-	} elseif($k >= 3) {
-		$params[] = $arg;
-	}
-}
-
-if(count($params) > 0) {
-	$arguments['params'] = $params;
-}
-
-define('CURRENT_TASK', (isset($argv[1]) ? $argv[1] : null));
-define('CURRENT_ACTION', (isset($argv[2]) ? $argv[2] : null));
-
-try {
-	$console -> handle($arguments);
-} catch (\Phalcon\Exception $e) {
-	echo $e -> getMessage();
-	exit(255);
-}
+define('CURRENT_TASK', null);
+define('CURRENT_ACTION', null);
 

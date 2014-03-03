@@ -20,12 +20,12 @@ class harvesterTask extends \Phalcon\CLI\Task
 								   'port' => $this -> config -> queue -> port,
 								   'login' => $this -> config -> queue -> login,
 								   'password' => $this -> config -> queue -> password,
-								   'exchange' => $this -> config -> queue -> harvester -> exchange,
+								   'exchangeName' => $this -> config -> queue -> harvester -> exchange,
+                                   'exchangeType' => $this -> config -> queue -> harvester -> type,
 								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
 								  ]);
 		$this -> queue -> setExchange();
         $queries = $this -> fb -> getQueriesScope();
-
 
         foreach ($queries as $key => $query) {
 
@@ -33,6 +33,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 $replacements = array($args[1]);
                 $result = $this -> fb -> getCurlFQL(preg_replace($query['patterns'], $replacements, $query['query']), 
                 									$args[0]);
+//print_r($result);                
                 if (count($result -> event) > 0) {
 					$this -> publishToBroker($result, $args, $query['name']);
 				}
@@ -44,7 +45,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 $replacements = array($args[1]);
                 $result = $this -> fb -> getCurlFQL(preg_replace($query['patterns'], $replacements, $query['query']), 
                 									$args[0]);
-
+//print_r($result);                
                 if (count($result -> friend_info) > 0) {
                 	foreach ($result -> friend_info as $friend) {
                 		$friendsUid[] = json_decode(json_encode($friend), true)['uid2'];
@@ -62,7 +63,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $fUids);
                     $result = $this -> fb -> getCurlFQL(preg_replace($query['patterns'], $replacements, $query['query']), 
                     								$args[0]);
-               
+//print_r($result);               
                     if (count($result -> event) > 0) {
 						$this -> publishToBroker($result, $args, $query['name']);
 
@@ -83,7 +84,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 $replacements = array(implode(',', $friendsUid));
                 $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                 $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
+//print_r($result);
                 if (count($result -> event_member) > 0) {
                     foreach ($result -> event_member as $event_friend) {
                         $friendsGoingUid[] = json_decode(json_encode($event_friend), true)['eid'];
@@ -104,7 +105,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $eids);
                     $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                     $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
+//print_r($result);
                     if (count($result -> event) > 0) {
 
 						$this -> publishToBroker($result, $args, $query['name']);
@@ -138,6 +139,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 $replacements = array($args[1]);
                 $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                 $result = $this -> fb -> getCurlFQL($fql, $args[0]);
+//print_r($result);                
                 if (count($result -> event_member) > 0) {
                     foreach ($result -> event_member as $event_user) {
                         $userGoingUid[] = json_decode(json_encode($event_user), true)['eid'];
@@ -155,7 +157,46 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $eids);
                     $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                     $result = $this -> fb -> getCurlFQL($fql, $args[0]);
+//print_r($result);
+                    if (count($result -> event) > 0) {
+                        $this -> publishToBroker($result, $args, $query['name']);
 
+                        if (count($result -> event) < (int)$limit) {
+                            $start = false;
+                        } else {
+                            $start = $start + $limit;
+                        }
+                    } else {
+                        $start = false;
+                    }
+                } while ($start !== false);
+
+                continue;
+            }
+
+            if ($query['name'] == 'user_page_uid') {
+                $replacements = array($args[1]);
+                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
+                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
+//print_r($result);
+                if (count($result -> page_admin) > 0) {
+                    foreach ($result -> page_admin as $user_page) {
+                        $userPagesUid[] = json_decode(json_encode($user_page), true)['page_id'];
+                    }
+                }
+                continue;
+            }
+
+
+            if ($query['name'] == 'user_page_event' && isset($userPagesUid) && !empty($userPagesUid)) {
+                $start = $query['start'];
+                $limit = $query['limit'];
+                $upUids = implode(',', $userPagesUid);
+
+                do {
+                    $replacements = array($start, $limit, $upUids);
+                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
+                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
                     if (count($result -> event) > 0) {
                         $this -> publishToBroker($result, $args, $query['name']);
 
@@ -177,7 +218,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                 $replacements = array($args[1]);
                 $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                 $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
+//print_r($result);
                 if (count($result -> page_fan) > 0) {
                     foreach ($result -> page_fan as $page) {
                         $pagesUid[] = json_decode(json_encode($page), true)['page_id'];
@@ -196,7 +237,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $pUids);
                     $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                     $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
+//print_r($result);
                     if (count($result -> event) > 0) {
                         $this -> publishToBroker($result, $args, $query['name']);
 
@@ -214,7 +255,7 @@ class harvesterTask extends \Phalcon\CLI\Task
             }
         }
 
-        echo "done \n\r";
+        print_r("done \n\r");
 	}
 
 	protected function publishToBroker($result, $args, $resultType)
@@ -223,7 +264,6 @@ class harvesterTask extends \Phalcon\CLI\Task
         	$data = ['args' => $args,
         			 'item' => json_decode(json_encode($event), true),
         			 'type' => $resultType];
-
         	$this -> queue -> publish(serialize($data));
         }
 	}

@@ -1,56 +1,40 @@
 <?php
 
-namespace Tasks;
+namespace Jobs\Parser;
 
-use \Vendor\Facebook\Extractor,
-	\Queue\Consumer\Consumer;
-
-
-class parserTask extends \Phalcon\CLI\Task
+class Facebook
 {
-	protected $queue;
+    public $cacheData;
 
-	public function listenAction()
-	{	
-		$this -> queue = new Consumer();
-		$this -> queue -> connect(['host' => $this -> config -> queue -> host,
-								   'port' => $this -> config -> queue -> port,
-								   'login' => $this -> config -> queue -> login,
-								   'password' => $this -> config -> queue -> password,
-								   'exchange' => $this -> config -> queue -> harvester -> exchange,
-								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
-								  ]);
-		$this -> queue -> getQueue();
 
-		while (true) {
-            $envelope = $this -> queue -> getItem(); 
-
-            if($envelope) {
-                $this -> queue -> ackItem($envelope);
-                $this -> parse($envelope);
-            } else {
-                sleep(2);
-            }
-        }
+	public function __construct(\Phalcon\DI $dependencyInjector)
+	{
+		$this -> cacheData = $dependencyInjector -> get('cacheData');
+        $this -> config = $dependencyInjector -> get('config');
 	}
 
-	protected function parse($message)
-	{
-		$msg = unserialize($message -> getBody());
+	public function run(\AMQPEnvelope $data)
+	{	
+		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		$locationsScope = $this -> cacheData -> get('locations');
 
-		if (!$this -> cacheData -> exists('fbe_' . $ev['eid']) && (isset($ev['venue']) && !empty($ev['venue']) || $ev['type'] == 'user_event')) 
+		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
         {
             $result = array();
             $result['fb_uid'] = $ev['eid'];
             $result['fb_creator_uid'] = $ev['creator'];
             $result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']);
             $result['name'] = $ev['name'];
+            $result['address'] = '';
 
             if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
                 $ext = explode('.', $ev['pic_big']);
-                $logo = 'fb_' . $ev['eid'] . '.' . end($ext);
+                if (strpos(end($ext), '?')) {
+                    $logo = 'fb_' . $ev['eid'] . '.' . substr(end($ext), 0, strpos(end($ext), '?'));
+                } else {
+                    $logo = 'fb_' . $ev['eid'] . '.' . end($ext);
+                }
                 $result['logo'] = $logo;
             }
 
@@ -69,15 +53,21 @@ class parserTask extends \Phalcon\CLI\Task
 
             if ($this -> cacheData -> exists('member_' . $ev['creator'])) {
                 $result['member_id'] = $this -> cacheData -> get('member_' . $ev['creator']);
-            }
+            } 
+
 
             $result['location_id'] = '';
-            if (isset($ev['venue']['id']) && !($this -> cacheData -> exists('venue_' . $ev['venue']['id']))) {
+            $venueCreated = false;
 
-                if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && 
-                    $ev['venue']['latitude'] != '' && $ev['venue']['longitude'] != '') 
-                {
-
+            if (isset($ev['venue']['id']) && $this -> cacheData -> exists('venue_' . $ev['venue']['id'])) {
+                $venue = $this -> cacheData -> get('venue_' . $ev['venue']['id']);
+                $result['venue_id'] = $venue['venue_id'];
+                $result['address'] = $venue['address'];
+                $result['latitude'] = $venue['latitude'];
+                $result['longitude'] = $venue['longitude'];
+                $result['location_id'] = $venue['location_id'];
+            } else {
+                if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
                     if (!empty($locationsScope)) {
                         foreach ($locationsScope as $loc_id => $coords) {
                             if ($ev['venue']['latitude'] >= $coords['latMin'] && $coords['latMax'] >= $ev['venue']['latitude'] &&
@@ -85,9 +75,10 @@ class parserTask extends \Phalcon\CLI\Task
                             {
                                 $result['location_id'] = $loc_id;
 
-                                if ($ev['venue']['street'] != '') {
+                                if (isset($ev['venue']['street'])) {
                                     $result['latitude'] = $ev['venue']['latitude'];
                                     $result['longitude'] = $ev['venue']['longitude'];
+                                    $result['address'] = $ev['venue']['street'];
                                 } else {
                                     $result['latitude'] = ($coords['latMin'] + $coords['latMax']) / 2;
                                     $result['longitude'] = ($coords['lonMin'] + $coords['lonMax']) / 2;
@@ -115,23 +106,24 @@ class parserTask extends \Phalcon\CLI\Task
                         $result['location_id'] = $loc -> id;
                         $result['latitude'] = ($loc -> latitudeMin + $loc -> latitudeMax) / 2;
                         $result['longitude'] = ($loc -> longitudeMin + $loc -> longitudeMax) / 2;
-                    }                                
-                } 
+                    }
+                }
 
-                if ($ev['venue']['street'] != '') {
+
+                if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && isset($ev['venue']['id'])) {
                     $venueObj = new \Models\Venue();
+                    isset($ev['location']) ? $venueName = $ev['location'] : '';
                     $venueObj -> assign(array(
                             'fb_uid' => $ev['venue']['id'],
                             'location_id' => $result['location_id'],
-                            'name' => $ev['location'],
+                            'name' => $venueName,
                             'address' => $ev['venue']['street'],
                             'latitude' => $ev['venue']['latitude'],
                             'longitude' => $ev['venue']['longitude']
                     ));
-                    if ($venueObj -> save()) {
-                        $result['venue_id'] = $venueObj -> id;
-                        $result['address'] = $venueObj -> address;
 
+                    if ($venueObj -> save() != false) {
+                        $venueCreated = $venueObj;
                         $this -> cacheData -> save('venue_' . $venueObj -> fb_uid, 
                                                 array('venue_id' => $venueObj -> id,
                                                       'address' => $venueObj -> address,
@@ -140,29 +132,18 @@ class parserTask extends \Phalcon\CLI\Task
                                                       'longitude' => $venueObj->longitude));
                     }
                 }
-            } elseif (isset($ev['venue']['id']) && $this -> cacheData -> exists('venue_' . $ev['venue']['id'])) {
-                $venue = $this -> cacheData -> get('venue_' . $ev['venue']['id']);
-                $result['venue_id'] = $venue['venue_id'];
-                $result['address'] = $venue['address'];
-                $result['latitude'] = $venue['latitude'];
-                $result['longitude'] = $venue['longitude'];
-                $result['location_id'] = $venue['location_id'];
-            } else {
-                if (isset($ev['location']) && $ev['location'] != '' && !empty($locationScope)) 
-                {
-                    foreach ($locationsScope as $loc_id => $coords) {
-                        if (strpos($ev['location'], $coords['city']))
-                        {
-                            $result['location_id'] = $loc_id;
-                            $result['latitude'] = ($coords['latMin'] + $coords['latMax']) / 2;
-                            $result['longitude'] = ($coords['lonMin'] + $coords['lonMax']) / 2;
 
-                            break;
-                        }
+                if ($venueCreated !== false) {
+                    $result['venue_id'] = $venueObj -> id;
+                    $result['address'] = $venueObj -> address;
+                } else {
+                    $result['venue_id'] = null;
+                    if (isset($ev['venue']['name'])) {
+                        $result['address'] = $ev['venue']['name'];
                     }
                 }
             }
-
+print_r($result);
             $Text = new \Categoryzator\Core\Text();
             $Text -> addContent($result['name'])
                   -> addContent($result['description'])
@@ -182,30 +163,14 @@ class parserTask extends \Phalcon\CLI\Task
             $eventObj = new \Models\Event();
             $eventObj -> assign($result);
 
-            if ($eventObj -> save()) {
+            if ($eventObj -> save() != false) {
                 if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
-                    $ch =  curl_init($ev['pic_big']);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
-                    $content = curl_exec($ch);
-                    if ($content) {
-                        if (!is_dir($this -> config -> application -> uploadDir . 'img/event/' . $eventObj->id)) {
-                            mkdir($this -> config -> application -> uploadDir . 'img/event/' . $eventObj->id);
-                        }
-                        $fPath = $this -> config -> application -> uploadDir . 'img/event/' . $eventObj->id.'/'.$logo;
-                        $f = fopen($fPath, 'wb');
-                        fwrite($f, $content);
-                        fclose($f);
-                        chmod($fPath, 0777);
-                    }
+                    $this -> saveEventImage($ev['pic_big'], $eventObj);
+                }
+                if (isset($ev['pic_cover']) && !empty($ev['pic_cover'])) {
+                    $this -> saveEventImage($ev['pic_cover']['source'], $eventObj, 'cover');
                 }
 
-                $images = new \Models\EventImage();
-                $images -> assign(array(
-                        'event_id' => $eventObj -> id,
-                        'image' => $ev['pic_big']
-                    ));
-                $images -> save();
                 $this -> cacheData -> save('fbe_' . $ev['eid'], $eventObj -> id);
                 $newEvents[$eventObj -> id] = $eventObj -> fb_uid;
             }
@@ -257,7 +222,56 @@ class parserTask extends \Phalcon\CLI\Task
 	                        }
 	                    }
         			break;
+
+                case 'user_page_event':
+                        foreach ($newEvents as $id => $ev) {
+                            $obj = \Models\Event::findFirst('id = ' . $id);
+                            $obj -> member_id = $msg['args'][2];
+                            $obj -> update();
+                        }
+                    break;
         	}
-        } 
+        }
 	}
+
+
+    public function saveEventImage($source, \Models\Event $event, $imgType = null, $width = false, $height = false)
+    {
+        $ext = explode('.', $source);
+        if (strpos(end($ext), '?')) {
+            $img = 'fb_' . $event -> fb_uid . '.' . substr(end($ext), 0, strpos(end($ext), '?'));
+        } else {
+            $img = 'fb_' . $event -> fb_uid . '.' . end($ext);
+        }
+
+        $ch = curl_init($source);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $content = curl_exec($ch);
+
+        if (is_null($imgType)) {
+            $fDir = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id;
+            $fPath = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $img;
+        } else {
+            $fDir = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $imgType;
+            $fPath = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $imgType . '/' . $img;            
+        }
+
+        if ($content) {
+            if (!is_dir($fDir)) {
+                mkdir($fDir, 0777, true);
+            }
+            $f = fopen($fPath, 'wb');
+            fwrite($f, $content);
+            fclose($f);
+            chmod($fPath, 0777);
+        }
+
+        $images = new \Models\EventImage();
+        $images -> assign(array(
+                'event_id' => $event -> id,
+                'image' => $img,
+                'type' => $imgType));
+        $images -> save();
+    }
 }

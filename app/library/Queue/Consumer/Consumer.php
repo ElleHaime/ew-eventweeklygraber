@@ -13,16 +13,16 @@ class Consumer extends \Queue\Base
 			$this -> queue = new \AMQPQueue($this -> channel);
 			$this -> queue -> setName('direct_messages');
 			$this -> queue -> declareQueue();
-			$this -> queue -> bind($this -> exchangeType, $this -> routingKey);
+			$this -> queue -> bind($this -> exchangeName, $this -> routingKey);
 
 		} catch (\Exception $e) {
 			echo 'Oooops: ' . $e -> getMessage();
 		}
 	}
 
-	public function consumeItem($arg)
+	public function consumeItem($object, $callback)
 	{
-		return $this -> queue -> consume($arg);
+		return $this -> queue -> consume($object, $callback);
 	}
 
 	public function getItem()

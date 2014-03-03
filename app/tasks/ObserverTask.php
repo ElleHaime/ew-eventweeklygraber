@@ -15,15 +15,19 @@ class observerTask extends \Phalcon\CLI\Task
 		$tasks = $cron -> find(array('state = ' . Cron::STATE_PENDING, 'name = ' . self::FB_TASK_NAME));
 
 		if ($tasks) {
-
-			$this -> console -> handle(['task' => 'parser', 
-										'action' => 'listen']);
-
 			foreach ($tasks as $task) {
 				$args = unserialize($task -> parameters);
-				//$task -> state = Cron::STATE_HANDLING;
-				$task -> delete();
-
+				/*if ($task -> delete() === false) {
+			        echo "Sorry, I can't delete the task right now: \n";
+			    } else {
+			        print_r("The task was deleted successfully! \n\r");
+			    }
+			    foreach ($task -> getMessages() as $message) {
+		            echo ($message . "\n");
+		        }*/
+		        $task -> state = Cron::STATE_HANDLING;
+		        $task -> update();
+		        
 				$this -> console -> handle(['task' => 'harvester', 
 											'action' => 'harvest',
 											'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id']]]);

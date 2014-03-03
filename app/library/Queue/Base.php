@@ -7,6 +7,7 @@ class Base
 	public $connection 		= false;
 	public $exchange 		= false;
 	public $exchangeType;
+	public $exchangeName;
 	public $routingKey;
 	public $channel;
 
@@ -23,7 +24,8 @@ class Base
 				die('Not connected :(' . PHP_EOL);
 			} 
 
-			$this -> exchangeType = $config['exchange'];
+			$this -> exchangeType = $config['exchangeType'];
+			$this -> exchangeName = $config['exchangeName'];
 			$this -> routingKey = $config['routing_key'];
 						
 		} catch (\Exception $e) {
