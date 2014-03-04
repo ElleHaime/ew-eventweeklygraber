@@ -143,7 +143,7 @@ class Facebook
                     }
                 }
             }
-print_r($result);
+
             $Text = new \Categoryzator\Core\Text();
             $Text -> addContent($result['name'])
                   -> addContent($result['description'])

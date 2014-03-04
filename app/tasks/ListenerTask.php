@@ -29,6 +29,6 @@ class listenerTask extends \Phalcon\CLI\Task
                 $t = new \Jobs\Parser\Facebook($this -> getDi());
                 $t -> run($job);
             } 
-        }
+       }
 	}
 }

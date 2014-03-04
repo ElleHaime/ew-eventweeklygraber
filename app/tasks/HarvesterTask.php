@@ -237,7 +237,7 @@ class harvesterTask extends \Phalcon\CLI\Task
                     $replacements = array($start, $limit, $args[1], $pUids);
                     $fql = preg_replace($query['patterns'], $replacements, $query['query']);
                     $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
+print_r($result);
                     if (count($result -> event) > 0) {
                         $this -> publishToBroker($result, $args, $query['name']);
 
