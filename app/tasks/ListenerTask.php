@@ -23,12 +23,26 @@ class listenerTask extends \Phalcon\CLI\Task
 								  ]);
 		$this -> queue -> getQueue();
 
-		while ($job = $this -> queue -> getItem()) {
+
+		while (true) {
+			$job = $this -> queue -> getItem();
+
+            if($job) {
+                $this -> queue -> ackItem($job);
+                $t = new \Jobs\Parser\Facebook($this -> getDi());
+                $t -> run($job);
+            } else {
+            	sleep(2);
+            }
+       	}
+		
+
+		/*while ($job = $this -> queue -> getItem()) {
             if($job) {
                 $this -> queue -> ackItem($job);
                 $t = new \Jobs\Parser\Facebook($this -> getDi());
                 $t -> run($job);
             } 
-       }
+       	}*/
 	}
 }
