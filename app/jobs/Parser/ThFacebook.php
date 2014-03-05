@@ -2,12 +2,12 @@
 
 namespace Jobs\Parser;
 
-class Facebook
+class ThFacebook extends \Worker
 {
     public $cacheData;
+    public $config;
 
-
-	public function __construct(\Phalcon\DI $dependencyInjector)
+	public function __construct(\Phalcon\DI $dependencyInjector, $id)
 	{
 		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
@@ -18,7 +18,7 @@ class Facebook
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		$locationsScope = $this -> cacheData -> get('locations');
-print_r($ev);
+
 		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
         {
             $result = array();

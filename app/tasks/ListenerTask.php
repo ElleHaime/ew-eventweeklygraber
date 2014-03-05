@@ -3,7 +3,9 @@
 namespace Tasks;
 
 use \Vendor\Facebook\Extractor,
-	\Queue\Consumer\Consumer;
+	\Queue\Consumer\Consumer,
+	\Library\Thread\ThreadManager,
+	\Library\Thread\Stack;
 
 
 class listenerTask extends \Phalcon\CLI\Task
@@ -29,13 +31,20 @@ class listenerTask extends \Phalcon\CLI\Task
 
             if($job) {
                 $this -> queue -> ackItem($job);
-                $t = new \Jobs\Parser\Facebook($this -> getDi());
-                $t -> run($job);
+
+               	if (!$this -> config -> threads == false) {
+	                $t = new \Jobs\Parser\Facebook($this -> getDi());
+	                $t -> run($job);
+	            } else {
+	            	$t = new ThreadManager($this -> getDi());
+	            	$work = array();
+					$work[] = $t -> submit(new Stack($job));
+					//$t -> shutdown();
+	            }
             } else {
             	sleep(2);
             }
        	}
-		
 
 		/*while ($job = $this -> queue -> getItem()) {
             if($job) {
