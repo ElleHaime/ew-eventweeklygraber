@@ -18,7 +18,7 @@ class Facebook
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		$locationsScope = $this -> cacheData -> get('locations');
-print_r($ev);
+
 		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
         {
             $result = array();

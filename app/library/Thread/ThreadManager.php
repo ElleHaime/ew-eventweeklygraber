@@ -9,16 +9,16 @@ class ThreadManager
 	public $status;
 	public $di;
 
-	public function __construct($di, $maxThreads = 10) {
+	public function __construct(\Phalcon\DI $di, $maxThreads = 10) {
 		$this -> maxThreads = $maxThreads;
 		$this -> di = $di;
 	}
 
 	/* submit Stackable to Worker */
-	public function submit(Stackable $stackable) {
+	public function submit(\Stackable $stackable) {
 		if (count($this -> workers) < $this -> maxThreads) {
 			$id = count($this -> workers);
-			$this -> workers[$id] = new ThFacebook($this -> di, $id, $data));
+			$this -> workers[$id] = new \Jobs\Parser\ThFacebook($this -> di, $id);
 			$this -> workers[$id] -> start(PTHREADS_INHERIT_NONE);
 
 			if ($this -> workers[$id] -> stack($stackable)) {

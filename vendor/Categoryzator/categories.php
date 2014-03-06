@@ -17,7 +17,6 @@ return array(
         'party',
         'drums',
         'rock',
-        'hip hop',
         'hiphop',
         'hip-hop',
         'concert',
@@ -31,6 +30,7 @@ return array(
         'pop',
         'punk',
         'r&b',
+        'rnb',
         'folk',
         'blues',
         'go-go',
@@ -39,7 +39,17 @@ return array(
         'rap',
         'dubstep',
         'reggae',
-        'award'
+        'award',
+        'contemporary',
+        'alternative',
+        'ambient',
+        'classical',
+        'eclectic',
+        'electronic',
+        'retro',
+        'traditional',
+        'festival',
+        'live'
     ),
     'sport' => array(
         'sport',
@@ -83,7 +93,10 @@ return array(
         'wrestling',
         'fifa',
         'soccer',
-        'boxing',
+        'boxing' => array(
+            'Vitali Klitschko',
+            'Muhammad Ali'
+        ),
         'karate',
         'kickboxing',
         'muay thai',
@@ -112,7 +125,9 @@ return array(
         'jump',
         'jumping',
         'throw',
-        'motoracing',
+        'motoracing' => array(
+            'Anderw Jordan'
+        ),
         'cricket',
         'wakeboarding',
         'kitesurfing',
@@ -139,7 +154,54 @@ return array(
         'rowing',
         'rugby',
         'triathlon',
-        'trampoline'
+        'trampoline',
+        'air',
+        'animal',
+        'recreational',
+        'automobile racing' => array(
+            'touring cars',
+            'rallying',
+            'single seaters',
+            'stock cars',
+            'endurance',
+            'motorsport ireland',
+            'btcc',
+            'single stage',
+            'formula 1',
+            'formula1',
+            'nascar',
+            '24 hours la mans',
+            'itcc',
+            'circuit Of ireland',
+            'gp 2',
+            'gp2',
+            'stock hatch',
+            '24 daytona',
+            'wtcc',
+            'world rally cars',
+            'gp 3',
+            'gp3',
+            'daytona 500',
+            'bishops court circuit',
+            'v8 super cars',
+            'world rally',
+            'grand prix',
+            'world touring cars',
+            'formula ford',
+            'british touring cars',
+            'red bull racing',
+            'irish touring cars'
+        ),
+        'motorcycle racing' => array(
+            'moto gp',
+            'moto cross',
+            'road racing',
+            'super bikes',
+            'quad biking',
+            'isle of man tt',
+            'honda gp team',
+            'sherries 500'
+        )
     ),
     'business' => array(
         'business',
@@ -206,23 +268,27 @@ return array(
         'fundraiser',
         'auction',
         'donation',
-        'donate'
+        'donate',
+        'family',
+        'demonstration',
+        'exhibition'
     ),
     'special' => array(
         'special',
         'vip',
-        'bal',
+        'bal'
     ),
     'art' => array(
         'art',
         'gallery',
-        'exhibition'
+        'exhibition',
+        'museum'
     ),
     'family' => array(
         'family',
         'parade',
         'celebration',
-        'show',
+        'show'
     ),
     'outdoor' => array(
         'outdoor',
