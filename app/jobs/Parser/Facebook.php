@@ -78,7 +78,11 @@ class Facebook
                                 if (isset($ev['venue']['street'])) {
                                     $result['latitude'] = $ev['venue']['latitude'];
                                     $result['longitude'] = $ev['venue']['longitude'];
-                                    $result['address'] = $ev['venue']['street'];
+                                    if (!empty($ev['venue']['street'])) {
+                                        $result['address'] = $ev['venue']['street'];
+                                    } elseif(!empty($ev['location']))  {
+                                        $result['address'] = $ev['location'];
+                                    }
                                 } else {
                                     $result['latitude'] = ($coords['latMin'] + $coords['latMax']) / 2;
                                     $result['longitude'] = ($coords['lonMin'] + $coords['lonMax']) / 2;
@@ -106,6 +110,10 @@ class Facebook
                         $result['location_id'] = $loc -> id;
                         $result['latitude'] = ($loc -> latitudeMin + $loc -> latitudeMax) / 2;
                         $result['longitude'] = ($loc -> longitudeMin + $loc -> longitudeMax) / 2;
+
+                        if (isset($ev['location'])) {
+                           $result['address'] = $ev['location'];
+                        }
                     }
                 }
 
@@ -113,14 +121,13 @@ class Facebook
                 if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && isset($ev['venue']['id'])) {
                     $venueObj = new \Models\Venue();
                     isset($ev['location']) ? $venueName = $ev['location'] : '';
-                    $venueObj -> assign(array(
+                    $venueObj -> assign([
                             'fb_uid' => $ev['venue']['id'],
                             'location_id' => $result['location_id'],
                             'name' => $venueName,
-                            'address' => $ev['venue']['street'],
+                            'address' => $result['address'],
                             'latitude' => $ev['venue']['latitude'],
-                            'longitude' => $ev['venue']['longitude']
-                    ));
+                            'longitude' => $ev['venue']['longitude']]);
 
                     if ($venueObj -> save() != false) {
                         $venueCreated = $venueObj;
@@ -138,16 +145,28 @@ class Facebook
                     $result['address'] = $venueObj -> address;
                 } else {
                     $result['venue_id'] = null;
-                    if (isset($ev['venue']['name'])) {
-                        $result['address'] = $ev['venue']['name'];
+                    if (isset($ev['location'])) {
+                        $result['address'] = $ev['location'];
                     }
                 }
             }
 
+            if (is_array($result['address'])) {
+                $result['address'] = '';
+            }
+
             $Text = new \Categoryzator\Core\Text();
-            $Text -> addContent($result['name'])
-                  -> addContent($result['description'])
-                  -> returnTag(true);
+            if (!empty($result['name'])) {
+                $Text -> addContent($result['name']);
+            } else {
+                $result['name'] = '';
+            }
+            if (!empty($result['description'])) {
+                $Text -> addContent($result['description']);
+            } else {
+                $result['description'] = '';
+            }
+            $Text -> returnTag(true);
 
             $categoryzator = new \Categoryzator\Categoryzator($Text);
             $newText = $categoryzator->analiz(\Categoryzator\Categoryzator::MULTI_CATEGORY);
@@ -158,7 +177,9 @@ class Facebook
                 $cats[$key] = new \Models\EventCategory();
                 $cats[$key]->category_id = $cat->id;
             }
-            $result['event_category'] = $cats;
+            if (!empty($cats)) {
+                $result['event_category'] = $cats;
+            }
 
             $eventObj = new \Models\Event();
             $eventObj -> assign($result);
