@@ -39,5 +39,7 @@ class Event extends \Phalcon\Mvc\Model
 		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'memberlike'));
 		$this -> hasMany('id', '\Models\EventCategory', 'event_id', array('alias' => 'event_category'));
 		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'event_like'));
+        $this -> hasMany('id', '\Models\EventTag', 'event_id', array('alias' => 'event_tag'));
+
 	}
 }

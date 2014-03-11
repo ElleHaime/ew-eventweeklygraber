@@ -2,6 +2,9 @@
 
 namespace Jobs\Parser;
 
+use Models\EventTag;
+use Models\Tag;
+
 class Facebook
 {
     public $cacheData;
@@ -171,15 +174,48 @@ class Facebook
             $categoryzator = new \Categoryzator\Categoryzator($Text);
             $newText = $categoryzator->analiz(\Categoryzator\Categoryzator::MULTI_CATEGORY);
             $cats = array();
+            $tags = array();
 
             foreach ($newText->category as $key => $c) {
                 $cat = \Models\Category::findFirst("key = '".$c."'");
                 $cats[$key] = new \Models\EventCategory();
                 $cats[$key]->category_id = $cat->id;
             }
+
+            foreach ($newText->tag as $c) {
+                foreach ($c as $key => $tag) {
+                    $Tag = Tag::findFirst("key = '".$tag."'");
+                    if ($Tag) {
+                        $tags[$key] = new EventTag();
+                        $tags[$key]->tag_id = $Tag->id;
+                    }
+                }
+            }
+
             if (!empty($cats)) {
                 $result['event_category'] = $cats;
+                $result['event_tag'] = $tags;
             }
+
+
+            /*foreach ($newText->tag as $c) {
+                foreach ($c as $key => $tag) {
+                    $Tag = TagObject::findFirst("key = '".$tag."'");
+                    if ($Tag) {
+                        $tags[$key] = new EventTagObject();
+                        $tags[$key]->tag_id = $Tag->id;
+                    }
+                }
+            }
+
+            $result['event_category'] = $cats;
+            $result['event_tag'] = $tags;
+
+            $this -> hasMany('id', '\Objects\EventCategory', 'event_id', array('alias' => 'event_category'));
+            $this -> hasMany('id', '\Objects\EventTag', 'event_id', array('alias' => 'event_tag'));
+            $eventObj = new self;
+            $eventObj -> assign($result);*/
+
 
             $eventObj = new \Models\Event();
             $eventObj -> assign($result);
