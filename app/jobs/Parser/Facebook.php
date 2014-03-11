@@ -246,7 +246,7 @@ class Facebook
 
                 case 'user_page_event':
                         foreach ($newEvents as $id => $ev) {
-                            $obj = \Models\Event::findFirst('id = ' . $id);
+                            $obj = \Models\Event::findFirst($id);
                             $obj -> member_id = $msg['args'][2];
                             $obj -> update();
                         }

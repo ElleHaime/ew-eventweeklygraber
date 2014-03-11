@@ -38,16 +38,16 @@ class Location extends \Phalcon\Mvc\Model
 				$isGeoObject = true;
 			}
 		}
-		$query = array();
+		$query = [];
 
 		if (isset($argument['longitude'])) {
-			$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'] . ' AND ' . (float)$argument['longitude'] . ' <= longitudeMax';
+			$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'];
+			$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
 		}
 		if (isset($argument['latitude'])) {
-			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'] . ' AND ' . (float)$argument['latitude'] . ' <= latitudeMax';
+			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
+			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
 		}
-
-		$query = implode(' and ', $query);
 
         if (!empty($query)) {
             $isLocationExists = self::findFirst($query);

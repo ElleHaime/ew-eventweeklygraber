@@ -1,0 +1,65 @@
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+/var/www/EventWeeklyGraber/app/inith.php
+
+/var/www/EventWeeklyGraber/app/initp.php
+
+/var/www/EventWeeklyGraber/app/inith.php
+inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+initp.php
+/var/www/EventWeeklyGraber/app/inith.php
+1
+/var/www/EventWeeklyGraber/app/initp.php
+1
+/var/www/EventWeeklyGraber/app/inith.php
+1
+/var/www/EventWeeklyGraber/app/initp.php
+1
+/var/www/EventWeeklyGraber/app/inith.php
+root 7799 7798 0 23:04 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/initp.php
+root 7799 7798 0 23:04 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/inith.php
+root 7829 7828 0 23:05 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/initp.php
+root 7829 7828 0 23:05 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/inith.php
+root 7878 7877 0 23:06 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/initp.php
+root 7878 7877 0 23:06 ? 00:00:00 /bin/sh -c cd /var/www/EventWeeklyGraber/app; ./check.sh inith.php initp.php >> /var/www/EventWeeklyGraber/logs/main.log 2>&1
+./check.sh: line 14: [: too many arguments
+/var/www/EventWeeklyGraber/app/inith.php
+1
+/var/www/EventWeeklyGraber/app/initp.php
+1
+
+
+/var/www/EventWeeklyGraber/app/inith.php
+2
+/var/www/EventWeeklyGraber/app/initp.php
+2
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+
+
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+
+
+/var/www/EventWeeklyGraber/app/inith.php
+/var/www/EventWeeklyGraber/app/initp.php
+
+
