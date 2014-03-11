@@ -20,7 +20,6 @@ check_process() {
 for SCRIPT_NAME in ${SCRIPTS[*]}
 do
 	FULL_PATH="$PWD/$SCRIPT_NAME"
-	echo $FULL_PATH
 	check_process $SCRIPT_NAME
 	CHECK_ANS=$?
 
