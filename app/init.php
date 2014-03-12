@@ -108,10 +108,11 @@ $console -> setDI($di);
 $di -> setShared('console', $console);
 
 $frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
-$cache = new \Phalcon\Cache\Backend\Memcache($frontCache, 
-											 ['host' => $config -> cache -> host,
-											  'port' => $config -> cache -> port,
-											  'persistent' => $config -> cache -> persistent]);
+$cache = new \Library\Cache\Memcache($frontCache, 
+									 ['host' => $config -> cache -> host,
+									  'port' => $config -> cache -> port,
+									  'persistent' => $config -> cache -> persistent,
+									  'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
 
 $arguments = array();
