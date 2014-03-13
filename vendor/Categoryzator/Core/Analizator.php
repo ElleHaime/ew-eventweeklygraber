@@ -105,17 +105,17 @@ class Analizator {
 
                 foreach ($tags as $key => $val) {
                     if (is_string($val)) {
-                        preg_match('/'.$val.'/i', $content, $output);
+                        preg_match('/\b'.$val.'\b/i', $content, $output);
                         if (count($output) > 0) {
                             $insert($categoryName, $val);
                         }
                     } elseif (is_array($val)) {
-                        preg_match('/'.$key.'/i', $content, $output);
+                        preg_match('/\b'.$key.'\b/i', $content, $output);
                         if (count($output) > 0) {
                             $insert($categoryName, $key);
                         }
                         foreach ($val as $subCat) {
-                            preg_match('/'.$subCat.'/i', $content, $output);
+                            preg_match('/\b'.$subCat.'\b/i', $content, $output);
                             if (count($output) > 0) {
                                 $insert($categoryName, $key);
                             }
