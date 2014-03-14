@@ -13,7 +13,7 @@ class harvesterTask extends \Phalcon\CLI\Task
 
 	public function harvestAction(array $args)
 	{
-		$this -> fb = new Extractor();
+		$this -> fb = new Extractor($this -> getDi());
 
 		$this -> queue = new Producer();
 		$this -> queue -> connect(['host' => $this -> config -> queue -> host,

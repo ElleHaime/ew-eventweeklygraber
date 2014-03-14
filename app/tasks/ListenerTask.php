@@ -23,7 +23,6 @@ class listenerTask extends \Phalcon\CLI\Task
 								  ]);
 		$this -> queue -> getQueue();
 
-
 		while (true) {
 			$job = $this -> queue -> getItem();
 

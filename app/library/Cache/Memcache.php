@@ -86,7 +86,7 @@ class Memcache extends Backend implements BackendInterface
             $lifetime = $frontend -> getLifetime();
         }
 
-        $this -> memcache -> save($this -> prefix . $keyName, $content, $lifetime, $stopBuffer);
+        $this -> memcache -> save($lastKey, $content, $lifetime, $stopBuffer);
 
         $isBuffering = $frontend -> isBuffering();
         if ($stopBuffer) {

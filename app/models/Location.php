@@ -49,12 +49,12 @@ class Location extends \Phalcon\Mvc\Model
 			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
 		}
 
+		$query = implode(' and ', $query);
         if (!empty($query)) {
             $isLocationExists = self::findFirst($query);
         }else {
             $isLocationExists = false;
         }
-
 
 		if (!$isLocationExists) {
 			if (!$isGeoObject) {
