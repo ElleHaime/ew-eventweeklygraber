@@ -6,16 +6,19 @@ use \Vendor\Facebook\FacebookApiException;
 
 class Extractor
 {
-
     private $facebook;
 
-    public function __construct()
+    public function __construct($dependencyInjector = null)
     {
-        $config = array(
-            'appId' => '166657830211705',
-            'secret' => 'e917842e47a57adb93a1e9761af4117a',
-        );
-        $this -> facebook = new \Vendor\Facebook\Facebook($config);
+        if (!is_null($dependencyInjector)) {
+            $appCfg = $dependencyInjector -> get('config');
+            $config = ['appId' => $appCfg -> facebook -> appId,
+                       'secret' => $appCfg -> facebook -> appSecret];
+
+            $this -> facebook = new \Vendor\Facebook\Facebook($config);
+        } else {
+            throw new \Exception('Facebook error: appKey and appSecret are missed');
+        }            
     }
 
     public function getQueriesScope()
