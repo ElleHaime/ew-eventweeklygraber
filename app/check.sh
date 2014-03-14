@@ -9,7 +9,7 @@ check_process() {
     fi
 
     PROCESS_NUM=$(ps -ef | grep "$1" | grep -v "grep" | grep -v "$$" | wc -l)
-    if [ $PROCESS_NUM -eq 2 ];
+    if [ $PROCESS_NUM -ge 2 ];
     then
     	return 1
     else 
