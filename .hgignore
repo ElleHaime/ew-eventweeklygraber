@@ -1,3 +1,5 @@
 .idea/*:
 config/config.php
 logs/*
+app/initp.php
+app/inith.php
