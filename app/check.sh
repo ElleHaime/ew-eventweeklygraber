@@ -11,7 +11,7 @@ check_process() {
     FULL_PATH="$PWD/$1"
     PROCESS_NUM=$(ps -ef | grep "$FULL_PATH" | grep -v "grep" | grep -v "$$" | wc -l)
    
-    if [ $PROCESS_NUM -ge 2 ];
+    if [ $PROCESS_NUM -ge 1 ];
     then
     	return 1
     else 
