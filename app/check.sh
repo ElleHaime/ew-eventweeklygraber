@@ -8,8 +8,10 @@ check_process() {
             return 0
     fi
 
-    PROCESS_NUM=$(ps -ef | grep "$1" | grep -v "grep" | grep -v "$$" | wc -l)
-    if [ $PROCESS_NUM -eq 2 ];
+    FULL_PATH="$PWD/$1"
+    PROCESS_NUM=$(ps -ef | grep "$FULL_PATH" | grep -v "grep" | grep -v "$$" | wc -l)
+   
+    if [ $PROCESS_NUM -ge 2 ];
     then
     	return 1
     else 
