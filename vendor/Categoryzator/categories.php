@@ -346,62 +346,56 @@ return array(
             'Karate',
             'Sumo Wrestling',
             'Taekwondo',
-            'boxing' => array(
-                'Boxing',
-                'Vitali Klitschko',
-                'Muhammad Ali'
-            ),
+            'boxing',
             'wrestling',
             'jujutsu'
         ),
-        'Motor Sports' => array(
-            'Automobile Racing' => array(
-                'Motorsport Ireland',
-                'Mondello Park',
-                'Brands Hatch',
-                'Bishops Court Circuit',
-                'Red Bull Racing',
-                'IrishTouring Cars',
-                'Touring Cars',
-                'BTCC',
-                'ITCC',
-                'WTCC',
-                'V8 Super Cars',
-                'World Touring CarsB',
-                'British Touring Cars',
-                'Single Seaters',
-                'Formula 1',
-                'GP 2',
-                'GP 3',
-                'Grand Prix',
-                'Formula Ford',
-                'Rallying',
-                'Formula Renault',
-                'Single Stage',
-                'Circuit Of Ireland',
-                'World Rally Cars',
-                'World Rally',
-                'Stock Cars',
-                'Nascar',
-                'Stock Hatch',
-                'Daytona 500',
-                'Endurance',
-                '24 hours la mans ',
-                '24 Daytona'
-            ),
-            'Motorcycle Racing' => array(
-                'motoracing',
-                'Super Bikes',
-                'Sherries 500',
-                'Isle Of Man TT',
-                'Road Racing',
-                'Moto Cross',
-                'Andrew Jordan',
-                'Honda GP Team',
-                'Moto GP'
-            ),
-            'Quad Biking'
+        'Automobile Racing' => array(
+            'Motorsport Ireland',
+            'Mondello Park',
+            'Brands Hatch',
+            'Bishops Court Circuit',
+            'Red Bull Racing',
+            'IrishTouring Cars',
+            'Touring Cars',
+            'BTCC',
+            'ITCC',
+            'WTCC',
+            'V8 Super Cars',
+            'World Touring CarsB',
+            'British Touring Cars',
+            'Single Seaters',
+            'Formula 1',
+            'GP 2',
+            'GP 3',
+            'Grand Prix',
+            'Formula Ford',
+            'Rallying',
+            'Formula Renault',
+            'Single Stage',
+            'Circuit Of Ireland',
+            'World Rally Cars',
+            'World Rally',
+            'Stock Cars',
+            'Nascar',
+            'Stock Hatch',
+            'Daytona 500',
+            'Endurance',
+            '24 hours la mans ',
+            '24 Daytona'
         ),
+        'Motorcycle Racing' => array(
+            'motoracing',
+            'Super Bikes',
+            'Sherries 500',
+            'Isle Of Man TT',
+            'Road Racing',
+            'Moto Cross',
+            'Andrew Jordan',
+            'Honda GP Team',
+            'Moto GP'
+        ),
+        'Quad Biking',
         'water Sports' => array(
             'Remote Control Boating',
             'Aquatics',
@@ -533,10 +527,3 @@ return array(
     ),
     'other' => array()
 );
-	
-	
-	
-
-	
-
-	

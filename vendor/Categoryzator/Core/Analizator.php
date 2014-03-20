@@ -7,8 +7,11 @@
 
 namespace Categoryzator\Core;
 
+use Categoryzator\Core\TConfig;
 
 class Analizator {
+
+    use TConfig;
 
     /**
      * @var Text string
@@ -52,6 +55,7 @@ class Analizator {
      */
     public function __construct(Text $text, $analizType)
     {
+        $this->initializeConfig();
         if (!$text instanceof Text) {
             throw new CategoryzatorException('Param $text must be a instance of Categoryzator\Core\Text object');
         }
@@ -59,8 +63,16 @@ class Analizator {
 
         $this->analizType = $analizType;
 
-        $cat = new Parser();
-        $this->categories = $cat->getCategories();
+        switch ($this->config->adapter) {
+            case 'file': $adapter = new \Categoryzator\Core\Adapter\File();
+                break;
+            case 'mysql': $adapter = new \Categoryzator\Core\Adapter\MySql();
+                break;
+            default: throw new \Exception('Invalid categoryzator adapter');
+                break;
+        }
+
+        $this->categories = $adapter->getCategories();
     }
 
     /**
@@ -105,17 +117,17 @@ class Analizator {
 
                 foreach ($tags as $key => $val) {
                     if (is_string($val)) {
-                        preg_match('/\b'.$val.'\b/i', $content, $output);
+                        preg_match('/\b'.preg_quote($val, '/').'\b/i', $content, $output);
                         if (count($output) > 0) {
                             $insert($categoryName, $val);
                         }
                     } elseif (is_array($val)) {
-                        preg_match('/\b'.$key.'\b/i', $content, $output);
+                        preg_match('/\b'.preg_quote($key, '/').'\b/i', $content, $output);
                         if (count($output) > 0) {
                             $insert($categoryName, $key);
                         }
                         foreach ($val as $subCat) {
-                            preg_match('/\b'.$subCat.'\b/i', $content, $output);
+                            preg_match('/\b'.preg_quote($subCat, '/').'\b/i', $content, $output);
                             if (count($output) > 0) {
                                 $insert($categoryName, $key);
                             }
