@@ -10,7 +10,7 @@ $config = new stdClass();
 $config->database = new stdClass();
 
 // EDIT THIS
-$config->adapter = 'file'; // adapters - 'file', 'mysql'
+$config->adapter = 'mysql'; // adapters - 'file', 'mysql'
 $config->database->host = 'localhost';
 $config->database->user = 'root';
 $config->database->password = 'pass';
