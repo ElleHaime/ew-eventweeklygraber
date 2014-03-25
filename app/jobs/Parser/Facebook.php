@@ -178,14 +178,16 @@ class Facebook
             $tags = array();
 
             foreach ($newText->category as $key => $c) {
-                $cat = \Models\Category::findFirst("key = '".$c."'");
-                $cats[$key] = new \Models\EventCategory();
-                $cats[$key]->category_id = $cat->id;
+                $Cat = \Models\Category::findFirst('key = \''.$c.'\'');
+                if ($Cat) {
+                    $cats[$key] = new \Models\EventCategory();
+                    $cats[$key]->category_id = $Cat->id;
+                }
             }
 
             foreach ($newText->tag as $c) {
                 foreach ($c as $key => $tag) {
-                    $Tag = Tag::findFirst("key = '".$tag."'");
+                    $Tag = Tag::findFirst('name = \''.$tag.'\'');
                     if ($Tag) {
                         $tags[$key] = new EventTag();
                         $tags[$key]->tag_id = $Tag->id;
