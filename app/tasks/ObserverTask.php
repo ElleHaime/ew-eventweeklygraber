@@ -26,7 +26,14 @@ class observerTask extends \Phalcon\CLI\Task
 			} else {
 				sleep(5);
 			}
-		}
+		} 
+	}
+
+	public function testrabbitAction()
+	{
+		$this -> console -> handle(['task' => 'harvester', 
+									'action' => 'test',
+									'params' => []]);
 	}
 
 	public function testAction(array $args)

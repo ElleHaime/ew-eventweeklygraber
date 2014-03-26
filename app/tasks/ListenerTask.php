@@ -21,33 +21,20 @@ class listenerTask extends \Phalcon\CLI\Task
                                    'exchangeType' => $this -> config -> queue -> harvester -> type,
 								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
 								  ]);
+		$this -> queue -> setExchange();		
 		$this -> queue -> getQueue();
-
+		
 		while (true) {
 			$job = $this -> queue -> getItem();
 
             if($job) {
                 $this -> queue -> ackItem($job);
-               //	if ($this -> config -> threads === false) {
-	                $t = new \Jobs\Parser\Facebook($this -> getDi());
-	                $t -> run($job);
-	           /* } else {
-	            	$t = new \Library\Thread\ThreadManager($this -> getDi());
-	            	$work = array();
-					$work[] = $t -> submit(new \Library\Thread\DataStack($job));
-					//$t -> shutdown();
-	            } */
+                $t = new \Jobs\Parser\Facebook($this -> getDi());
+                $t -> run($job);
             } else {
+            	print_r("No items in queue\n\r");
             	sleep(2);
             }
        	}
-
-		/*while ($job = $this -> queue -> getItem()) {
-            if($job) {
-                $this -> queue -> ackItem($job);
-                $t = new \Jobs\Parser\Facebook($this -> getDi());
-                $t -> run($job);
-            } 
-       	}*/
 	}
 }

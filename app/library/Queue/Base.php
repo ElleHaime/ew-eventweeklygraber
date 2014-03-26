@@ -23,6 +23,7 @@ class Base
 			if (!$this -> connection -> isConnected()) {
 				die('Not connected :(' . PHP_EOL);
 			} 
+			$this -> channel = new \AMQPChannel($this -> connection);
 
 			$this -> exchangeType = $config['exchangeType'];
 			$this -> exchangeName = $config['exchangeName'];
@@ -33,6 +34,18 @@ class Base
 		}
 		
 		return $this;
+	}
+
+	public function setExchange()
+	{
+		try {
+			$this -> exchange = new \AMQPExchange($this -> channel);
+			$this -> exchange -> setName($this -> exchangeName);
+			$this -> exchange -> setType($this -> exchangeType);
+
+		} catch (\Exception $e) {
+			echo 'Oooops: ' . $e -> getMessage();
+		}
 	}
 
 	public function closeConnection()

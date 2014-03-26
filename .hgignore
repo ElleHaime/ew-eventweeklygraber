@@ -1,5 +1,6 @@
 .idea/*:
-config/config.php
 logs/*
 app/initp.php
 app/inith.php
+config/config.php
+vendor/Categoryzator/config.php

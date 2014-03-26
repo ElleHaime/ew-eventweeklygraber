@@ -21,17 +21,18 @@ class Facebook
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		$locationsScope = $this -> cacheData -> get('locations');
-//print_r('raw event: ' . $ev['eid'] . "\n\r");
+
 		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
         {
-//print_r('cache exists: ' . $this -> cacheData -> get('fbe_' . $ev['eid']) . "\n\r");
-//print_r('new event: ' . 'fbe_' . $ev['eid']);
             $result = array();
             $result['fb_uid'] = $ev['eid'];
             $result['fb_creator_uid'] = $ev['creator'];
             $result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']);
             $result['name'] = $ev['name'];
             $result['address'] = '';
+            if (!empty($ev['ticket_uri'])) {
+                $result['tickets_url'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['ticket_uri']);
+            }
 
             if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
                 $ext = explode('.', $ev['pic_big']);
@@ -211,16 +212,13 @@ class Facebook
 
                 $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
+
+                $this-> cacheData -> save('events_total', $this-> cacheData -> get('events_total')+1);
             }
         } else {
             $newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
         }
 
-        /*if ($this -> cacheData -> exists('fbe_' . $ev['eid']) && isset($ev['venue'])){ 
-            $newEvents[$this -> cacheData -> get('fbe_' . $ev['eid'])] = $ev['eid'];
-        } */
-
-//print_r("\n\r\n\r\n\r");
 
         if (!empty($newEvents)) {
         	switch ($msg['type']) {
@@ -233,6 +231,8 @@ class Facebook
                                 $obj -> assign($events);
                                 $obj -> save();
                                 $this-> cacheData -> save('member.friends.go.' . $msg['args'][2] . '.' . $id, $ev);
+                                $this-> cacheData -> save('member.friends.go.summary.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('member.friends.go.summary.' . $msg['args'][2])+1);
                             }
                         }
         			break;
@@ -247,6 +247,8 @@ class Facebook
                                 $obj -> assign($events);
                                 $obj -> save();
                                 $this -> cacheData -> save('member.go.' . $msg['args'][2] . '.' . $id, $ev);
+                                $this-> cacheData -> save('member.go.summary.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('member.go.summary.' . $msg['args'][2])+1);
                             }
                         }
         			break;
@@ -260,16 +262,24 @@ class Facebook
 	                            $obj = new \Models\EventLike();
 	                            $obj -> assign($newData);
 	                            $obj -> save();
-	                            $this -> cacheData->save('member.like.' . $msg['args'][2] . '.' . $id, $ev);
+	                            $this -> cacheData -> save('member.like.' . $msg['args'][2] . '.' . $id, $ev);
+                                $this-> cacheData -> save('member.like.summary.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('member.like.summary.' . $msg['args'][2])+1);
 	                        }
 	                    }
         			break;
 
                 case 'user_page_event':
+                case 'user_event':
                         foreach ($newEvents as $ev => $id) {
-                            $obj = \Models\Event::findFirst($id);
-                            $obj -> member_id = $msg['args'][2];
-                            $obj -> update();
+                            if (!$this -> cacheData -> exists('member.create.' . $msg['args'][2] . '.' . $id)) {
+                                $obj = \Models\Event::findFirst($id);
+                                $obj -> member_id = $msg['args'][2];
+                                $obj -> update();
+                                $this -> cacheData->save('member.create.' . $msg['args'][2] . '.' . $id, $ev);
+                                $this-> cacheData -> save('member.create.summary.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('member.create.summary.' . $msg['args'][2])+1);
+                            }
                         }
                     break;
         	}

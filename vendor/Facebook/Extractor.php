@@ -29,7 +29,7 @@ class Extractor
             array(
                 'order' => 1,
                 'name' => 'user_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE eid IN (SELECT eid FROM event_member WHERE uid=$userUid)
                     AND creator = $userUid
@@ -54,7 +54,7 @@ class Extractor
             array(
                 'order' => 3,
                 'name' => 'friend_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                   WHERE creator IN ($friendsUid)
                       AND start_time > ' . $timelimit . ' 
@@ -84,7 +84,7 @@ class Extractor
             array(
                 'order' => 5,
                 'name' => 'friend_going_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE eid IN ($eventsUid)
                     AND creator != $userUid
@@ -115,7 +115,7 @@ class Extractor
             array(
                 'order' => 7,
                 'name' => 'user_going_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE eid IN ($userEventsUid)
                     AND creator != $userUid
@@ -144,7 +144,7 @@ class Extractor
             array(
                 'order' => 9,
                 'name' => 'user_page_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE creator IN ($userPageUid)
                     AND start_time > ' . $timelimit . ' 
@@ -171,7 +171,7 @@ class Extractor
             array(
                 'order' => 11,
                 'name' => 'page_event',
-                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, creator, start_time, end_time
+                'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE creator IN ($pageUid)
                     AND start_time > ' . $timelimit . ' 

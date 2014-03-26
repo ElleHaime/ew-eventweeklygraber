@@ -13,8 +13,8 @@ $config->database = new stdClass();
 $config->adapter = 'mysql'; // adapters - 'file', 'mysql'
 $config->database->host = 'localhost';
 $config->database->user = 'root';
-$config->database->password = 'pass';
-$config->database->database = 'eventweekly_dev';
+$config->database->password = 'root';
+$config->database->database = 'ew';
 
 $config->database->table_category = 'category';
 $config->database->table_tag = 'tag';

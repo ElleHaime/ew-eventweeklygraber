@@ -11,6 +11,29 @@ class harvesterTask extends \Phalcon\CLI\Task
 	protected $fb;
 	protected $queue;
 
+
+    public function testAction(array $args)
+    {
+
+        $this -> queue = new Producer();
+        $this -> queue -> connect(['host' => $this -> config -> queue -> host,
+                                   'port' => $this -> config -> queue -> port,
+                                   'login' => $this -> config -> queue -> login,
+                                   'password' => $this -> config -> queue -> password,
+                                   'exchangeName' => $this -> config -> queue -> harvester -> exchange,
+                                   'exchangeType' => $this -> config -> queue -> harvester -> type,
+                                   'routing_key' => $this -> config -> queue -> harvester -> routing_key
+                                  ]);
+        $this -> queue -> setExchange();
+        print_r($this -> queue);
+        for ($i = 0; $i < 1000; $i++) {
+            echo ".";
+            $this -> queue -> publish('Element #' . $i . ' published');
+        }
+        print_r("\n\rready");
+    }
+
+
 	public function harvestAction(array $args)
 	{
 		$this -> fb = new Extractor($this -> getDi());
