@@ -31,7 +31,7 @@ class Facebook
             $result['name'] = $ev['name'];
             $result['address'] = '';
             if (!empty($ev['ticket_uri'])) {
-                $result['tickets_url'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['ticket_uri']);
+                $result['tickets_url'] = $ev['ticket_uri'];
             }
 
             if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
@@ -233,8 +233,8 @@ class Facebook
                                 $obj -> assign($events);
                                 $obj -> save();
                                 $this-> cacheData -> save('member.friends.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('member.friends.go.summary.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('member.friends.go.summary.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userFriendsGoing.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('userFriendsGoing.' . $msg['args'][2])+1);
                             }
                         }
         			break;
@@ -249,8 +249,8 @@ class Facebook
                                 $obj -> assign($events);
                                 $obj -> save();
                                 $this -> cacheData -> save('member.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('member.go.summary.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('member.go.summary.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsGoing.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('userEventsGoing.' . $msg['args'][2])+1);
                             }
                         }
         			break;
@@ -265,8 +265,8 @@ class Facebook
 	                            $obj -> assign($newData);
 	                            $obj -> save();
 	                            $this -> cacheData -> save('member.like.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('member.like.summary.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('member.like.summary.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsLiked.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('userEventsLiked.' . $msg['args'][2])+1);
 	                        }
 	                    }
         			break;
@@ -279,8 +279,8 @@ class Facebook
                                 $obj -> member_id = $msg['args'][2];
                                 $obj -> update();
                                 $this -> cacheData->save('member.create.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('member.create.summary.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('member.create.summary.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsCreated.' . $msg['args'][2], 
+                                            $this-> cacheData -> get('userEventsCreated.' . $msg['args'][2])+1);
                             }
                         }
                     break;
