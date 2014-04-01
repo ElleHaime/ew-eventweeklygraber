@@ -1,4 +1,7 @@
 .idea/*:
+.settings/*
+.project
+.buildpath
 logs/*
 app/initp.php
 app/inith.php

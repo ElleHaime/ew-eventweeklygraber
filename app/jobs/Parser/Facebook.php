@@ -215,7 +215,7 @@ class Facebook
                 $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
 
-                $this-> cacheData -> save('events_total', $this-> cacheData -> get('events_total')+1);
+                $this-> cacheData -> save('eventsGTotal', $this-> cacheData -> get('eventsGTotal')+1);
             }
         } else {
             $newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
