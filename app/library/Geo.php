@@ -92,7 +92,10 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 								$location['longitudeMin'] = (float)$scope -> geometry -> bounds -> southwest -> lng;
 								$location['latitudeMax'] = (float)$scope -> geometry -> bounds -> northeast -> lat;
 								$location['longitudeMax'] = (float)$scope -> geometry -> bounds -> northeast -> lng;
-							}						
+								$location['resultSet'] = true;
+							} else {
+								$location['resultSet'] = false;
+							}
 							return $location;
 						} 
 					} else {

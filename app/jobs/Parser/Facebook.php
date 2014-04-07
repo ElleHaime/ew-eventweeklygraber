@@ -54,7 +54,7 @@ class Facebook
             }
 
             if (empty($result['end_date']) && !empty($result['start_date'])) {
-                $result['end_date'] = date('Y-m-d H:m:i', strtotime($result['start_date'].' + 1 week'));
+                $result['end_date'] = date('Y-m-d H:m:i', strtotime('tomorrow -1 minute'));
             }
 
             if ($this -> cacheData -> exists('member_' . $ev['creator'])) {
@@ -102,22 +102,24 @@ class Facebook
                         $locator = new \Models\Location();
                         $loc = $locator -> createOnChange(array('latitude' => $ev['venue']['latitude'],
                                                                 'longitude' => $ev['venue']['longitude']));
-                        $locationsScope[$loc -> id] = array('latMin' => $loc -> latitudeMin,
-                                                            'lonMin' => $loc -> longitudeMin,
-                                                            'latMax' => $loc -> latitudeMax,
-                                                            'lonMax' => $loc -> longitudeMax,
-                                                            'city' => $loc -> city,
-                                                            'country' => $loc -> country);
-                         
-                        $this -> cacheData -> delete('locations');
-                        $this -> cacheData -> save('locations', $locationsScope);  
+                        if ($loc) {
+                            $locationsScope[$loc -> id] = array('latMin' => $loc -> latitudeMin,
+                                                                'lonMin' => $loc -> longitudeMin,
+                                                                'latMax' => $loc -> latitudeMax,
+                                                                'lonMax' => $loc -> longitudeMax,
+                                                                'city' => $loc -> city,
+                                                                'country' => $loc -> country);
+                             
+                            $this -> cacheData -> delete('locations');
+                            $this -> cacheData -> save('locations', $locationsScope);  
 
-                        $result['location_id'] = $loc -> id;
-                        $result['latitude'] = ($loc -> latitudeMin + $loc -> latitudeMax) / 2;
-                        $result['longitude'] = ($loc -> longitudeMin + $loc -> longitudeMax) / 2;
+                            $result['location_id'] = $loc -> id;
+                            $result['latitude'] = ($loc -> latitudeMin + $loc -> latitudeMax) / 2;
+                            $result['longitude'] = ($loc -> longitudeMin + $loc -> longitudeMax) / 2;
 
-                        if (isset($ev['location'])) {
-                           $result['address'] = $ev['location'];
+                            if (isset($ev['location'])) {
+                               $result['address'] = $ev['location'];
+                            }
                         }
                     }
                 }

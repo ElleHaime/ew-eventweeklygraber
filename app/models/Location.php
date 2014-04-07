@@ -52,7 +52,7 @@ class Location extends \Phalcon\Mvc\Model
 		$query = implode(' and ', $query);
         if (!empty($query)) {
             $isLocationExists = self::findFirst($query);
-        }else {
+        } else {
             $isLocationExists = false;
         }
 
@@ -84,14 +84,10 @@ class Location extends \Phalcon\Mvc\Model
 		if (!empty($newLoc)) {
 			$isLocationExists -> latitude = $newLoc['latitude'];
 			$isLocationExists -> longitude = $newLoc['longitude'];
-		} else {
+		} elseif (!empty($argument) && isset($argument['resultSet'])) {
 			$isLocationExists -> latitude = (float)$argument['latitude'];
 			$isLocationExists -> longitude = (float)$argument['longitude'];
 		}
-		$isLocationExists -> latitudeMin = (float)$isLocationExists -> latitudeMin;
-		$isLocationExists -> latitudeMax = (float)$isLocationExists -> latitudeMax;
-		$isLocationExists -> longitudeMin = (float)$isLocationExists -> longitudeMin;
-		$isLocationExists -> longitudeMax = (float)$isLocationExists -> longitudeMax;
 	
 		return $isLocationExists;
 	} 
