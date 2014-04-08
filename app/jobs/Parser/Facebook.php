@@ -54,7 +54,7 @@ class Facebook
             }
 
             if (empty($result['end_date']) && !empty($result['start_date'])) {
-                $result['end_date'] = date('Y-m-d H:m:i', strtotime('tomorrow -1 minute'));
+                $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
             }
 
             if ($this -> cacheData -> exists('member_' . $ev['creator'])) {
