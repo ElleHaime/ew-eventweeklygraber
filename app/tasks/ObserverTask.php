@@ -8,11 +8,9 @@ class observerTask extends \Phalcon\CLI\Task
 {
 	const FB_TASK_NAME = 'extract_facebook_events';
 
-
 	public function observeAction() {
 		while (true) {
 			$tasks = Cron::find(['state = ' . Cron::STATE_PENDING, 'name = "' . self::FB_TASK_NAME . '"']);
-
 			if ($tasks) {
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
@@ -23,9 +21,8 @@ class observerTask extends \Phalcon\CLI\Task
 												'action' => 'harvest',
 												'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id']]]);
 				}
-			} else {
-				sleep(5);
 			}
+			sleep(2);
 		} 
 	}
 
