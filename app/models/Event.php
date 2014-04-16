@@ -25,6 +25,8 @@ class Event extends \Phalcon\Mvc\Model
 	public $logo;
 	public $is_description_full = 0;
     public $deleted = 0;
+    
+    public $cacheData; 
 
 
 	public function initialize()
@@ -41,5 +43,39 @@ class Event extends \Phalcon\Mvc\Model
 		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'event_like'));
         $this -> hasMany('id', '\Models\EventTag', 'event_id', array('alias' => 'event_tag'));
 
+        $this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
+	
+	public function getCreatedEventsCount($uId)
+	{
+		if ($uId) {
+			$query = new \Phalcon\Mvc\Model\Query("SELECT Models\Event.id, Models\Event.fb_uid
+													FROM Models\Event
+													WHERE Models\Event.deleted = 0
+													AND Models\Event.member_id = " . $uId, $this -> getDI());
+			$event = $query -> execute();
+			return $event;
+		} else {
+			return 0;
+		}
+	}
+	
+
+	public function setCache()
+	{
+		$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid
+												FROM Models\Event
+												WHERE event_status = 1", $this -> getDI());
+		$events = $query -> execute();
+	
+		if ($events) {
+			foreach ($events as $event) {
+				if ($event -> fb_uid && !$this -> cacheData -> exists('fbe_' . $event -> fb_uid)) {
+					$this -> cacheData -> save('fbe_' . $event -> fb_uid, $event -> id);
+				}
+			}
+		}
+		$this -> cacheData -> save('fb_events', 'cached');
+	}
+	
 }

@@ -17,14 +17,38 @@ class Location extends \Phalcon\Mvc\Model
 	public $latitudeMax;
 	public $longitudeMax;
 	public $parent_id = 0;
-	 
+
+	public $cacheData;
 
 	public function initialize()
 	{
 		$this -> hasMany('id', '\Models\Member', 'location_id', array('alias' => 'member'));
 		$this -> hasMany('id', '\Models\Event', 'location_id', array('alias' => 'event'));
 		$this -> hasMany('id', '\Models\Venue', 'location_id', array('alias' => 'venue'));
+		
+		$this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
+	
+	
+	public function setCache()
+	{
+		$query = new \Phalcon\Mvc\Model\Query("SELECT id, latitudeMin, longitudeMin, latitudeMax, longitudeMax, city, country FROM Models\Location", $this -> getDI());
+		$locations = $query -> execute();
+		$locationsCache = array();
+	
+		if ($locations) {
+			foreach ($locations as $loc) {
+				$locationsCache[$loc -> id] = array('latMin' => $loc -> latitudeMin,
+						'lonMin' => $loc -> longitudeMin,
+						'latMax' => $loc -> latitudeMax,
+						'lonMax' => $loc -> longitudeMax,
+						'city' => $loc -> city,
+						'country' => $loc -> country);
+			}
+		}
+		$this -> cacheData -> save('locations', $locationsCache);
+	}
+	
 
 	public function createOnChange($argument = array(), $network = 'facebook')
 	{

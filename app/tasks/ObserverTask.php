@@ -7,19 +7,30 @@ use \Models\Cron;
 class observerTask extends \Phalcon\CLI\Task
 {
 	const FB_TASK_NAME = 'extract_facebook_events';
+	const CACHE_TASK_NAME = 'cache_events_counters';
 
 	public function observeAction() {
 		while (true) {
-			$tasks = Cron::find(['state = ' . Cron::STATE_PENDING, 'name = "' . self::FB_TASK_NAME . '"']);
+			$tasks = Cron::find(['state = ' . Cron::STATE_PENDING, 'name in("' . self::FB_TASK_NAME . '", "' . self::CACHE_TASK_NAME . '")']);
 			if ($tasks) {
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
 			        $task -> state = Cron::STATE_HANDLING;
 			        $task -> update();
 			        
-					$this -> console -> handle(['task' => 'harvester', 
-												'action' => 'harvest',
-												'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id']]]);
+			        switch ($task -> name) {
+			        	case self::CACHE_TASK_NAME:
+				        		$this -> console -> handle(['task' => 'cacher',
+											        		'action' => 'counters',
+											        		'params' => [$args['member_id']]]);
+			        		break;
+			        		
+			        	case self::FB_TASK_NAME: 
+				        		$this -> console -> handle(['task' => 'harvester',
+									        				'action' => 'harvest',
+									        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id']]]);
+			        		break;
+			        }
 				}
 			}
 			sleep(2);

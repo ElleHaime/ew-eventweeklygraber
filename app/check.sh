@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPTS=($1 $2)
+SCRIPTS=($1 $2 $3)
 
 check_process() {
 	if [ "$1" = "" ];
@@ -9,8 +9,8 @@ check_process() {
     fi
 
     FULL_PATH="$PWD/$1"
+    
     PROCESS_NUM=$(ps -ef | grep "$FULL_PATH" | grep -v "grep" | grep -v "$$" | wc -l)
-   
     if [ $PROCESS_NUM -ge 1 ];
     then
     	return 1

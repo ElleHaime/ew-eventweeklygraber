@@ -41,6 +41,7 @@ $di -> set('loader', [
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
 						'Jobs' => APPLICATION_PATH . '/app/jobs',
 						'Jobs\Parser' => APPLICATION_PATH . '/app/jobs/Parser',
+						'Jobs\Cacher' => APPLICATION_PATH . '/app/jobs/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
 						'Models' => APPLICATION_PATH . '/app/models']
