@@ -234,9 +234,14 @@ class Facebook
                                 $obj = new \Models\EventMemberFriend();
                                 $obj -> assign($events);
                                 $obj -> save();
+                                
+                                $newCount = $this-> cacheData -> get('userFriendsGoing.' . $msg['args'][2])+1;
                                 $this-> cacheData -> save('member.friends.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userFriendsGoing.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('userFriendsGoing.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userFriendsGoing.' . $msg['args'][2], $newCount);
+                                
+                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+                                $objC -> userFriendsGoing =  $newCount;
+                                $objC -> update();
                             }
                         }
         			break;
@@ -250,9 +255,15 @@ class Facebook
                                 $obj = new \Models\EventMember();
                                 $obj -> assign($events);
                                 $obj -> save();
+                                
+                                $newCount = $this-> cacheData -> get('userEventsGoing.' . $msg['args'][2])+1;
                                 $this -> cacheData -> save('member.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsGoing.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('userEventsGoing.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsGoing.' . $msg['args'][2], $newCount);
+                                
+                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+                                $objC -> userEventsGoing =  $newCount;
+                                $objC -> update();
+                                
                             }
                         }
         			break;
@@ -266,9 +277,15 @@ class Facebook
 	                            $obj = new \Models\EventLike();
 	                            $obj -> assign($newData);
 	                            $obj -> save();
+	                            
+	                            $newCount = $this-> cacheData -> get('userEventsLiked.' . $msg['args'][2])+1;
 	                            $this -> cacheData -> save('member.like.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsLiked.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('userEventsLiked.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsLiked.' . $msg['args'][2], $newCount);
+                                
+                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+                                $objC -> userEventsLiked =  $newCount;
+                                $objC -> update();
+                         
 	                        }
 	                    }
         			break;
@@ -280,9 +297,14 @@ class Facebook
                                 $obj = \Models\Event::findFirst($id);
                                 $obj -> member_id = $msg['args'][2];
                                 $obj -> update();
+                                
+                                $newCount = $this-> cacheData -> get('userEventsCreated.' . $msg['args'][2])+1;
                                 $this -> cacheData->save('member.create.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsCreated.' . $msg['args'][2], 
-                                            $this-> cacheData -> get('userEventsCreated.' . $msg['args'][2])+1);
+                                $this-> cacheData -> save('userEventsCreated.' . $msg['args'][2], $newCount);
+                                
+                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+                                $objC -> userEventsCreated =  $newCount;
+                                $objC -> update();
                             }
                         }
                     break;
