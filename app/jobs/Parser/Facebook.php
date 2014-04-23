@@ -328,11 +328,11 @@ class Facebook
         $content = curl_exec($ch);
 
         if (is_null($imgType)) {
-            $fDir = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id;
-            $fPath = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $img;
+            $fDir = $this -> config -> application -> uploadDir . $event -> id;
+            $fPath = $this -> config -> application -> uploadDir . $event -> id . '/' . $img;
         } else {
-            $fDir = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $imgType;
-            $fPath = $this -> config -> application -> uploadDir . 'img/event/' . $event -> id . '/' . $imgType . '/' . $img;            
+            $fDir = $this -> config -> application -> uploadDir . $event -> id . '/' . $imgType;
+            $fPath = $this -> config -> application -> uploadDir . $event -> id . '/' . $imgType . '/' . $img;            
         }
 
         if ($content) {

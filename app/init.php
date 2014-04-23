@@ -24,7 +24,8 @@ $di -> set('loader', [
 						'library' => APPLICATION_PATH . '/app/library',
 						'tasks' => APPLICATION_PATH . '/app/tasks',
 						'jobs' => APPLICATION_PATH . '/app/jobs',
-						'vendor' => APPLICATION_PATH . '/vendor']
+						'vendor' => APPLICATION_PATH . '/vendor',
+						'upload' => APPLICATION_PATH . '../upload']
 					]
 				 ]
 				],
@@ -71,6 +72,7 @@ $di -> set('db',
 				  'username' => $config -> database -> username,
 				  'password' => $config -> database -> password,
 				  'dbname' => $config -> database -> dbname,
+				  'port' => $config -> database -> port,
                   'charset' => $config -> database -> charset
 			)
 		);
