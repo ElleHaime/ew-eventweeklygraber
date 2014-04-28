@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Cacher;
+namespace Jobs\Grabber\Cacher;
 
 class Totalcache
 {

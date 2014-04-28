@@ -1,6 +1,6 @@
 <?php
 
-namespace Tasks;
+namespace Tasks\Grabber;
 
 use \Vendor\Facebook\Extractor,
 	\Queue\Consumer\Consumer;

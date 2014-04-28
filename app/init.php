@@ -23,7 +23,8 @@ $di -> set('loader', [
 						'models' => APPLICATION_PATH . '/app/models',
 						'library' => APPLICATION_PATH . '/app/library',
 						'tasks' => APPLICATION_PATH . '/app/tasks',
-						'jobs' => APPLICATION_PATH . '/app/jobs',
+						'grabberJobs' => APPLICATION_PATH . '/app/jobs/Grabber',
+						'applicationJobs' => APPLICATION_PATH . '/app/jobs/Application',
 						'vendor' => APPLICATION_PATH . '/vendor',
 						'upload' => APPLICATION_PATH . '../upload']
 					]
@@ -40,9 +41,11 @@ $di -> set('loader', [
 						'Queue\Consumer' => APPLICATION_PATH . '/app/library/Queue/Consumer',
 						'Categoryzator' => APPLICATION_PATH . '/vendor/Categoryzator/',
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
-						'Jobs' => APPLICATION_PATH . '/app/jobs',
-						'Jobs\Parser' => APPLICATION_PATH . '/app/jobs/Parser',
-						'Jobs\Cacher' => APPLICATION_PATH . '/app/jobs/Cacher',
+						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
+						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
+						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
+						'Jobs\Grabber\Cacher' => APPLICATION_PATH . '/app/jobs/Grabber/Cacher',
+						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
 						'Models' => APPLICATION_PATH . '/app/models']
@@ -52,6 +55,7 @@ $di -> set('loader', [
 				['method' => 'register'],
 			]
 		   ]);
+
 $di -> get('loader');
 
 if(is_readable(APPLICATION_PATH . '/config/config.php')) {
@@ -82,25 +86,16 @@ $di -> set('db',
 	} 
 );
 
-
 $di -> set('dispatcher', [
-		'className' => '\Phalcon\CLI\Dispatcher',
-		'calls' => [
-			['method' => 'setDefaultNamespace', 
-			 'arguments' => [
-				['type' => 'parameter', 'value' => 'Tasks'],
-			]],
-			['method' => 'setDefaultTask', 
-			 'arguments' => [
-				['type' => 'parameter', 'value' => 'observer'],
-			]],
-			['method' => 'setDefaultAction', 
-			 'arguments' => [
-				['type' => 'parameter', 'value' => 'observe'],
-			]],
-		],
-	]
-);
+	'className' => '\Phalcon\CLI\Dispatcher',
+	'calls' => [
+		['method' => 'setDefaultNamespace',
+		 'arguments' => [
+			['type' => 'parameter', 'value' => 'Tasks'],
+		]],
+	],
+]);
+
 
 $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
@@ -108,6 +103,7 @@ $di -> set('geo', function() use ($di) {
 
 $console = new ConsoleApp();
 $console -> setDI($di);
+
 $di -> setShared('console', $console);
 
 $frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);

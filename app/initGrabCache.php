@@ -5,7 +5,7 @@
 require_once('init.php');
 
 try {
-        $console -> handle(['task' => 'cacher',
+        $console -> handle(['task' => 'cachergrab',
                             'action' => 'cache']);
 } catch (\Phalcon\Exception $e) {
         echo $e -> getMessage();

@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Cacher;
+namespace Jobs\Grabber\Cacher;
 
 class Counters
 {
@@ -34,15 +34,9 @@ class Counters
 	
 	private function processCounters($data, $cacheNameItem, $cacheNameSum)
 	{
-		/*if (!$this -> subject -> cacheData -> exists($cacheNameSum)) {
-			$this -> subject -> cacheData -> save($cacheNameSum, 0);
-		}*/
-
 		foreach ($data as $item) {
 			if (!$this -> cacheData -> exists($cacheNameItem . $item -> id)) {
 				$this -> cacheData -> save($cacheNameItem . $item -> id, $item -> fb_uid);
-	
-			//	$this -> subject -> cacheData -> save($cacheNameSum, $this -> subject -> cacheData -> get($cacheNameSum)+1);
 			}
 		}
 	}

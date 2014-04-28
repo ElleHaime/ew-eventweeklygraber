@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Parser;
+namespace Jobs\Grabber\Parser;
 
 use Models\EventTag;
 use Models\Tag;
