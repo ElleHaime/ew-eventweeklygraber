@@ -1,5 +1,3 @@
-#!/usr/bin/php5
-
 <?php
 
 require_once('init.php');
