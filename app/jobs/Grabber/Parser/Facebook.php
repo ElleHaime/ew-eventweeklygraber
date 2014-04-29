@@ -216,8 +216,11 @@ class Facebook
 
                 $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
-
                 $this-> cacheData -> save('eventsGTotal', $this-> cacheData -> get('eventsGTotal')+1);
+                
+                $total = \Models\Total::findFirst('entity = "event"');
+                $total -> assign(['total' => $this-> cacheData -> get('eventsGTotal')]);
+                $total -> update();
             }
         } else {
             $newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);

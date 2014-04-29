@@ -29,6 +29,10 @@ class Totalcache
 			$memberNetwork = new \Models\MemberNetwork();
 			$memberNetwork -> setCache();
 		}
+		if (!$this -> cacheData -> exists('eventsGTotal')) {
+			$total = new \Models\Total();
+			$event -> setCache();
+		}
 				
 		print_r("Data cached: total\n\r");		
 	}
