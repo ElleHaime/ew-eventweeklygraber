@@ -101,18 +101,17 @@ $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
 });
 
+$frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
+$cache = new \Library\Cache\Memcache($frontCache,
+		['host' => $config -> cache -> host,
+		'port' => $config -> cache -> port,
+		'persistent' => $config -> cache -> persistent,
+		'prefix' => $config -> database -> dbname]);
+$di -> set('cacheData', $cache);
+
 $console = new ConsoleApp();
 $console -> setDI($di);
-
 $di -> setShared('console', $console);
-
-$frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
-$cache = new \Library\Cache\Memcache($frontCache, 
-									 ['host' => $config -> cache -> host,
-									  'port' => $config -> cache -> port,
-									  'persistent' => $config -> cache -> persistent,
-									  'prefix' => $config -> database -> dbname]);
-$di -> set('cacheData', $cache);
 
 $arguments = array();
 
