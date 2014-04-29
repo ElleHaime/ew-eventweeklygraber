@@ -3,6 +3,7 @@
 .project
 .buildpath
 logs/*
+upload/*
 app/initp.php
 app/inith.php
 config/config.php
