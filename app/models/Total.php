@@ -1,8 +1,6 @@
 <?php
 
-namespace Objects;
-
-use Core\Model;
+namespace Models;
 
 class Total extends Model
 {
