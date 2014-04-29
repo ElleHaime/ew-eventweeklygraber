@@ -109,6 +109,13 @@ $cache = new \Library\Cache\Memcache($frontCache,
 		'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
 
+/*$keys = $cache -> queryKeys();
+foreach ($keys as $key) {
+	$cache -> delete($key);
+}
+print_r('cache cleared');
+exit();*/
+
 $console = new ConsoleApp();
 $console -> setDI($di);
 $di -> setShared('console', $console);
