@@ -8,11 +8,6 @@ class Total extends \Phalcon\Mvc\Model
     public $entity;
     public $total;
 
-    public function initialize()
-    {
-		parent::initialize();
-    }
-    
     public function setCache()
     {
     	$evTotal = self::findFirst('entity = "event"');
