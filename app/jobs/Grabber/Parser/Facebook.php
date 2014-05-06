@@ -20,7 +20,6 @@ class Facebook
 	{	
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
-		$locationsScope = $this -> cacheData -> get('locations');
 
 		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
         {
@@ -57,9 +56,9 @@ class Facebook
                 $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
             }
 
-            if ($this -> cacheData -> exists('member_' . $ev['creator'])) {
-                $result['member_id'] = $this -> cacheData -> get('member_' . $ev['creator']);
-            } 
+            if ($fbMember = \Models\MemberNetwork::findFirst('account_uid = "' . $ev['creator'] . '"')) {
+            	$result['member_id'] = $fbMember -> member_id;
+            }
 
             $result['location_id'] = '';
             $venueCreated = false;
@@ -73,61 +72,30 @@ class Facebook
                 $result['location_id'] = $venue['location_id'];
             } else {
                 if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
-                    if (!empty($locationsScope)) {
-                        foreach ($locationsScope as $loc_id => $coords) {
-                            if ($ev['venue']['latitude'] >= $coords['latMin'] && $coords['latMax'] >= $ev['venue']['latitude'] &&
-                                $ev['venue']['longitude'] <= $coords['lonMax'] && $coords['lonMin'] <= $ev['venue']['longitude'])
-                            {
-                                $result['location_id'] = $loc_id;
-
-                                if (isset($ev['venue']['street'])) {
-                                    $result['latitude'] = $ev['venue']['latitude'];
-                                    $result['longitude'] = $ev['venue']['longitude'];
-                                    if (!empty($ev['venue']['street'])) {
-                                        $result['address'] = $ev['venue']['street'];
-                                    } elseif(!empty($ev['location']))  {
-                                        $result['address'] = $ev['location'];
-                                    }
-                                } else {
-                                    $result['latitude'] = ($coords['latMin'] + $coords['latMax']) / 2;
-                                    $result['longitude'] = ($coords['lonMin'] + $coords['lonMax']) / 2;
-                                }
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if ($result['location_id'] == '') {
-                        $locator = new \Models\Location();
-                        $loc = $locator -> createOnChange(array('latitude' => $ev['venue']['latitude'],
-                                                                'longitude' => $ev['venue']['longitude']));
-                        if ($loc) {
-                            $locationsScope[$loc -> id] = array('latMin' => $loc -> latitudeMin,
-                                                                'lonMin' => $loc -> longitudeMin,
-                                                                'latMax' => $loc -> latitudeMax,
-                                                                'lonMax' => $loc -> longitudeMax,
-                                                                'city' => $loc -> city,
-                                                                'country' => $loc -> country);
-                             
-                            $this -> cacheData -> delete('locations');
-                            $this -> cacheData -> save('locations', $locationsScope);  
-
-                            $result['location_id'] = $loc -> id;
-                            $result['latitude'] = ($loc -> latitudeMin + $loc -> latitudeMax) / 2;
-                            $result['longitude'] = ($loc -> longitudeMin + $loc -> longitudeMax) / 2;
-
-                            if (isset($ev['location'])) {
-                               $result['address'] = $ev['location'];
-                            }
-                        }
-                    }
+                	$locations = new \Models\Location();
+                	$locExists = $locations -> createOnChange(['latitude' => $ev['venue']['latitude'], 'longitude' => $ev['venue']['longitude']]);
+                	
+                	if ($locExists) {
+                		$result['location_id'] = $locExists -> id;
+                		
+                		if (isset($ev['venue']['street'])) {
+                			$result['latitude'] = $ev['venue']['latitude'];
+                			$result['longitude'] = $ev['venue']['longitude'];
+                			if (!empty($ev['venue']['street'])) {
+                				$result['address'] = $ev['venue']['street'];
+                			} elseif(!empty($ev['location']))  {
+                				$result['address'] = $ev['location'];
+                			}
+                		} else {
+                			$result['latitude'] = ($locExists['latMin'] + $locExists['latMax']) / 2;
+                			$result['longitude'] = ($locExists['lonMin'] + $locExists['lonMax']) / 2;
+                		}
+                	}
                 }
-
 
                 if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && isset($ev['venue']['id'])) {
                     $venueObj = new \Models\Venue();
-                    isset($ev['location']) ? $venueName = $ev['location'] : '';
+                    isset($ev['location']) ? $venueName = $ev['location'] : $venueName = '';
                     $venueObj -> assign([
                             'fb_uid' => $ev['venue']['id'],
                             'location_id' => $result['location_id'],
@@ -216,10 +184,9 @@ class Facebook
 
                 $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
-                $this-> cacheData -> save('eventsGTotal', $this-> cacheData -> get('eventsGTotal')+1);
                 
                 $total = \Models\Total::findFirst('entity = "event"');
-                $total -> assign(['total' => $this-> cacheData -> get('eventsGTotal')]);
+                $total -> assign(['total' => $total -> total + 1]);
                 $total -> update();
             }
         } else {
@@ -227,23 +194,18 @@ class Facebook
         }
 
 
-        if (!empty($newEvents)) {
+		if (!empty($newEvents)) {
         	switch ($msg['type']) {
         		case 'friend_going_event':
         				foreach ($newEvents as $ev => $id) {
-                            if (!$this -> cacheData -> exists('member.friends.go.' . $msg['args'][2] . '.' . $id)) {
-                                $events = array('member_id' => $msg['args'][2],
-                                   			 	'event_id' => $id);
+        					if (!\Models\EventMemberFriend::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id)) {
                                 $obj = new \Models\EventMemberFriend();
-                                $obj -> assign($events);
+                                $obj -> assign(['member_id' => $msg['args'][2],
+                                   			 	'event_id' => $id]);
                                 $obj -> save();
                                 
-                                $newCount = $this-> cacheData -> get('userFriendsGoing.' . $msg['args'][2])+1;
-                                $this-> cacheData -> save('member.friends.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userFriendsGoing.' . $msg['args'][2], $newCount);
-                                
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userFriendsGoing =  $newCount;
+                                $objC -> userFriendsGoing =  $objC -> userFriendsGoing + 1;
                                 $objC -> update();
                             }
                         }
@@ -251,42 +213,31 @@ class Facebook
 
         		case 'user_going_event':
         				foreach ($newEvents as $ev => $id) {
-        					if (!$this -> cacheData -> exists('member.go.' . $msg['args'][2] . '.' . $id)) {
-                                $events = array('member_id' => $msg['args'][2],
-				                                'event_id' => $id,
-				                                'member_status' => 1);
+        					if (!\Models\EventMember::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id . ' AND member_status = 1')) {
                                 $obj = new \Models\EventMember();
-                                $obj -> assign($events);
+                                $obj -> assign(['member_id' => $msg['args'][2],
+				                                'event_id' => $id,
+				                                'member_status' => 1]);
                                 $obj -> save();
                                 
-                                $newCount = $this-> cacheData -> get('userEventsGoing.' . $msg['args'][2])+1;
-                                $this -> cacheData -> save('member.go.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsGoing.' . $msg['args'][2], $newCount);
-                                
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userEventsGoing =  $newCount;
+                                $objC -> userEventsGoing =  $objC -> userEventsGoing + 1;
                                 $objC -> update();
-                                
                             }
                         }
         			break;
 
         		case 'page_event':
         				foreach ($newEvents as $ev => $id) {
-	                        if (!$this -> cacheData -> exists('member.like.' . $msg['args'][2] . '.' . $id)) {
-	                            $newData = array('member_id' => $msg['args'][2],
-                                                 'event_id' => $id,
-                                                 'status' => 1);
+        					if (!\Models\EventLike::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id . ' AND status = 1')) {
 	                            $obj = new \Models\EventLike();
-	                            $obj -> assign($newData);
+	                            $obj -> assign(['member_id' => $msg['args'][2],
+                                                'event_id' => $id,
+                                                'status' => 1]);
 	                            $obj -> save();
-	                            
-	                            $newCount = $this-> cacheData -> get('userEventsLiked.' . $msg['args'][2])+1;
-	                            $this -> cacheData -> save('member.like.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsLiked.' . $msg['args'][2], $newCount);
                                 
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userEventsLiked =  $newCount;
+                                $objC -> userEventsLiked =  $objC -> userEventsLiked + 1;
                                 $objC -> update();
                          
 	                        }
@@ -296,23 +247,19 @@ class Facebook
                 case 'user_page_event':
                 case 'user_event':
                         foreach ($newEvents as $ev => $id) {
-                            if (!$this -> cacheData -> exists('member.create.' . $msg['args'][2] . '.' . $id)) {
+                        	if (!\Models\Event::findFirst('member_id = ' . $msg['args'][2] . ' AND id = ' . $id)) {
                                 $obj = \Models\Event::findFirst($id);
                                 $obj -> member_id = $msg['args'][2];
                                 $obj -> update();
                                 
-                                $newCount = $this-> cacheData -> get('userEventsCreated.' . $msg['args'][2])+1;
-                                $this -> cacheData->save('member.create.' . $msg['args'][2] . '.' . $id, $ev);
-                                $this-> cacheData -> save('userEventsCreated.' . $msg['args'][2], $newCount);
-                                
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userEventsCreated =  $newCount;
+                                $objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
                                 $objC -> update();
                             }
                         }
                     break;
         	}
-        }
+        }        			
 	}
 
 

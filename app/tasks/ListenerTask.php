@@ -32,6 +32,7 @@ class listenerTask extends \Phalcon\CLI\Task
                 $t = new \Jobs\Grabber\Parser\Facebook($this -> getDi());
                 $t -> run($job);
             } else {
+            	print_r("No items in queue\n\r");
             	sleep(2);
             }
        	}
