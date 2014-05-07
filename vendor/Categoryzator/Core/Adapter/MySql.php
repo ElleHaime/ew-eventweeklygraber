@@ -20,7 +20,7 @@ class MySql extends AbstractAdapter
     public function __construct()
     {
         $this->initializeConfig();
-        $this->connection = new \PDO("mysql:host={$this->config->database->host};dbname={$this->config->database->database};charset=utf8", $this->config->database->user, $this->config->database->password);
+        $this->connection = new \PDO("mysql:host={$this->config->database->host};dbname={$this->config->database->database};port={$this->config->database->port};charset=utf8", $this->config->database->user, $this->config->database->password);
     }
 
     /**

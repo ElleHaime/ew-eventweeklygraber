@@ -17,7 +17,9 @@ class Facebook
 	}
 
 	public function run(\AMQPEnvelope $data)
-	{	
+	{
+		error_reporting(E_ALL & ~E_NOTICE);
+		
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 
@@ -57,7 +59,9 @@ class Facebook
             }
 
             if ($fbMember = \Models\MemberNetwork::findFirst('account_uid = "' . $ev['creator'] . '"')) {
-            	$result['member_id'] = $fbMember -> member_id;
+            	if ($fbMember -> member_id != $msg['args'][2]) {
+            		$result['member_id'] = $fbMember -> member_id;
+            	}
             }
 
             $result['location_id'] = '';
@@ -175,6 +179,10 @@ class Facebook
             $eventObj -> assign($result);
 
             if ($eventObj -> save() != false) {
+            	$total = \Models\Total::findFirst('entity = "event"');
+            	$total -> total = $total -> total + 1;
+            	$total -> update();
+            	 
                 if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
                     $this -> saveEventImage($ev['pic_big'], $eventObj);
                 }
@@ -184,10 +192,6 @@ class Facebook
 
                 $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
-                
-                $total = \Models\Total::findFirst('entity = "event"');
-                $total -> assign(['total' => $total -> total + 1]);
-                $total -> update();
             }
         } else {
             $newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
