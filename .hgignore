@@ -6,5 +6,6 @@ logs/*
 upload/*
 app/initp.php
 app/inith.php
+app/imgSync.sh
 config/config.php
 vendor/Categoryzator/config.php
