@@ -45,7 +45,7 @@ $cfg = [
             'licenseKey' => 'gAsqWYLrLpdh'
         ],
 
-		'uploadDir' => '/var/www/EventWeekly/public/upload/',
+	'uploadDir' => '/var/www/EventWeekly/public/upload/',
 
 		'defautTask' => 'observer',
 		'defaultAction' => 'observe'
