@@ -107,6 +107,12 @@ class Memcache extends Backend implements BackendInterface
     {
         return $this -> memcache -> delete($this -> prefix . $keyName);
     }
+    
+    
+    public function flush()
+    {
+    	parent::flush();
+    }
 
     /**
      * Query the existing cached keys
