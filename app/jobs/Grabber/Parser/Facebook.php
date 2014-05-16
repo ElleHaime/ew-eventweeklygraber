@@ -23,7 +23,8 @@ class Facebook
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 
-		if (!$this -> cacheData -> exists('fbe_' . $ev['eid'])) 
+		//if (!$this -> cacheData -> exists('fbe_' . $ev['eid']))
+		if ($eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
         {
             $result = array();
             $result['fb_uid'] = $ev['eid'];
@@ -194,7 +195,8 @@ class Facebook
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
             }
         } else {
-            $newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
+            //$newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
+            $newEvents[$ev['eid']] = $eventExists -> id;
         }
 
 
