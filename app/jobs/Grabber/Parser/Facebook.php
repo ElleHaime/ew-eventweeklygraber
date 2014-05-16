@@ -24,7 +24,7 @@ class Facebook
 		$ev = $msg['item'];
 
 		//if (!$this -> cacheData -> exists('fbe_' . $ev['eid']))
-		if ($eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
+		if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
         {
             $result = array();
             $result['fb_uid'] = $ev['eid'];
