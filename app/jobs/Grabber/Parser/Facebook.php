@@ -46,18 +46,56 @@ class Facebook
                 $result['logo'] = $logo;
             }
 
-            if (!empty($ev['start_time'])) {
-                $result['start_date'] = date('Y-m-d', strtotime($ev['start_time']));
-                $result['start_time'] = date('H:i', strtotime($ev['start_time']));
-            }
-            if (!empty($ev['end_time'])) {
-                $result['end_date'] = date('Y-m-d', strtotime($ev['end_time']));
-                $result['end_time'] = date('H:i', strtotime($ev['end_time']));
+            if(!empty($ev['start_time'])) {
+                $start = explode('T', $ev['start_time']);
+                $result['start_date'] = $start[0];
+                if (isset($start[1])) {
+                    $time = explode('+', $start[1]); 
+                    $result['start_time'] = $time[0];       
+                }
             }
 
-            if (empty($result['end_date']) && !empty($result['start_date'])) {
-                $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+            if(!empty($ev['end_time'])) {
+                $end = explode('T', $ev['end_time']);
+                $result['end_date'] = $end[0];
+                if (isset($end[1])) {
+                    $time = explode('+', $end[1]);
+                    $result['end_time'] = $time[0];
+                }
             }
+
+            if (isset($result['start_date']) && isset($result['end_date'])) {
+                if (isset($result['start_time']) && isset($result['end_time'])) {
+
+                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
+
+                    if(strtotime($result['start_date'] . ' ' . $result['start_time']) >= strtotime($result['end_date'] . ' ' . $result['end_time'])) {
+                        $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+                    } else {
+                        $result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
+                    }
+                    unset($result['start_time']);
+                    unset($result['end_time']);
+
+                } elseif(isset($result['start_time']) && !isset($result['end_time'])) {
+                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
+                    $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+
+                    unset($result['start_time']);
+
+                } elseif(!isset($result['start_time']) && isset($result['end_time'])) {
+                    $result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
+                    unset($result['end_time']);
+                }
+            } elseif (isset($result['start_date']) && !isset($result['end_date'])) {
+                $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+                if (isset($result['start_time'])) {
+                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];    
+                    unset($result['start_time']);
+                } 
+                unset($result['start_time']);
+            }
+
 
             if ($fbMember = \Models\MemberNetwork::findFirst('account_uid = "' . $ev['creator'] . '"')) {
             	if ($fbMember -> member_id != $msg['args'][2]) {
