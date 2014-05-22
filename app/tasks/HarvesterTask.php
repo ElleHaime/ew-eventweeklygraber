@@ -278,7 +278,7 @@ class harvesterTask extends \Phalcon\CLI\Task
             }
         }
 
-        print_r("done \n\r");
+        //print_r("done \n\r");
 	}
 
 	protected function publishToBroker($result, $args, $resultType)

@@ -23,7 +23,6 @@ class Facebook
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 
-		//if (!$this -> cacheData -> exists('fbe_' . $ev['eid']))
 		if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
         {
             $result = array();
@@ -100,6 +99,10 @@ class Facebook
             if ($fbMember = \Models\MemberNetwork::findFirst('account_uid = "' . $ev['creator'] . '"')) {
             	if ($fbMember -> member_id != $msg['args'][2]) {
             		$result['member_id'] = $fbMember -> member_id;
+            		
+            		$objC = \Models\EventMemberCounter::findFirst('member_id = ' . $fbMember -> member_id);
+            		$objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
+            		$objC -> update();
             	}
             }
 
@@ -233,7 +236,6 @@ class Facebook
                 $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
             }
         } else {
-            //$newEvents[$ev['eid']] = $this -> cacheData -> get('fbe_' . $ev['eid']);
             $newEvents[$ev['eid']] = $eventExists -> id;
         }
 
