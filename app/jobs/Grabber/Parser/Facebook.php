@@ -292,15 +292,21 @@ class Facebook
 
                 case 'user_page_event':
                 case 'user_event':
+print_r("user #" . $msg['args'][2] . " event with ");                	
                         foreach ($newEvents as $ev => $id) {
-                        	if (!\Models\Event::findFirst('member_id = ' . $msg['args'][2] . ' AND id = ' . $id)) {
+print_r("fb_uid = " . $ev . " and id = " . $id);
+                            if (!\Models\Event::findFirst('member_id = ' . $msg['args'][2] . ' AND id = ' . $id)) {
                                 $obj = \Models\Event::findFirst($id);
                                 $obj -> member_id = $msg['args'][2];
                                 $obj -> update();
-                                
+print_r(" saved to event\n\r");
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+print_r("old counter: " . $objC -> userEventsCreated . "\n\r");
                                 $objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
+print_r("new counter: " . $objC -> userEventsCreated . "\n\r");
                                 $objC -> update();
+                            } else { 
+print_r(" already exists\n\r");
                             }
                         }
                     break;
