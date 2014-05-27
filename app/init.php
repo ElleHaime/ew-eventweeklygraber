@@ -45,6 +45,7 @@ $di -> set('loader', [
 						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
 						'Jobs\Grabber\Cacher' => APPLICATION_PATH . '/app/jobs/Grabber/Cacher',
+						'Jobs\Grabber\Sync' => APPLICATION_PATH . '/app/jobs/Grabber/Sync',
 						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',

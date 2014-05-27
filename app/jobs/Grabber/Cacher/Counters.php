@@ -28,8 +28,6 @@ class Counters
 		$model = new \Models\EventMemberFriend();
 		$emfSummary = $model -> getEventMemberFriendEventsCount($userId);
 		$this -> processCounters($emfSummary, 'member.friends.go.' . $userId . '.', 'userFriendsGoing.' . $userId);
-		
-		//print_r("Data cached: member #" . $userId . "\n\r");		
 	}
 	
 	private function processCounters($data, $cacheNameItem, $cacheNameSum)
