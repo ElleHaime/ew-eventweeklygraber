@@ -16,7 +16,7 @@ class Expired
 		$events = [];
 		$query = new \Phalcon\Mvc\Model\Query("SELECT Models\Event.id
 												FROM Models\Event
-												WHERE Models\Event.end_date < '" . date('Y-m-d H:i:s', strtotime('tomorrow midnight')) . "'", $this -> di);
+												WHERE Models\Event.end_date < '" . date('Y-m-d H:i:s', strtotime('midnight')) . "'", $this -> di);
 		$result = $query -> execute();
 		foreach($result as $ev) {
 			$events[] = $ev -> id;
