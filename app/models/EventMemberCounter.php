@@ -19,12 +19,13 @@ class EventMemberCounter extends \Phalcon\Mvc\Model
 	public function syncMemberCounter()
 	{
 		$di = $this -> getDI();
-		$query = new \Phalcon\Mvc\Model\Query("SELECT Frontend\Models\Member.id FROM Frontend\Models\Member", $di);
+		$query = new \Phalcon\Mvc\Model\Query("SELECT Models\Member.id FROM Models\Member", $di);
 		$members = $query -> execute();
 	
 		if ($members) {
 			foreach ($members as $member) {
-				$memberId = $member -> member_id;
+				$memberId = $member -> id;
+				
 				$query = new \Phalcon\Mvc\Model\Query("SELECT DISTINCT Models\Event.id
 														FROM  Models\Event
 														WHERE Models\Event.member_id = " . $memberId, $di);
