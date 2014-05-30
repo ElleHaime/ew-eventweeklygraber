@@ -251,8 +251,10 @@ class Facebook
                                 $obj -> save();
                                 
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userFriendsGoing =  $objC -> userFriendsGoing + 1;
-                                $objC -> update();
+                                if ($objC) {
+	                                $objC -> userFriendsGoing =  $objC -> userFriendsGoing + 1;
+	                                $objC -> update();
+                                }
                             }
                         }
         			break;
@@ -267,8 +269,10 @@ class Facebook
                                 $obj -> save();
                                 
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userEventsGoing =  $objC -> userEventsGoing + 1;
-                                $objC -> update();
+                                if ($objC) {
+	                                $objC -> userEventsGoing =  $objC -> userEventsGoing + 1;
+	                                $objC -> update();
+                                }
                             }
                         }
         			break;
@@ -283,9 +287,10 @@ class Facebook
 	                            $obj -> save();
                                 
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-                                $objC -> userEventsLiked =  $objC -> userEventsLiked + 1;
-                                $objC -> update();
-                         
+                                if ($objC) {
+	                                $objC -> userEventsLiked =  $objC -> userEventsLiked + 1;
+	                                $objC -> update();
+                                }
 	                        }
 	                    }
         			break;
@@ -301,10 +306,12 @@ print_r("fb_uid = " . $ev . " and id = " . $id);
                                 $obj -> update();
 print_r(" saved to event\n\r");
                                 $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
+                                if ($objC) {
 print_r("old counter: " . $objC -> userEventsCreated . "\n\r");
-                                $objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
+                                	$objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
 print_r("new counter: " . $objC -> userEventsCreated . "\n\r");
-                                $objC -> update();
+                                	$objC -> update();
+                                } 
                             } else { 
 print_r(" already exists\n\r");
                             }
