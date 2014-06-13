@@ -3,11 +3,16 @@
 namespace Tasks;
 
 use \Vendor\Facebook\Extractor,
-	\Queue\Producer\Producer;
+	\Queue\Producer\Producer,
+	\Models\Cron;
 
 
 class harvesterTask extends \Phalcon\CLI\Task
 {
+	const IDLE = 'idle';
+	const RUNNING = 'running';
+	
+	protected $state = self::IDLE;
 	protected $fb;
 	protected $queue;
 
@@ -278,7 +283,9 @@ class harvesterTask extends \Phalcon\CLI\Task
             }
         }
 
-        //print_r("done \n\r");
+        $task = Cron::findFirst($args[3]);
+        $task -> state = Cron::STATE_EXECUTED;
+        $task -> update();
 	}
 
 	protected function publishToBroker($result, $args, $resultType)
@@ -289,5 +296,16 @@ class harvesterTask extends \Phalcon\CLI\Task
         			 'type' => $resultType];
         	$this -> queue -> publish(serialize($data));
         }
+	}
+	
+	public function getState()
+	{
+		return $this -> state;
+	}
+	
+	public function setState($state = 'idle')
+	{
+		$this -> state = $state;
+		return $this; 
 	}
 }
