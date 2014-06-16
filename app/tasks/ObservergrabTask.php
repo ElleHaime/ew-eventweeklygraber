@@ -14,7 +14,7 @@ class observergrabTask extends \Phalcon\CLI\Task
 		$harvestTask = new HarvesterTask();
 		
 		while (true) {
-			$tasks = Cron::find(['state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ')', 'name  = "' . self::FB_TASK_NAME . '"']);
+			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_TASK_NAME . '"');
 			if ($tasks) {
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
@@ -25,9 +25,8 @@ class observergrabTask extends \Phalcon\CLI\Task
 						        				'action' => 'harvest',
 						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
 				}
-			} else {
-				sleep(1);
-			}
+			} 
+			sleep(1);
 		} 
 	}
 	
