@@ -15,6 +15,12 @@ class harvesterTask extends \Phalcon\CLI\Task
 	protected $state = self::IDLE;
 	protected $fb;
 	protected $queue;
+	
+	protected $userPagesUid 	= [];
+	protected $userGoingUid 	= [];
+	protected $pagesUid			= [];
+	protected $friendsUid 		= [];
+	protected $friendsGoingUid 	= [];
 
 
     public function testAction(array $args)
@@ -41,6 +47,8 @@ class harvesterTask extends \Phalcon\CLI\Task
 
 	public function harvestAction(array $args)
 	{
+		error_reporting(E_ALL & ~E_NOTICE);		
+		
 		$this -> fb = new Extractor($this -> getDi());
 
 		$this -> queue = new Producer();
@@ -57,228 +65,142 @@ class harvesterTask extends \Phalcon\CLI\Task
 
         foreach ($queries as $key => $query) {
 
-            if ($query['name'] == 'user_event') {
-                $replacements = array($args[1]);
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);                
-                if (count($result -> event) > 0) {
-					$this -> publishToBroker($result, $args, $query['name']);
-				}
-            }
+        	if ($query['name'] == 'user_event') {
+        		$replacements = array($args[1]);
+        		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
+        		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
 
-            if ($query['name'] == 'friend_uid') {
-                $replacements = array($args[1]);
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);                
-                if (count($result -> friend_info) > 0) {
-                	foreach ($result -> friend_info as $friend) {
-                		$friendsUid[] = json_decode(json_encode($friend), true)['uid2'];
-                	}
-                }
-            }
+        		if (count($result -> event) > 0) {
+        			foreach ($result -> event as $key => $ev) {
+        				$this -> publishToBroker($ev, $args, $query['name']);
+        			}
+        		}
+        	}
 
-            if ($query['name'] == 'friend_event' && isset($friendsUid) && !empty($friendsUid)) {
-                $start = $query['start'];
-                $limit = $query['limit'];
-                $fUids = implode(',', $friendsUid);
+        	if ($query['name'] == 'user_page_uid') {
+        		$this -> userPagesUid = $this -> processIds($query, $args, 'page_admin', 'page_id');
+        	}
+        	 
+        	if ($query['name'] == 'user_page_event' && !empty($this -> userPagesUid)) {
+        		$this -> processEvents($query, $args, $this -> userPagesUid, 2);
+        	}
 
-                do {
-                    $replacements = array($start, $limit, $args[1], $fUids);
-                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);               
-                    if (count($result -> event) > 0) {
-						$this -> publishToBroker($result, $args, $query['name']);
+        	/*if ($query['name'] == 'user_going_eid') {
+        		$this -> userGoingUid = $this -> processIds($query, $args, 'event_member', 'eid');
+        	}
+        	 
+        	if ($query['name'] == 'user_going_event' && !empty($this -> userGoingUid)) {
+        		$this -> processEvents($query, $args, $this -> userGoingUid);
+        	}
 
-                        if (count($result -> event) < (int)$limit) {
-                            $start = false;
-                        } else {
-                            $start = $start + $limit;
-                        }
-                    } else {
-                        $start = false;
-                    }
-                } while ($start !== false); 
-            }
-
-            if ($query['name'] == 'friend_going_eid' && !empty($friendsUid)) {
-                $replacements = array(implode(',', $friendsUid));
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                if (count($result -> event_member) > 0) {
-                    foreach ($result -> event_member as $event_friend) {
-                        $friendsGoingUid[] = json_decode(json_encode($event_friend), true)['eid'];
-                    }
-                }
-            }
-
-            if ($query['name'] == 'friend_going_event' && isset($friendsGoingUid) && !empty($friendsGoingUid)) {
-                $start = $query['start'];
-                $limit = $query['limit'];
-                $eChunked = array_chunk($friendsGoingUid, 100);
-                $currentChunk = 0;
-
-                do {
-                    $eids = implode(',', $eChunked[$currentChunk]);
-
-                    $replacements = array($start, $limit, $args[1], $eids);
-                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                    if (count($result -> event) > 0) {
-
-						$this -> publishToBroker($result, $args, $query['name']);
-
-                        if (count($result -> event) < (int)$limit) {
-                            if ((count($eChunked) - 1) > $currentChunk) {
-                                $currentChunk++;
-                                $start = 0;
-                            } else {
-                                $start = false;
-                                $currentChunk = 0;
-                            }
-                        } else {
-                            $start = $start + $limit;
-                        }
-                    } else {
-                        if ((count($eChunked) - 1) > $currentChunk) {
-                            $currentChunk++;
-                            $start = 0;
-                        } else {
-                            $start = false;
-                            $currentChunk = 0;
-                        }
-                    }
-                } while ($start !== false);
-            }
-
-            if ($query['name'] == 'user_going_eid') {
-                $replacements = array($args[1]);
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);                
-                if (count($result -> event_member) > 0) {
-                    foreach ($result -> event_member as $event_user) {
-                        $userGoingUid[] = json_decode(json_encode($event_user), true)['eid'];
-                    }
-                }
-            }
-
-            if ($query['name'] == 'user_going_event' && isset($userGoingUid) && !empty($userGoingUid)) {
-                $start = $query['start'];
-                $limit = $query['limit'];
-                $eids = implode(',', $userGoingUid);
-
-                do {
-                    $replacements = array($start, $limit, $args[1], $eids);
-                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                    if (count($result -> event) > 0) {
-                        $this -> publishToBroker($result, $args, $query['name']);
-
-                        if (count($result -> event) < (int)$limit) {
-                            $start = false;
-                        } else {
-                            $start = $start + $limit;
-                        }
-                    } else {
-                        $start = false;
-                    }
-                } while ($start !== false);
-            }
-
-            if ($query['name'] == 'user_page_uid') {
-                $replacements = array($args[1]);
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                if (count($result -> page_admin) > 0) {
-                    foreach ($result -> page_admin as $user_page) {
-                        $userPagesUid[] = json_decode(json_encode($user_page), true)['page_id'];
-                    }
-                }
-            }
-
-
-            if ($query['name'] == 'user_page_event' && isset($userPagesUid) && !empty($userPagesUid)) {
-                $start = $query['start'];
-                $limit = $query['limit'];
-                $upUids = implode(',', $userPagesUid);
-
-                do {
-                    $replacements = array($start, $limit, $upUids);
-                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-                    if (count($result -> event) > 0) {
-                        $this -> publishToBroker($result, $args, $query['name']);
-
-                        if (count($result -> event) < (int)$limit) {
-                            $start = false;
-                        } else {
-                            $start = $start + $limit;
-                        }
-                    } else {
-                        $start = false;
-                    }
-                } while ($start !== false);
-            }
-
-
-            if ($query['name'] == 'page_uid') {
-                $replacements = array($args[1]);
-                $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                if (count($result -> page_fan) > 0) {
-                    foreach ($result -> page_fan as $page) {
-                        $pagesUid[] = json_decode(json_encode($page), true)['page_id'];
-                    }
-                }
-            }
-
-            if ($query['name'] == 'page_event' && isset($pagesUid) && !empty($pagesUid)) {
-
-                $start = $query['start'];
-                $limit = $query['limit'];
-                $pUids = implode(',', $pagesUid);
-
-                do {
-                    $replacements = array($start, $limit, $args[1], $pUids);
-                    $fql = preg_replace($query['patterns'], $replacements, $query['query']);
-                    $result = $this -> fb -> getCurlFQL($fql, $args[0]);
-//print_r($result);
-                    if (count($result -> event) > 0) {
-                        $this -> publishToBroker($result, $args, $query['name']);
-
-                        if (count($result -> event) < (int)$limit) {
-                            $start = false;
-                        } else {
-                            $start = $start + $limit;
-                        }
-                    } else {
-                        $start = false;
-                    }
-                } while ($start !== false);
-            }
-        }
+        	if ($query['name'] == 'page_uid') {
+        		$this -> pagesUid = $this -> processIds($query, $args, 'page_fan', 'page_id');
+        	}
+        	 
+        	if ($query['name'] == 'page_event' && !empty($this -> pagesUid)) {
+        		$this -> processEvents($query, $args, $this -> pagesUid);
+        	}
+        	 
+        	if ($query['name'] == 'friend_uid') {
+        		$this -> friendsUid = $this -> processIds($query, $args, 'friend_info', 'uid2');
+        	}
+        	
+        	if ($query['name'] == 'friend_event' && !empty($this -> friendsUid)) {
+        		$this -> processEvents($query, $args, $this -> friendsUid);
+        	}
+        	
+        	if ($query['name'] == 'friend_going_eid' && !empty($this -> friendsUid)) {
+        		$this -> friendsGoingUid = $this -> processIds($query, $args, 'event_member', 'eid');
+        	}
+        	
+        	if ($query['name'] == 'friend_going_event' && !empty($this -> friendsGoingUid)) {
+        		$this -> processEvents($query, $args, $this -> friendsGoingUid);
+        	}*/
+        } 
 
         $task = Cron::findFirst($args[3]);
         $task -> state = Cron::STATE_EXECUTED;
         $task -> update();
 	}
-
-	protected function publishToBroker($result, $args, $resultType)
+	
+	protected function processIds($query, $args, $table, $id)
 	{
-        foreach ($result as $event) {
-        	$data = ['args' => $args,
-        			 'item' => json_decode(json_encode($event), true),
-        			 'type' => $resultType];
-        	$this -> queue -> publish(serialize($data));
-        }
+		$resultScope = [];
+		$replacements = array($args[1]);
+		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
+		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
+
+		if (count($result -> $table) > 0) {
+			foreach ($result -> $table as $item) {
+				$resultScope[] = json_decode(json_encode($item), true)[$id];
+			}
+		}	
+		
+		return $resultScope; 
+	}
+	
+	
+	protected function processEvents($query, $args, $baseIds, $peace = 10)
+	{
+//print_r($query['name'] . "\n\r");
+//print_r("Ids: " . count($baseIds) . "\n\r");	
+		$chunked = array_chunk($baseIds, $peace);
+//print_r("Chunked: ");
+//print_r($chunked);
+//print_r("\n\r");
+//print_r("Chunked count: " . count($chunked));
+//print_r("\n\r");
+		$currentChunk = 0;
+		$start = true;
+	
+		do {
+			$ids = implode(',', $chunked[$currentChunk]);
+			$replacements = array($args[1], $ids);
+			$fql = preg_replace($query['patterns'], $replacements, $query['query']);
+//print_r($fql);			
+//print_r("\n\r");
+			$result = $this -> fb -> getCurlFQL($fql, $args[0]);
+//print_r("Result count: " .  count($result -> event) . "\n\r");
+			if (count($result -> event) > 0) {
+				foreach ($result -> event as $key => $ev) {
+					$this -> publishToBroker($ev, $args, $query['name']);
+				}
+				
+				if ((count($chunked) - 1) > $currentChunk) {
+					$currentChunk++;
+				} else {
+					$start = false;
+				}
+//print_r("Current chunk: " . $currentChunk . "\n\r");				
+			} else {
+				if ($result -> error_code && $result -> error_msg) {
+					print_r($query['name'] . "\n\r");
+					print_r($result);
+					print_r($args);
+					print_r("\n\r");
+					print_r("\n\r");
+					print_r("\n\r");
+					
+					if ((count($chunked) - 1) > $currentChunk) {
+						$currentChunk++;
+					} else {
+						$start = false;
+					}
+				} else {
+					$start = false;
+				}
+			}
+		} while ($start !== false);
+//die();		
+	}
+	
+
+	protected function publishToBroker($event, $args, $resultType)
+	{
+       	$data = ['args' => $args,
+       			 'item' => json_decode(json_encode($event), true),
+        		 'type' => $resultType];
+        $this -> queue -> publish(serialize($data));
 	}
 	
 	public function getState()
