@@ -21,6 +21,8 @@ class harvesterTask extends \Phalcon\CLI\Task
 	protected $pagesUid			= [];
 	protected $friendsUid 		= [];
 	protected $friendsGoingUid 	= [];
+	
+	protected $testCounter 		= 0;
 
 
     public function testAction(array $args)
@@ -82,10 +84,10 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
         	 
         	if ($query['name'] == 'user_page_event' && !empty($this -> userPagesUid)) {
-        		$this -> processEvents($query, $args, $this -> userPagesUid, 2);
+        		$this -> processEvents($query, $args, $this -> userPagesUid, 5);
         	}
 
-        	/*if ($query['name'] == 'user_going_eid') {
+        	if ($query['name'] == 'user_going_eid') {
         		$this -> userGoingUid = $this -> processIds($query, $args, 'event_member', 'eid');
         	}
         	 
@@ -98,7 +100,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
         	 
         	if ($query['name'] == 'page_event' && !empty($this -> pagesUid)) {
-        		$this -> processEvents($query, $args, $this -> pagesUid);
+        		$this -> processEvents($query, $args, $this -> pagesUid, 5);
         	}
         	 
         	if ($query['name'] == 'friend_uid') {
@@ -115,12 +117,14 @@ class harvesterTask extends \Phalcon\CLI\Task
         	
         	if ($query['name'] == 'friend_going_event' && !empty($this -> friendsGoingUid)) {
         		$this -> processEvents($query, $args, $this -> friendsGoingUid);
-        	}*/
+        	} 
         } 
 
         $task = Cron::findFirst($args[3]);
         $task -> state = Cron::STATE_EXECUTED;
-        $task -> update();
+        $task -> update(); 
+        
+        //print_r("\n\r\n\rSummary:" . $this -> testCounter);
 	}
 	
 	protected function processIds($query, $args, $table, $id)
@@ -128,6 +132,7 @@ class harvesterTask extends \Phalcon\CLI\Task
 		$resultScope = [];
 		$replacements = array($args[1]);
 		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
+		
 		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
 
 		if (count($result -> $table) > 0) {
@@ -155,11 +160,16 @@ class harvesterTask extends \Phalcon\CLI\Task
 	
 		do {
 			$ids = implode(',', $chunked[$currentChunk]);
-			$replacements = array($args[1], $ids);
+			if (count($query['patterns']) == 1) {
+				$replacements = array($ids);
+			} else {
+				$replacements = array($ids, $args[1]);
+			}
 			$fql = preg_replace($query['patterns'], $replacements, $query['query']);
 //print_r($fql);			
 //print_r("\n\r");
 			$result = $this -> fb -> getCurlFQL($fql, $args[0]);
+			$this -> testCounter = $this -> testCounter + count($result -> event);
 //print_r("Result count: " .  count($result -> event) . "\n\r");
 			if (count($result -> event) > 0) {
 				foreach ($result -> event as $key => $ev) {
@@ -187,11 +197,15 @@ class harvesterTask extends \Phalcon\CLI\Task
 						$start = false;
 					}
 				} else {
-					$start = false;
+					if ((count($chunked) - 1) > $currentChunk) {
+						$currentChunk++;
+					} else {
+						$start = false;
+					}
 				}
 			}
 		} while ($start !== false);
-//die();		
+//print_r("\n\r");		
 	}
 	
 

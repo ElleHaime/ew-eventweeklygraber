@@ -32,8 +32,10 @@ class Facebook
 		} 
 		
 		if ($needHandle) {
+//print_r($ev['eid'] . " ");			
 			if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
 	        {
+//print_r("new event \n\r");	        	
 	            $result = array();
 	            $result['fb_uid'] = $ev['eid'];
 	            $result['fb_creator_uid'] = $ev['creator'];
@@ -230,6 +232,7 @@ class Facebook
 	            $eventObj -> assign($result);
 	
 	            if ($eventObj -> save() != false) {
+print_r("saved\n\r");	            	
 	            	$total = \Models\Total::findFirst('entity = "event"');
 	            	$total -> total = $total -> total + 1;
 	            	$total -> update();
@@ -243,29 +246,38 @@ class Facebook
 	
 	                $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
 	                $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
+	            } else {
+///print_r("ooooooops, not saved\n\r");	            	
 	            }
 	        } else {
+//print_r("exists already\n\r");	        	
 	            $newEvents[$ev['eid']] = $eventExists -> id;
 	        }
 		}
 
 		if (!empty($newEvents)) {
+//print_r($msg['type'] . "\n\r");			
         	switch ($msg['type']) {
         		case 'friend_going_event':
+        		case 'friend_event':
         				foreach ($newEvents as $ev => $id) {
         					if (!\Models\EventMemberFriend::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id)) {
+///print_r("not in counters: \n\r");
                             	if ($needHandle) {
 	                                $obj = new \Models\EventMemberFriend();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
 	                                   			 	'event_id' => $id]);
 	                                $obj -> save();
-                                
+///print_r("saved to table: \n\r");                                
 	                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
 	                                if ($objC) {
 		                                $objC -> userFriendsGoing =  $objC -> userFriendsGoing + 1;
 		                                $objC -> update();
+///print_r("saved to counters: \n\r");		                                
 	                                }
                                 }
+                            } else {
+///print_r("already in counters: \n\r");
                             }
                         }
         			break;
@@ -328,8 +340,12 @@ class Facebook
                             } 
         				}
                     break;
+                
+                default:
+                	print_r("can'\t identify type");
         	}
-        }        			
+        }
+//print_r("\n\r");
 	}
 
 

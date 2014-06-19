@@ -31,8 +31,7 @@ class Extractor
                 'name' => 'user_event',
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
-                    WHERE eid IN (SELECT eid FROM event_member WHERE uid=$userUid)
-                    	AND creator = $userUid
+                    WHERE creator = $userUid
             			AND NOT (eid = 532851033479333)
                      	AND start_time > ' . $timelimit . '
                     ORDER BY eid',
@@ -58,7 +57,7 @@ class Extractor
         					AND start_time > ' . $timelimit . '
         				ORDER BY eid',
         		'type' => 'final',
-        		'patterns' => array('/\$userUid/', '/\$userPageUid/')
+        		'patterns' => array('/\$userPageUid/', '/\$userUid/')
         	),
         	array(
         		'order' => 6,
@@ -76,12 +75,12 @@ class Extractor
         		'name' => 'user_going_event',
         		'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
         			FROM event
-        			WHERE (eid IN ($userEventsUid) OR creator IN($userUid))
+        			WHERE eid IN ($userEventsUid)
         				AND NOT (eid = 532851033479333)
         				AND start_time > ' . $timelimit . '
         			ORDER BY eid',
         		'type' => 'final',
-        		'patterns' => array('/\$userUid/', '/\$userEventsUid/')
+        		'patterns' => array('/\$userEventsUid/')
         	),
         	array(
         		'order' => 10,
@@ -97,19 +96,20 @@ class Extractor
         		'name' => 'page_event',
         		'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
         			FROM event
-        			WHERE (creator IN ($pagesUid) OR creator IN($userUid))
+        			WHERE creator IN ($pagesUid)
+        				AND NOT (creator  = $userUid)
         				AND NOT (eid = 532851033479333)
         				AND start_time > ' . $timelimit . '
         			ORDER BY eid',
         		'type' => 'final',
-        		'patterns' => array('/\$userUid/', '/\$pagesUid/')
+        		'patterns' => array('/\$pagesUid/', '/\$userUid/')
         	),        		        		
             array(
                 'order' => 2,
                 'name' => 'friend_uid',
                 'query' => 'SELECT uid2
-              FROM friend 
-              WHERE uid1 = $userUid',
+              		FROM friend 
+              		WHERE uid1 = $userUid',
                 'type' => 'prepare',
                 'patterns' => array('/\$userUid/')
             ),
@@ -118,20 +118,21 @@ class Extractor
                 'name' => 'friend_event',
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
-                  	WHERE (creator IN ($friendsUid) OR creator IN($userUid))
+                  	WHERE creator IN ($friendsUid)
             		  	AND NOT (eid = 532851033479333)
                       	AND start_time > ' . $timelimit . ' 
                   ORDER BY eid',
                 'type' => 'final',
-                'patterns' => array('/\$userUid/', '/\$friendsUid/')
+                'patterns' => array('/\$friendsUid/')
             ),
             array(
                 'order' => 4,
                 'name' => 'friend_going_eid',
                 'query' => 'SELECT eid
-              FROM event_member 
-              WHERE uid IN($friendsUid)
-                AND rsvp_status = "attending"',
+              		FROM event_member 
+              		WHERE uid IN($friendsUid)
+                		AND rsvp_status = "attending"
+            		ORDER BY start_time',
                 'type' => 'prepare',
                 'patterns' => array('/\$friendsUid/')
             ),
@@ -141,177 +142,14 @@ class Extractor
                 'name' => 'friend_going_event',
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
-                    WHERE (eid IN ($eventsUid) OR creator IN($userUid))
+                    WHERE eid IN ($eventsUid) 
             			AND NOT (eid = 532851033479333)
                       	AND start_time > ' . $timelimit . ' 
                     ORDER BY eid',
                 'type' => 'final',
-                'patterns' => array('/\$userUid/', '/\$eventsUid/')
+                'patterns' => array('/\$eventsUid/')
             ),
        );
-        
-        /*$queries = array(
-        		array(
-        				'order' => 1,
-        				'name' => 'user_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE eid IN (SELECT eid FROM event_member WHERE uid=$userUid)
-        				AND creator = $userUid
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid',
-        				'type' => 'final',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$userUid/')
-        		),
-        		array(
-        				'order' => 8,
-        				'name' => 'user_page_uid',
-        				'query' => 'SELECT page_id
-        				FROM page_admin
-        				WHERE uid = $userUid',
-        				'type' => 'prepare',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$userUid/')
-        		),
-        		array(
-        				'order' => 9,
-        				'name' => 'user_page_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE creator IN ($userPageUid)
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid
-        				LIMIT $start, $lim',
-        				'type' => 'final',
-        				'start' => 0,
-        				'limit' => 50,
-        				'patterns' => array('/\$start/',
-        						'/\$lim/',
-        						'/\$userPageUid/')
-        		),
-        		array(
-        				'order' => 6,
-        				'name' => 'user_going_eid',
-        				'query' => 'SELECT eid
-        				FROM event_member
-        				WHERE uid  = $userUid
-        				AND rsvp_status = "attending"
-        				ORDER BY start_time',
-        				'type' => 'prepare',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$userUid/')
-        		),
-        		array(
-        				'order' => 7,
-        				'name' => 'user_going_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE eid IN ($userEventsUid)
-        				AND creator != $userUid
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid
-        				LIMIT $start, $lim',
-        				'type' => 'final',
-        				'start' => 0,
-        				'limit' => 50,
-        				'patterns' => array('/\$start/',
-        						'/\$lim/',
-        						'/\$userUid/',
-        						'/\$userEventsUid/')
-        		),
-        		array(
-        				'order' => 10,
-        				'name' => 'page_uid',
-        				'query' => 'SELECT page_id
-        				FROM page_fan
-        				WHERE uid = $userUid',
-        				'type' => 'prepare',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$userUid/')
-        		),
-        		array(
-        				'order' => 11,
-        				'name' => 'page_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE creator IN ($pageUid)
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid
-        				LIMIT $start, $lim',
-        				'type' => 'final',
-        				'start' => 0,
-        				'limit' => 50,
-        				'patterns' => array('/\$start/',
-        						'/\$lim/',
-        						'/\$userUid/',
-        						'/\$pageUid/')
-        		),
-        		array(
-        				'order' => 2,
-        				'name' => 'friend_uid',
-        				'query' => 'SELECT uid2
-        				FROM friend
-        				WHERE uid1 = $userUid',
-        				'type' => 'prepare',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$userUid/')
-        		),
-        		array(
-        				'order' => 3,
-        				'name' => 'friend_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE creator IN ($friendsUid)
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid
-        				LIMIT $start, $lim',
-        				'type' => 'final',
-        				'start' => 0,
-        				'limit' => 50,
-        				'patterns' => array('/\$start/',
-        						'/\$lim/',
-        						'/\$userUid/',
-        						'/\$friendsUid/')
-        		),
-        		array(
-        				'order' => 4,
-        				'name' => 'friend_going_eid',
-        				'query' => 'SELECT eid
-        				FROM event_member
-        				WHERE uid IN($friendsUid)
-        				AND rsvp_status = "attending"',
-        				'type' => 'prepare',
-        				'start' => false,
-        				'limit' => false,
-        				'patterns' => array('/\$friendsUid/')
-        		),
-        
-        		array(
-        				'order' => 5,
-        				'name' => 'friend_going_event',
-        				'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
-        				FROM event
-        				WHERE eid IN ($eventsUid)
-        				AND creator != $userUid
-        				AND start_time > ' . $timelimit . '
-        				ORDER BY eid
-        				LIMIT $start, $lim',
-        				'type' => 'final',
-        				'start' => 0,
-        				'limit' => 50,
-        				'patterns' => array('/\$start/',
-        						'/\$lim/',
-        						'/\$userUid/',
-        						'/\$eventsUid/')
-        		),
-        );
-        */
 
         return $queries;
     }

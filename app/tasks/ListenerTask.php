@@ -10,6 +10,7 @@ class listenerTask extends \Phalcon\CLI\Task
 {
 	protected $queue;
 
+
 	public function listenAction()
 	{	
 		$this -> queue = new Consumer();
