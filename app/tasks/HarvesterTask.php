@@ -80,7 +80,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
 
         	if ($query['name'] == 'user_page_uid') {
-        		$this -> userPagesUid = $this -> processIds($query, $args, 'page_admin', 'page_id');
+        		$this -> userPagesUid = $this -> processIds($query, $args, $args[1], 'page_admin', 'page_id');
         	}
         	 
         	if ($query['name'] == 'user_page_event' && !empty($this -> userPagesUid)) {
@@ -88,7 +88,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
 
         	if ($query['name'] == 'user_going_eid') {
-        		$this -> userGoingUid = $this -> processIds($query, $args, 'event_member', 'eid');
+        		$this -> userGoingUid = $this -> processIds($query, $args, $args[1], 'event_member', 'eid');
         	}
         	 
         	if ($query['name'] == 'user_going_event' && !empty($this -> userGoingUid)) {
@@ -96,7 +96,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
 
         	if ($query['name'] == 'page_uid') {
-        		$this -> pagesUid = $this -> processIds($query, $args, 'page_fan', 'page_id');
+        		$this -> pagesUid = $this -> processIds($query, $args, $args[1], 'page_fan', 'page_id');
         	}
         	 
         	if ($query['name'] == 'page_event' && !empty($this -> pagesUid)) {
@@ -104,7 +104,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
         	 
         	if ($query['name'] == 'friend_uid') {
-        		$this -> friendsUid = $this -> processIds($query, $args, 'friend_info', 'uid2');
+        		$this -> friendsUid = $this -> processIds($query, $args, $args[1], 'friend_info', 'uid2');
         	}
         	
         	if ($query['name'] == 'friend_event' && !empty($this -> friendsUid)) {
@@ -112,7 +112,7 @@ class harvesterTask extends \Phalcon\CLI\Task
         	}
         	
         	if ($query['name'] == 'friend_going_eid' && !empty($this -> friendsUid)) {
-        		$this -> friendsGoingUid = $this -> processIds($query, $args, 'event_member', 'eid');
+        		$this -> friendsGoingUid = $this -> processIds($query, $args, implode(',', $this -> friendsUid), 'event_member', 'eid');
         	}
         	
         	if ($query['name'] == 'friend_going_event' && !empty($this -> friendsGoingUid)) {
@@ -127,12 +127,13 @@ class harvesterTask extends \Phalcon\CLI\Task
         //print_r("\n\r\n\rSummary:" . $this -> testCounter);
 	}
 	
-	protected function processIds($query, $args, $table, $id)
+	protected function processIds($query, $args, $replacements, $table, $id)
 	{
+//print_r($query['name'] . "\n\r");		
 		$resultScope = [];
-		$replacements = array($args[1]);
+		$replacements = array($replacements);
 		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
-		
+//print_r($fql . "\n\r");		
 		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
 
 		if (count($result -> $table) > 0) {
@@ -140,7 +141,8 @@ class harvesterTask extends \Phalcon\CLI\Task
 				$resultScope[] = json_decode(json_encode($item), true)[$id];
 			}
 		}	
-		
+//print_r($resultScope);
+//print_r("\n\r");		
 		return $resultScope; 
 	}
 	
@@ -149,6 +151,7 @@ class harvesterTask extends \Phalcon\CLI\Task
 	{
 //print_r($query['name'] . "\n\r");
 //print_r("Ids: " . count($baseIds) . "\n\r");	
+//print_r("\n\r");
 		$chunked = array_chunk($baseIds, $peace);
 //print_r("Chunked: ");
 //print_r($chunked);
