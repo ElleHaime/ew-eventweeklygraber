@@ -46,6 +46,27 @@ class Event extends \Phalcon\Mvc\Model
         $this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
 	
+	
+	public function getCreators()
+	{
+		$result = [];		
+		$query = new \Phalcon\Mvc\Model\Query("SELECT DISTINCT Models\Event.fb_creator_uid
+													FROM Models\Event
+													WHERE Models\Event.fb_creator_uid IS NOT NULL
+														LIMIT 10", $this -> getDI());
+														
+		$creators = $query -> execute();
+		
+		if ($creators -> count() != 0) {
+			foreach ($creators as $val) {
+				$result[] = $val -> fb_creator_uid;
+			}
+		}
+		
+		return $result;
+	}
+	
+	
 	public function getCreatedEventsCount($uId)
 	{
 		if ($uId) {

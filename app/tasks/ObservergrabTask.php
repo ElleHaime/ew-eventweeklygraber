@@ -3,11 +3,13 @@
 namespace Tasks;
 
 use \Models\Cron,
-	\Tasks\HarvesterTask;
+	\Tasks\HarvesterTask,
+	\Tasks\HarvestgraphTask;
 
 class observergrabTask extends \Phalcon\CLI\Task
 {
 	const FB_TASK_NAME = 'extract_facebook_events';
+	const FB_GRAPH_TASK_NAME = 'extract_graph_facebook_events';
 	const CACHE_TASK_NAME = 'cache_events_counters';	
 
 	public function observeAction() {
@@ -28,6 +30,28 @@ class observergrabTask extends \Phalcon\CLI\Task
 			} 
 			sleep(1);
 		} 
+	}
+	
+	
+	public function observegraphAction()
+	{
+		$harvestTask = new HarvestgraphTask();
+		
+		while (true) {
+			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_TASK_NAME . '"');
+			if ($tasks) {
+				foreach ($tasks as $task) {
+					$args = unserialize($task -> parameters);
+			        $task -> state = Cron::STATE_HANDLING;
+			        //$task -> update();
+			        
+	        		$this -> console -> handle(['task' => 'harvestgraph',
+						        				'action' => 'harvest',
+						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
+				}
+			} 
+			sleep(1);
+		}
 	}
 	
 /*	
