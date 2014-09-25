@@ -26,22 +26,33 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 		} catch(\Exception $e) {
 			print_r($e);
 		}
+		
+		$this -> queueEvent = new Producer();
+		$this -> queueEvent -> connect(['host' => $this -> config -> queue -> host,
+								   		'port' => $this -> config -> queue -> port,
+								   		'login' => $this -> config -> queue -> login,
+								   		'password' => $this -> config -> queue -> password,
+								   		'exchangeName' => $this -> config -> queue -> harvester -> exchange,
+                                   		'exchangeType' => $this -> config -> queue -> harvester -> type,
+								   		'routing_key' => $this -> config -> queue -> harvester -> routing_key
+								  	]);
+		$this -> queueEvent -> setExchange();
+		
+		$this -> queueCreators = new Producer();
+		$this -> queueCreators ->  connect(['host' => $this -> config -> queue -> host,
+								   		    'port' => $this -> config -> queue -> port,
+									   		'login' => $this -> config -> queue -> login,
+									   		'password' => $this -> config -> queue -> password,
+									   		'exchangeName' => $this -> config -> queue -> harvesterCreators -> exchange,
+	                                   		'exchangeType' => $this -> config -> queue -> harvesterCreators -> type,
+									   		'routing_key' => $this -> config -> queue -> harvesterCreators -> routing_key
+									  	]);
+		$this -> queueCreators -> setExchange();
 	}
 	
 	public function harvestAction(array $args)
 	{
 		$this -> init();
-		
-		$this -> queue = new Producer();
-		$this -> queue -> connect(['host' => $this -> config -> queue -> host,
-								   'port' => $this -> config -> queue -> port,
-								   'login' => $this -> config -> queue -> login,
-								   'password' => $this -> config -> queue -> password,
-								   'exchangeName' => $this -> config -> queue -> harvester -> exchange,
-                                   'exchangeType' => $this -> config -> queue -> harvester -> type,
-								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
-								  ]);
-		$this -> queue -> setExchange();
 		
 		$model = new Event();
 		$creators = $model -> getCreators();
@@ -55,11 +66,10 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 					$data = $request -> execute() -> getGraphObject() -> asArray();
 
 					if (!empty($data)) {
-						$this -> savePage($data);
-						 
+						$this -> publishToPageBroker($data);
 					} 
 				} catch (FacebookRequestException $ex) {
-					print_r($ex -> getMessage());
+					print_r($ex -> getMessage() . "\n\r");
 				}	
 				
 				
@@ -75,7 +85,7 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 						}
 					} 
 				} catch (FacebookRequestException $ex) {
-					print_r("oooooooooops\n\r");					
+					print_r($ex -> getMessage() . "\n\r");					
 				}	
 			}								
 		}
@@ -91,56 +101,13 @@ class harvestgraphTask extends \Phalcon\CLI\Task
        			 'item' => json_decode(json_encode($event), true),
         		 'type' => $resultType];
        	
-        $this -> queue -> publish(serialize($data));
+        $this -> queueEvent -> publish(serialize($data));
 	}
 
 	
-	protected function publishToPageBroker($page, $args)
+	protected function publishToPageBroker($page)
 	{
-       	$data = ['item' => json_decode(json_encode($event), true)];
-        $this -> queue -> publish(serialize($data));
-	}
-	
-	protected function savePage($data)
-	{
-		$newPage = [];
-		$newPage['fb_uid'] = $data['id'];
-		$newPage['fb_uname'] = $data['username'];
-		$newPage['name'] = $data['name'];
-		$newPage['link'] = $data['link'];
-		$newPage['category'] = $data['category'];
-		if (isset($data['phone'])) {
-			$newPage['phone'] = $data['phone'];
-		}
-		if (isset($data['site'])) {
-			$newPage['site'] = $data['website'];
-		}
-		if (isset($data['likes'])) {
-			$newPage['likes'] = $data['likes'];
-		}
-		$description = '';
-		if (isset($data['about'])) {
-			$description = $data['about'];	
-		} elseif (isset($data['description'])) {
-			$description = $data['description'];
-		} elseif (isset($data['company_overview'])) {
-			$description = $data['company_overview'];
-		}
-		$newPage['description'] = $description;
-					
-		$locations = new \Models\Location();
-       	$locExists = $locations -> createOnChange(['latitude' => $data['location'] -> latitude, 
-       											   'longitude' => $data['location'] -> longitude]);
-        if ($locExists) {
-			$newPage['location_id'] = $locExists -> id;
-		}
-					
-		$page = new \Models\Page();
-		$page -> assign($newPage);
-		if ($page -> save()) {
-			return $page -> id;
-		} else {
-			return false;
-		}
+       	$data = ['item' => $page];
+        $this -> queueCreators -> publish(serialize($page));
 	}
 }

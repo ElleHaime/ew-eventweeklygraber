@@ -43,7 +43,7 @@ class observergrabTask extends \Phalcon\CLI\Task
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
 			        $task -> state = Cron::STATE_HANDLING;
-			        //$task -> update();
+			        $task -> update();
 			        
 	        		$this -> console -> handle(['task' => 'harvestgraph',
 						        				'action' => 'harvest',

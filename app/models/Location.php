@@ -64,13 +64,14 @@ class Location extends \Phalcon\Mvc\Model
 		}
 		$query = [];
 
-		if (isset($argument['longitude'])) {
+		if (isset($argument['longitude']) && isset($argument['latitude'])) {
 			$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'];
 			$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
-		}
-		if (isset($argument['latitude'])) {
 			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
 			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
+		} elseif (isset($argument['city']) && isset($argument['country'])) {
+			$query[] = 'city LIKE "%' . trim($argument['city']) . '%"';
+			$query[] = 'country LIKE "%' . trim($argument['country']) . '%"';
 		}
 
 		$query = implode(' and ', $query);
@@ -80,7 +81,7 @@ class Location extends \Phalcon\Mvc\Model
             $isLocationExists = false;
         }
 
-		if (!$isLocationExists) {
+		if (!$isLocationExists && isset($argument['longitude']) && isset($argument['latitude'])) {
 			if (!$isGeoObject) {
 				if (isset($argument['longitude']) && isset($argument['latitude'])) {
 					$newLoc = $geo -> getLocation($argument);
