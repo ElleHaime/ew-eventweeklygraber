@@ -141,23 +141,13 @@ class harvesterTask extends \Phalcon\CLI\Task
 				$resultScope[] = json_decode(json_encode($item), true)[$id];
 			}
 		}	
-//print_r($resultScope);
-//print_r("\n\r");		
+		
 		return $resultScope; 
 	}
 	
 	
 	protected function processEvents($query, $args, $baseIds, $peace = 10)
-	{
-//print_r($query['name'] . "\n\r");
-//print_r("Ids: " . count($baseIds) . "\n\r");	
-//print_r("\n\r");
 		$chunked = array_chunk($baseIds, $peace);
-//print_r("Chunked: ");
-//print_r($chunked);
-//print_r("\n\r");
-//print_r("Chunked count: " . count($chunked));
-//print_r("\n\r");
 		$currentChunk = 0;
 		$start = true;
 	
@@ -169,11 +159,9 @@ class harvesterTask extends \Phalcon\CLI\Task
 				$replacements = array($ids, $args[1]);
 			}
 			$fql = preg_replace($query['patterns'], $replacements, $query['query']);
-//print_r($fql);			
-//print_r("\n\r");
 			$result = $this -> fb -> getCurlFQL($fql, $args[0]);
 			$this -> testCounter = $this -> testCounter + count($result -> event);
-//print_r("Result count: " .  count($result -> event) . "\n\r");
+
 			if (count($result -> event) > 0) {
 				foreach ($result -> event as $key => $ev) {
 					$this -> publishToBroker($ev, $args, $query['name']);
@@ -184,7 +172,7 @@ class harvesterTask extends \Phalcon\CLI\Task
 				} else {
 					$start = false;
 				}
-//print_r("Current chunk: " . $currentChunk . "\n\r");				
+			
 			} else {
 				if ($result -> error_code && $result -> error_msg) {
 					print_r($query['name'] . "\n\r");

@@ -32,10 +32,12 @@ class Facebook
 		} 
 		
 		if ($needHandle) {
-//print_r($ev['eid'] . " ");			
+			if (!isset($ev['eid']) && isset($ev['id'])) {
+				$ev['eid'] = $ev['id'];
+			}	
+		
 			if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
 	        {
-//print_r("new event \n\r");	        	
 	            $result = array();
 	            $result['fb_uid'] = $ev['eid'];
 	            $result['fb_creator_uid'] = $ev['creator'];
@@ -226,7 +228,7 @@ class Facebook
 	            if (!empty($cats)) {
 	                $result['event_category'] = $cats;
 	                $result['event_tag'] = $tags;
-	            }
+	            } 
 	
 	            $eventObj = new \Models\Event();
 	            $eventObj -> assign($result);

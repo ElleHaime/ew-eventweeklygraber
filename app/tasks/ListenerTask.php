@@ -18,9 +18,9 @@ class listenerTask extends \Phalcon\CLI\Task
 								   'port' => $this -> config -> queue -> port,
 								   'login' => $this -> config -> queue -> login,
 								   'password' => $this -> config -> queue -> password,
-								   'exchangeName' => $this -> config -> queue -> harvester -> exchange,
-                                   'exchangeType' => $this -> config -> queue -> harvester -> type,
-								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
+								   'exchangeName' => $this -> config -> queue -> harvesterCreators -> exchange,
+                                   'exchangeType' => $this -> config -> queue -> harvesterCreators -> type,
+								   'routing_key' => $this -> config -> queue -> harvesterCreators -> routing_key
 								  ]);
 		$this -> queue -> setExchange();		
 		$this -> queue -> getQueue();
