@@ -90,8 +90,9 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 			}								
 		}
 		
-		print_r("done\n\r");
-		die();
+		$task = Cron::findFirst($args[3]);
+        $task -> state = Cron::STATE_EXECUTED;
+        $task -> update(); 
 	}
 	
 	
