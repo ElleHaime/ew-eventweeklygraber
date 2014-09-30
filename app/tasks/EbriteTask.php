@@ -31,7 +31,6 @@ class ebriteTask extends \Phalcon\CLI\Task
 	public function harvestAction()
 	{
 		$this -> init();
-		$this -> ebrite -> getCategories();
-		$this -> ebrite -> getEventsByCity('Dublin');
+		$events = $this -> ebrite -> getEventsByCity('Dublin');
 	}
 }

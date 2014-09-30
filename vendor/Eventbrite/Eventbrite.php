@@ -7,7 +7,6 @@ use Vendor\Eventbrite\Base,
 
 class Eventbrite extends Base
 {
-
 	public function __construct($dependencyInjector = null)
 	{
 		if (!is_null($dependencyInjector)) {
@@ -21,21 +20,25 @@ class Eventbrite extends Base
 	public function getCategories()
 	{
 		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
+			  			-> setEntity('categories')
+			  			-> getData();
+		return $result;
+	}
+	
+	public function getSubcategories()
+	{
+		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
 			  			-> setEntity('subcategories')
-			  			-> makeRequest();
-print_r($result);
-die();			  			
+			  			-> getData();
 		return $result;
 	}
 	
 	public function getEventsByCity($arg)
 	{
 		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
-			  			-> setEntity('events')
+			  			-> setEntity('events/search')
 			  			-> setFilter('venue.city', $arg)
-			  			-> makeRequest();
-print_r($result);
-die();			  			
+			  			-> getData();
 	}
 	
 	public function getEventDetails()

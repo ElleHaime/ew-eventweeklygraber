@@ -19,21 +19,25 @@ abstract class Base
 	const TOKEN_TYPE_PERSONAL	= 1;
 	const TOKEN_TYPE_CLIENT		= 2;
 
-	protected $apiVersion	= 'v3';
-	protected $requestUrl	= 'https://www.eventbriteapi.com';
+	protected $apiVersion		= 'v3';
+	protected $requestUrl		= 'https://www.eventbriteapi.com';
 	
-	protected $appKey 		= null;
-	protected $authToken	= null;
-	protected $anonToken	= null;
-	protected $clientSecret = null;
-	protected $tokenType	= '';
+	protected $appKey 			= null;
+	protected $authToken		= null;
+	protected $anonToken		= null;
+	protected $clientSecret 	= null;
+	protected $tokenType		= '';
 	
-	protected $curlMethod 	= 'GET';
-	protected $curlEntity	= null;
-	protected $curlEntityId	= null;
-	protected $curlUrl		= null;
-	protected $curlArgs 	= [];
-	protected $curlPage		= 1;
+	protected $curlMethod 		= 'GET';
+	protected $curlEntity		= null;
+	protected $curlEntityId		= null;
+	protected $curlUrl			= null;
+	protected $curlArgs 		= [];
+	protected $curlPageId		= 0;
+	protected $curlMaxPerPage	= 50;
+	protected $curlMaxObjects	= 5000;  
+	protected $curlPageNum		= 100;  # max 5.000 objects per day / 50 objects per page
+	protected $curlPaginate		= true;
 	
 	protected $curlOpts = [
 		CURLOPT_RETURNTRANSFER => true,
@@ -51,6 +55,32 @@ abstract class Base
 	protected function auth()
 	{
 	}
+	
+	
+	protected function getData()
+	{
+		$result = [];
+		
+		if ($this -> curlPaginate) {
+			do  {
+				$this -> curlPageId++;
+				$data = $this -> makeRequest();
+print_r($data);
+die();				
+				foreach ($data[$this -> curlEntity] as $val) {
+					$result[] = $val;	
+				}
+				if (count($data[$this -> curlEntity]) < $this -> curlMaxPerPage) {
+					$this -> curlPageId = $this -> curlPageNum;
+				}
+			} while($this -> curlPageId != $this -> curlPageNum);
+		} else {
+			$result = $this -> makeRequest();
+		}
+		
+		return $result;
+	}
+	
 	
 	protected function makeRequest()
 	{
@@ -141,6 +171,12 @@ abstract class Base
 		return $this;
 	}
 	
+	public function setPagination($arg = true)
+	{
+		$this -> curlPagination = $arg;
+		return $this;
+	}
+	
 	protected function composePersonalUrl()
 	{
 		if (is_null($this -> curlEntity)) {
@@ -155,7 +191,8 @@ abstract class Base
 		$this -> curlUrl = $this -> requestUrl . '/' . 
 			   			   $this -> apiVersion . '/' .
 			   			   $this -> curlEntity . '/?token=' .
-			   			   $this -> authToken;
+			   			   $this -> authToken . '&page=' . 
+			   			   $this -> curlPageId;
 		if (!empty($this -> curlArgs)) {
 			foreach ($this -> curlArgs as $arg => $val) {
 				$this -> curlUrl .= '&' . $arg . '=' . $val;
