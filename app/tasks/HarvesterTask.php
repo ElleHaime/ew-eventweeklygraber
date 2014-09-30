@@ -146,7 +146,8 @@ class harvesterTask extends \Phalcon\CLI\Task
 	}
 	
 	
-	protected function processEvents($query, $args, $baseIds, $peace = 10)
+	protected function processEvents($query, $args, $baseIds, $peace = 10) 
+	{
 		$chunked = array_chunk($baseIds, $peace);
 		$currentChunk = 0;
 		$start = true;
