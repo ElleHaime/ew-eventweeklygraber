@@ -3,7 +3,7 @@
 namespace Tasks;
 
 use \Models\Cron,
-	\Tasks\HarvesterTask;
+	\Tasks\FacebookTask;
 
 class observergrabTask extends \Phalcon\CLI\Task
 {
@@ -21,7 +21,7 @@ class observergrabTask extends \Phalcon\CLI\Task
 			        $task -> state = Cron::STATE_HANDLING;
 			        $task -> update();
 			        
-	        		$this -> console -> handle(['task' => 'harvester',
+	        		$this -> console -> handle(['task' => 'facebook',
 						        				'action' => 'harvest',
 						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
 				}

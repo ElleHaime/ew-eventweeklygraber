@@ -7,7 +7,7 @@ use \Vendor\Facebook\Extractor,
 	\Models\Cron;
 
 
-class harvesterTask extends \Phalcon\CLI\Task
+class facebookTask extends \Phalcon\CLI\Task
 {
 	const IDLE = 'idle';
 	const RUNNING = 'running';
