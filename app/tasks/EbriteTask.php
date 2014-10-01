@@ -33,7 +33,7 @@ class ebriteTask extends \Phalcon\CLI\Task
 	public function harvestAction()
 	{
 		$this -> init();
-		
+
 		$existed = Ebrite::find();
 		if ($existed) {
 			 foreach ($existed as $item) {
@@ -53,8 +53,6 @@ print_r("done\n\r");
 	protected function publishToBroker($event)
 	{
        	$data = ['item' => json_decode(json_encode($event), true)];
-print_r(serialize($data));
-print_r("\n\r\n\r");       	
         $this -> queue -> publish(serialize($data));
 	}
 }
