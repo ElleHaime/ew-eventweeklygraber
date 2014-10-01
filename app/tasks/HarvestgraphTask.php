@@ -61,10 +61,12 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 			foreach ($creators as $val) {
 				// get page info
 				$query = '/' . $val;
+//print_r($query . "\n\r");				
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 					$data = $request -> execute() -> getGraphObject() -> asArray();
-
+//print_r($data);
+//print_r("\n\r");
 					if (!empty($data)) {
 						$this -> publishToPageBroker($data);
 					} 
@@ -74,13 +76,16 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 				
 				
 				// save events					
-				$query = '/' . $val . '/events?fields=id,start_time,end_time,name,location,venue,description';
+				$query = '/' . $val . '/events?fields=id,owner,start_time,end_time,name,location,cover,venue,description,ticket_uri';
+//print_r($query . "\n\r");				
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 					$data = $request -> execute() -> getGraphObject() -> asArray();
 
 					if (!empty($data['data'])) {
 						foreach ($data['data'] as $event) {
+							$event -> creator = $val;
+							$event -> pic_cover = $event -> cover;
 							$this -> publishToEventBroker($event, $args, 'creators');
 						}
 					} 
@@ -92,7 +97,8 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 		
 		$task = Cron::findFirst($args[3]);
         $task -> state = Cron::STATE_EXECUTED;
-        $task -> update(); 
+        $task -> update();
+//print_r("done\n\r");
 	}
 	
 	

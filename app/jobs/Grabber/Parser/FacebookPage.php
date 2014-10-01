@@ -2,6 +2,7 @@
 
 namespace Jobs\Grabber\Parser;
 
+use \Models\Page as Page;
 
 class FacebookPage
 {
@@ -17,9 +18,22 @@ class FacebookPage
 	public function run(\AMQPEnvelope $item)
 	{
 		$data = unserialize($item -> getBody());
+
+/*print_r("id = " . $data['id']);
+print_r("\n\r");		
 		
-		if (!$pageExists = \Models\Page::findFirst('fb_uid = "' . $data['id'] . '"')) 
+if($data['id'] == 340290452649951) {
+	print_r("here\n\r");
+	print_r($data);
+	print_r("\n\r");
+	$test = Page::findFirst(['fb_uid = "' . $data['id'] . '"']);
+	print_r($test);
+	print_r("\n\r");	
+}*/
+		if (!Page::findFirst(['fb_uid = "' . $data['id'] . '"'])) 
 		{
+//print_r($data);
+//print_r("\n\r");		
 			$newPage = [];
 			$newPage['fb_uid'] = $data['id'];
 			if (isset($data['username'])) {
@@ -72,7 +86,7 @@ class FacebookPage
 				}
 			}
 						
-			$page = new \Models\Page();
+			$page = new Page();
 			$page -> assign($newPage);
 			if ($page -> save()) {
 				return $page -> id;
@@ -80,5 +94,6 @@ class FacebookPage
 				return false;
 			}
 		}
+//print_r("done\n\r");		
 	}
 }

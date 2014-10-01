@@ -342,9 +342,6 @@ print_r("saved\n\r");
                             } 
         				}
                     break;
-                
-                default:
-                	print_r("can'\t identify type");
         	}
         }
 //print_r("\n\r");
