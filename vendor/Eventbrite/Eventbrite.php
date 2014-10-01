@@ -3,6 +3,7 @@
 namespace Vendor\Eventbrite;
 
 use Vendor\Eventbrite\Base,
+	Models\Eventbrite as Ebrite,
 	\Exception as Exception;
 
 class Eventbrite extends Base
@@ -33,12 +34,14 @@ class Eventbrite extends Base
 		return $result;
 	}
 	
-	public function getEventsByCity($arg)
+	public function getEventsByCity($city, $lastId)
 	{
 		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
-			  			-> setEntity('events/search')
-			  			-> setFilter('venue.city', $arg)
+			  			-> setEntity('events')
+			  			-> setFilter('venue.city', $city)
+			  			-> setFilter('since_id', $lastId)
 			  			-> getData();
+		return $result;
 	}
 	
 	public function getEventDetails()

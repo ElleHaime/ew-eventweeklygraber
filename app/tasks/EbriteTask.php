@@ -3,6 +3,7 @@
 namespace Tasks;
 
 use \Vendor\Eventbrite\Eventbrite,
+	\Models\Eventbrite as Ebrite,
 	\Queue\Producer\Producer,
 	\Models\Cron;
 
@@ -28,9 +29,32 @@ class ebriteTask extends \Phalcon\CLI\Task
 		$this -> queue -> setExchange();
 	}
 	
+	
 	public function harvestAction()
 	{
 		$this -> init();
-		$events = $this -> ebrite -> getEventsByCity('Dublin');
+		
+		$existed = Ebrite::find();
+		if ($existed) {
+			 foreach ($existed as $item) {
+				$events = $this -> ebrite -> getEventsByCity($item -> location, 
+															 $item -> last_id);
+				if ($events) {
+					foreach ($events as $ev) {
+						$this -> publishToBroker($ev);
+					}
+				}				
+			 }
+		}
+print_r("done\n\r");
+	}
+	
+	
+	protected function publishToBroker($event)
+	{
+       	$data = ['item' => json_decode(json_encode($event), true)];
+print_r(serialize($data));
+print_r("\n\r\n\r");       	
+        $this -> queue -> publish(serialize($data));
 	}
 }

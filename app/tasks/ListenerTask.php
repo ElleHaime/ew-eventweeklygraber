@@ -38,4 +38,34 @@ class listenerTask extends \Phalcon\CLI\Task
             }
        	}
 	}
+	
+	
+	public function listenebriteAction()
+	{	
+		$this -> queueEbrite = new Consumer();
+		$this -> queueEbrite -> connect(['host' => $this -> config -> queue -> host,
+									     'port' => $this -> config -> queue -> port,
+									     'login' => $this -> config -> queue -> login,
+									     'password' => $this -> config -> queue -> password,
+									     'exchangeName' => $this -> config -> queue -> harvesterEbrite -> exchange,
+	                                     'exchangeType' => $this -> config -> queue -> harvesterEbrite -> type,
+									     'routing_key' => $this -> config -> queue -> harvesterEbrite -> routing_key
+									   ]);
+		$this -> queueEbrite -> setExchange();		
+		$this -> queueEbrite -> getQueue();
+
+		while (true) {
+			$job = $this -> queueEbrite -> getItem();
+
+			if($job) {
+                $this -> queueEbrite -> ackItem($job);
+                $t = new \Jobs\Grabber\Parser\Eventbrite($this -> getDi());
+                $t -> run($job);
+            } else {
+            	print_r("No items in queue\n\r");
+            	sleep(2);
+            }
+       	}
+	}
+	
 }

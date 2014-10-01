@@ -36,7 +36,7 @@ abstract class Base
 	protected $curlPageId		= 0;
 	protected $curlMaxPerPage	= 50;
 	protected $curlMaxObjects	= 5000;  
-	protected $curlPageNum		= 100;  # max 5.000 objects per day / 50 objects per page
+	protected $curlPageNum		= 1;  # max 5.000 objects per day / 50 objects per page
 	protected $curlPaginate		= true;
 	
 	protected $curlOpts = [
@@ -65,8 +65,7 @@ abstract class Base
 			do  {
 				$this -> curlPageId++;
 				$data = $this -> makeRequest();
-print_r($data);
-die();				
+				
 				foreach ($data[$this -> curlEntity] as $val) {
 					$result[] = $val;	
 				}
@@ -187,16 +186,24 @@ die();
 			throw new Exception('Oooops, you forgot about auth token, dude. With love, you EventbriteAPI');
 			return false;
 		}
-		
+
+		if ($this -> curlEntity == 'events') {
+			$source = 'events/search';
+		}
 		$this -> curlUrl = $this -> requestUrl . '/' . 
 			   			   $this -> apiVersion . '/' .
-			   			   $this -> curlEntity . '/?token=' .
+			   			   $source . '/?token=' .
 			   			   $this -> authToken . '&page=' . 
 			   			   $this -> curlPageId;
 		if (!empty($this -> curlArgs)) {
 			foreach ($this -> curlArgs as $arg => $val) {
-				$this -> curlUrl .= '&' . $arg . '=' . $val;
+				if ($arg != 'since_id' || ($arg == 'since_id' && $val != 1)) {
+					$this -> curlUrl .= '&' . $arg . '=' . $val;
+				}
 			}
 		}
+//print_r($this -> curlUrl . "\n\r");
+//die();				
+		
 	}
 }
