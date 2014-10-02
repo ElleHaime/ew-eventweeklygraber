@@ -8,8 +8,11 @@ use Models\EventTag,
 
 class Eventbrite
 {
+	public $cacheData;
+	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
+		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
 	}
 	
@@ -21,7 +24,7 @@ class Eventbrite
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 print_r($ev);
-//die();		
+die();		
 		if (!Event::findFirst('eb_uid = "' . $ev['id'] . '"'))
 		{
 			$result = array();
@@ -36,8 +39,10 @@ print_r($ev);
                 $logo = 'eb_' . $ev['id'] . '.' . end($ext);
                 $result['logo'] = $logo;
             }
-print_r($result);
-die();
+            
+			if (!empty($ev['ticket_classes'])) {
+				
+			}
 
 			if(!empty($ev['start'])) {
                 $start = explode('T', $ev['start']['local']);
@@ -102,24 +107,24 @@ die();
 	           		} elseif(!empty($ev['venue']['name']))  {
                 		$result['address'] = $ev['venue']['name'];
                		} else {
-	                	$result['latitude'] = ($locExists['latMin'] + $locExists['latMax']) / 2;
-	                	$result['longitude'] = ($locExists['lonMin'] + $locExists['lonMax']) / 2;
-                	}
+               			$result['address'] = '';
+               		}
 				}
             }
 
-                if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && isset($ev['venue']['id'])) {
-                    $venueObj = new \Models\Venue();
-                    isset($ev['location']) ? $venueName = $ev['location'] : $venueName = '';
-                    $venueObj -> assign([
-                            'fb_uid' => $ev['venue']['id'],
-                            'location_id' => $result['location_id'],
-                            'name' => $venueName,
-                            'address' => $result['address'],
-                            'latitude' => $ev['venue']['latitude'],
-                            'longitude' => $ev['venue']['longitude']]);
+            if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude']) && isset($ev['venue']['id'])) {
+                $venueObj = new \Models\Venue();
+                isset($ev['venue']['name']) ? $venueName = $ev['venue']['name'] : $venueName = '';
+                $venueObj -> assign([
+					'eb_uid' => $ev['venue']['id'],
+                	'eb_url' => $ev['venue']['recource_uri'],
+                    'location_id' => $result['location_id'],
+                    'name' => $venueName,
+                    'address' => $result['address'],
+                    'latitude' => $ev['venue']['latitude'],
+                    'longitude' => $ev['venue']['longitude']]);
 
-                    if ($venueObj -> save() != false) {
+                if ($venueObj -> save() != false) {
                         $venueCreated = $venueObj;
                         $this -> cacheData -> save('venue_' . $venueObj -> fb_uid, 
                                                 array('venue_id' => $venueObj -> id,
@@ -139,10 +144,48 @@ die();
                         $result['address'] = $ev['location'];
                     }
                 }
-	            
-			if (!empty($ev['ticket_classes'])) {
-				
 			}
+			
+			$Text = new \Categoryzator\Core\Text();
+	        if (!empty($result['name'])) {
+	        	$Text -> addContent($result['name']);
+	        } else {
+	            $result['name'] = '';
+	        }
+	        if (!empty($result['description'])) {
+	            $Text -> addContent($result['description']);
+	        } else {
+	            $result['description'] = '';
+	        }
+	        $Text -> returnTag(true);
+	
+	        $categoryzator = new \Categoryzator\Categoryzator($Text);
+	        $newText = $categoryzator->analiz(\Categoryzator\Categoryzator::MULTI_CATEGORY);
+	        $cats = array();
+	        $tags = array();
+	
+	        foreach ($newText->category as $key => $c) {
+	        	$Cat = \Models\Category::findFirst('key = \''.$c.'\'');
+	            if ($Cat) {
+	            	$cats[$key] = new \Models\EventCategory();
+	            	$cats[$key]->category_id = $Cat->id;
+	            }
+	        }
+	
+	        foreach ($newText->tag as $c) {
+	        	foreach ($c as $key => $tag) {
+	            	$Tag = Tag::findFirst('name = \''.$tag.'\'');
+	                if ($Tag) {
+	                	$tags[$key] = new EventTag();
+	                    $tags[$key]->tag_id = $Tag->id;
+	                }
+	            }
+	        }
+	
+	        if (!empty($cats)) {
+	        	$result['event_category'] = $cats;
+	        	$result['event_tag'] = $tags;
+	        }
 print_r($result);
 die();
 			
