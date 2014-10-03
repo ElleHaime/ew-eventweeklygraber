@@ -4,10 +4,13 @@ namespace Jobs\Grabber\Parser;
 
 use Models\EventTag,
 	Models\Tag,
+	Models\Total,
 	Models\Event;
 
 class Eventbrite
 {
+	use \Jobs\Grabber\Parser\Helper;
+	
 	public $cacheData;
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
@@ -23,15 +26,14 @@ class Eventbrite
 		
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
-print_r($ev);
-die();		
+		
 		if (!Event::findFirst('eb_uid = "' . $ev['id'] . '"'))
 		{
 			$result = array();
 
 			$result['eb_uid'] = $ev['id'];
 			$result['eb_url'] = $ev['url'];
-			$result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']);
+			$result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']['text']);
 			$result['name'] = $ev['name']['text'];
 			
 			if (isset($ev['logo_url']) && !empty($ev['logo_url'])) {
@@ -39,10 +41,6 @@ die();
                 $logo = 'eb_' . $ev['id'] . '.' . end($ext);
                 $result['logo'] = $logo;
             }
-            
-			if (!empty($ev['ticket_classes'])) {
-				
-			}
 
 			if(!empty($ev['start'])) {
                 $start = explode('T', $ev['start']['local']);
@@ -60,50 +58,19 @@ die();
                 }
             }
             
-			if (isset($result['start_date']) && isset($result['end_date'])) {
-                if (isset($result['start_time']) && isset($result['end_time'])) {
-
-                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
-
-                    if(strtotime($result['start_date'] . ' ' . $result['start_time']) >= strtotime($result['end_date'] . ' ' . $result['end_time'])) {
-                        $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-                    } else {
-                        $result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
-                    }
-                    unset($result['start_time']);
-                    unset($result['end_time']);
-
-                } elseif(isset($result['start_time']) && !isset($result['end_time'])) {
-                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
-                    $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-
-                    unset($result['start_time']);
-
-                } elseif(!isset($result['start_time']) && isset($result['end_time'])) {
-                    $result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
-                    unset($result['end_time']);
-                }
-            } elseif (isset($result['start_date']) && !isset($result['end_date'])) {
-                $result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-                if (isset($result['start_time'])) {
-                    $result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];    
-                    unset($result['start_time']);
-                } 
-                unset($result['start_time']);
-            }
-            
+			$result = $this -> processDates($result);
             
             if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
             	$result['latitude'] = $ev['venue']['latitude'];
                 $result['longitude'] = $ev['venue']['longitude'];
 				$locations = new \Models\Location();
 				$locExists = $locations -> createOnChange(['latitude' => $ev['venue']['latitude'], 'longitude' => $ev['venue']['longitude']]);
-                	
+				
 				if ($locExists) {
                 	$result['location_id'] = $locExists -> id;
                 		
                 	if (isset($ev['venue']['address'])) {
-               			$result['address'] = $ev['venue']['address_1'];
+               			$result['address'] = $ev['venue']['address']['address_1'];
 	           		} elseif(!empty($ev['venue']['name']))  {
                 		$result['address'] = $ev['venue']['name'];
                		} else {
@@ -132,7 +99,6 @@ die();
                                                       'location_id' => $venueObj -> location_id,
                                                       'latitude' => $venueObj->latitude,
                                                       'longitude' => $venueObj->longitude));
-                    }
                 }
 
                 if ($venueCreated !== false) {
@@ -145,58 +111,24 @@ die();
                     }
                 }
 			}
+
+			if ($categories = $this -> categorize($result)) {
+				$result['event_category'] = $categories['cats'];
+        		$result['event_tag'] = $categories['tags'];
+			}
 			
-			$Text = new \Categoryzator\Core\Text();
-	        if (!empty($result['name'])) {
-	        	$Text -> addContent($result['name']);
-	        } else {
-	            $result['name'] = '';
-	        }
-	        if (!empty($result['description'])) {
-	            $Text -> addContent($result['description']);
-	        } else {
-	            $result['description'] = '';
-	        }
-	        $Text -> returnTag(true);
-	
-	        $categoryzator = new \Categoryzator\Categoryzator($Text);
-	        $newText = $categoryzator->analiz(\Categoryzator\Categoryzator::MULTI_CATEGORY);
-	        $cats = array();
-	        $tags = array();
-	
-	        foreach ($newText->category as $key => $c) {
-	        	$Cat = \Models\Category::findFirst('key = \''.$c.'\'');
-	            if ($Cat) {
-	            	$cats[$key] = new \Models\EventCategory();
-	            	$cats[$key]->category_id = $Cat->id;
-	            }
-	        }
-	
-	        foreach ($newText->tag as $c) {
-	        	foreach ($c as $key => $tag) {
-	            	$Tag = Tag::findFirst('name = \''.$tag.'\'');
-	                if ($Tag) {
-	                	$tags[$key] = new EventTag();
-	                    $tags[$key]->tag_id = $Tag->id;
-	                }
-	            }
-	        }
-	
-	        if (!empty($cats)) {
-	        	$result['event_category'] = $cats;
-	        	$result['event_tag'] = $tags;
-	        }
-print_r($result);
-die();
-			
+	        $eventObj = new \Models\Event();
+	        $eventObj -> assign($result);
+	        
+			if ($eventObj -> save() != false) {
+            	$total = Total::findFirst('entity = "event"');
+            	$total -> total = $total -> total + 1;
+            	$total -> update();
+
+				if (isset($ev['logo']) && !empty($ev['logo'])) {
+                    $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
+                }
+			}
 		}
-print_r("done\n\r");		
-die();		
 	}
-	
-	
-	protected function processDates()
-	{
-	}
-	
 }
