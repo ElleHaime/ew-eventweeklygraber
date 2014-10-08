@@ -4,7 +4,7 @@ namespace Tasks\Application;
 
 use \Models\Cron;
 
-class cacherTask extends \Phalcon\CLI\Task
+class CacheTask extends \Phalcon\CLI\Task
 {
 	public function countersAction($args) 
 	{
@@ -20,5 +20,5 @@ class cacherTask extends \Phalcon\CLI\Task
 			
 			sleep(60);
 		} 
-	}
+	}	
 }

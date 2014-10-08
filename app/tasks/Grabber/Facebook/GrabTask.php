@@ -1,13 +1,13 @@
 <?php
 
-namespace Tasks;
+namespace Tasks\Facebook;
 
 use \Vendor\Facebook\Extractor,
 	\Queue\Producer\Producer,
 	\Models\Cron;
 
 
-class facebookTask extends \Phalcon\CLI\Task
+class GrabTask extends \Phalcon\CLI\Task
 {
 	const IDLE = 'idle';
 	const RUNNING = 'running';

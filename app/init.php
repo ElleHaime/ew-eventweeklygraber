@@ -12,25 +12,10 @@ $di -> set('router', array(
 	'className' => '\Phalcon\CLI\Router',
 ));
 
+
 $di -> set('loader', [
 			'className' => '\Phalcon\Loader',
 			'calls' => [
-
-				['method' => 'registerDirs', 
-				 'arguments' => [
-					['type' => 'parameter', 
-					 'value' => [
-						'models' => APPLICATION_PATH . '/app/models',
-						'library' => APPLICATION_PATH . '/app/library',
-						'tasks' => APPLICATION_PATH . '/app/tasks',
-						'grabberJobs' => APPLICATION_PATH . '/app/jobs/Grabber',
-						'applicationJobs' => APPLICATION_PATH . '/app/jobs/Application',
-						'vendor' => APPLICATION_PATH . '/vendor',
-						'upload' => APPLICATION_PATH . '../upload']
-					]
-				 ]
-				],
-
 				['method' => 'registerNamespaces',
 				 'arguments' => [
 				 	['type' => 'parameter', 
@@ -41,6 +26,10 @@ $di -> set('loader', [
 						'Queue\Consumer' => APPLICATION_PATH . '/app/library/Queue/Consumer',
 						'Categoryzator' => APPLICATION_PATH . '/vendor/Categoryzator/',
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
+						'Tasks\Eventbrite' => APPLICATION_PATH . '/app/tasks/Grabber/Eventbrite',
+				 		'Tasks\Facebook' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook',				 	
+				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Grabber/Cache',
+				 		'Tasks\Application' => APPLICATION_PATH . '/app/tasks/Application',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
 						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
@@ -55,7 +44,7 @@ $di -> set('loader', [
 				 ]
 				],
 				['method' => 'register'],
-			]
+			],
 		   ]);
 
 $di -> get('loader');
@@ -88,16 +77,6 @@ $di -> set('db',
 	} 
 );
 
-$di -> set('dispatcher', [
-	'className' => '\Phalcon\CLI\Dispatcher',
-	'calls' => [
-		['method' => 'setDefaultNamespace',
-		 'arguments' => [
-			['type' => 'parameter', 'value' => 'Tasks'],
-		]],
-	],
-]);
-
 
 $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
@@ -111,12 +90,6 @@ $cache = new \Library\Cache\Memcache($frontCache,
 		'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
 
-/*$keys = $cache -> queryKeys();
-foreach ($keys as $key) {
-	$cache -> delete($key);
-}
-print_r('cache cleared');
-exit();*/
 
 $console = new ConsoleApp();
 $console -> setDI($di);

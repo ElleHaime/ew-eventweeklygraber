@@ -61,21 +61,22 @@ class Eventbrite
 			$result = $this -> processDates($result);
             
             if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
-            	$result['latitude'] = $ev['venue']['latitude'];
-                $result['longitude'] = $ev['venue']['longitude'];
+               	$result['latitude'] = $ev['venue']['latitude'];
+		        $result['longitude'] = $ev['venue']['longitude'];
+		        
 				$locations = new \Models\Location();
 				$locExists = $locations -> createOnChange(['latitude' => $ev['venue']['latitude'], 'longitude' => $ev['venue']['longitude']]);
-				
+						
 				if ($locExists) {
-                	$result['location_id'] = $locExists -> id;
-                		
-                	if (isset($ev['venue']['address'])) {
-               			$result['address'] = $ev['venue']['address']['address_1'];
-	           		} elseif(!empty($ev['venue']['name']))  {
-                		$result['address'] = $ev['venue']['name'];
-               		} else {
-               			$result['address'] = '';
-               		}
+		          	$result['location_id'] = $locExists -> id;
+		                		
+		           	if (isset($ev['venue']['address'])) {
+		        		$result['address'] = $ev['venue']['address']['address_1'];
+			    	} elseif(!empty($ev['venue']['name']))  {
+		          		$result['address'] = $ev['venue']['name'];
+		        	} else {
+		        		$result['address'] = '';
+		        	}
 				}
             }
 
@@ -84,7 +85,6 @@ class Eventbrite
                 isset($ev['venue']['name']) ? $venueName = $ev['venue']['name'] : $venueName = '';
                 $venueObj -> assign([
 					'eb_uid' => $ev['venue']['id'],
-                	'eb_url' => $ev['venue']['recource_uri'],
                     'location_id' => $result['location_id'],
                     'name' => $venueName,
                     'address' => $result['address'],

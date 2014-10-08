@@ -1,12 +1,12 @@
 <?php
 
-namespace Tasks\Grabber;
+namespace Tasks\Facebook;
 
 use \Vendor\Facebook\Extractor,
 	\Queue\Consumer\Consumer;
 
 
-class listenerTask extends \Phalcon\CLI\Task
+class ParseTask extends \Phalcon\CLI\Task
 {
 	protected $queue;
 
@@ -32,8 +32,9 @@ class listenerTask extends \Phalcon\CLI\Task
                 $t = new \Jobs\Grabber\Parser\Facebook($this -> getDi());
                 $t -> run($job);
             } else {
+            	print_r("No items in queue\n\r");
             	sleep(2);
             }
-       	}
+       	} 
 	}
 }

@@ -36,7 +36,7 @@ abstract class Base
 	protected $curlPageId		= 0;
 	protected $curlMaxPerPage	= 50;
 	protected $curlMaxObjects	= 5000;  
-	protected $curlPageNum		= 1;  # max 5.000 objects per day / 50 objects per page
+	protected $curlPageNum		= 50;  # max 5.000 objects per day / 50 objects per page
 	protected $curlPaginate		= true;
 	
 	protected $curlOpts = [
@@ -65,7 +65,7 @@ abstract class Base
 			do  {
 				$this -> curlPageId++;
 				$data = $this -> makeRequest();
-				
+print_r(count($data[$this -> curlEntity]) . "\n\r");				
 				foreach ($data[$this -> curlEntity] as $val) {
 					$result[] = $val;	
 				}
@@ -204,6 +204,5 @@ abstract class Base
 		}
 //print_r($this -> curlUrl . "\n\r");
 //die();				
-		
 	}
 }

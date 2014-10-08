@@ -1,6 +1,6 @@
 <?php
 
-namespace Tasks;
+namespace Tasks\Eventbrite;
 
 use \Vendor\Eventbrite\Eventbrite,
 	\Models\Eventbrite as Ebrite,
@@ -8,7 +8,7 @@ use \Vendor\Eventbrite\Eventbrite,
 	\Models\Cron;
 
 
-class ebriteTask extends \Phalcon\CLI\Task
+class GrabTask extends \Phalcon\CLI\Task
 {
 	protected $ebrite;
 	protected $queue;
@@ -37,12 +37,17 @@ class ebriteTask extends \Phalcon\CLI\Task
 		$existed = Ebrite::find();
 		if ($existed) {
 			 foreach ($existed as $item) {
+print_r($item -> location . "\n\r");
 				$events = $this -> ebrite -> getEventsByCity($item -> location, 
 															 $item -> last_id);
 				if ($events) {
+					$lastId = $item -> last_id;
 					foreach ($events as $ev) {
 						$this -> publishToBroker($ev);
+						$lastId = $ev -> id;
 					}
+					$item -> last_id = $lastId;
+					$item -> update();
 				}				
 			 }
 		}

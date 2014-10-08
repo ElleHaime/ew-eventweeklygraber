@@ -21,5 +21,4 @@ class cachergrabTask extends \Phalcon\CLI\Task
 			sleep(60);
 		} 
 	}
-	
 }
