@@ -2,10 +2,12 @@
 
 namespace Models;
 
-class Eventbrite extends \Phalcon\Mvc\Model
+class Grabber extends \Phalcon\Mvc\Model
 {
 	public $id;
-	public $location;
+	public $grabber;
+	public $param;
+	public $value;
 	public $last_id;
 	
 	public function initialize()

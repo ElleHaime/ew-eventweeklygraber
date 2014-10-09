@@ -3,7 +3,7 @@
 namespace Tasks\Eventbrite;
 
 use \Vendor\Eventbrite\Eventbrite,
-	\Models\Eventbrite as Ebrite,
+	\Models\Grabber as Grabber,
 	\Queue\Producer\Producer,
 	\Models\Cron;
 
@@ -34,11 +34,11 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> init();
 
-		$existed = Ebrite::find();
+		$existed = Grabber::find(['grabber = "eventbrite"']);
 		if ($existed) {
 			 foreach ($existed as $item) {
-print_r($item -> location . "\n\r");
-				$events = $this -> ebrite -> getEventsByCity($item -> location, 
+print_r($item -> value . "\n\r");
+				$events = $this -> ebrite -> getEventsByCity($item -> value, 
 															 $item -> last_id);
 				if ($events) {
 					$lastId = $item -> last_id;

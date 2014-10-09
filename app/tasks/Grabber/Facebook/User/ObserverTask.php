@@ -1,9 +1,9 @@
 <?php
 
-namespace Tasks\Facebook;
+namespace Tasks\Facebook\User;
 
 use \Models\Cron,
-	\Tasks\Facebook\Grab;
+	\Tasks\Facebook\User\Grab;
 
 class ObserverTask extends \Phalcon\CLI\Task
 {
@@ -19,7 +19,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 			        $task -> state = Cron::STATE_HANDLING;
 			        $task -> update();
 			        
-	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Grab',
+	        		$this -> console -> handle(['task' => 'Tasks\Facebook\User\Grab',
 						        				'action' => 'harvest',
 						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
 				}

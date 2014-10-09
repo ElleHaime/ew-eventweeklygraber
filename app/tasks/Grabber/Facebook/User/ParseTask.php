@@ -1,6 +1,6 @@
 <?php
 
-namespace Tasks\Facebook;
+namespace Tasks\Facebook\User;
 
 use \Vendor\Facebook\Extractor,
 	\Queue\Consumer\Consumer;

@@ -3,10 +3,10 @@
 require_once('init.php');
 
 try {
-        $console -> handle(['task' => 'Tasks\Facebook\Observer',
+        $console -> handle(['task' => 'Tasks\Facebook\User\Observer',
                             'action' => 'observe']);
         
-		$console -> handle(['task' => 'Tasks\Facebook\Parse',
+		$console -> handle(['task' => 'Tasks\Facebook\User\Parse',
 				    		'action' => 'listen']); 
 		       
 } catch (\Phalcon\Exception $e) {
