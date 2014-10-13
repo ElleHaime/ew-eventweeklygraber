@@ -7,7 +7,7 @@ use \Vendor\Facebook\Extractor,
 	\Models\Cron;
 
 
-trait GrabHelper
+trait Grabable
 {
 	public function initQueue($source)
 	{
