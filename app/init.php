@@ -41,6 +41,7 @@ $di -> set('loader', [
 						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
+				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
 						'Models' => APPLICATION_PATH . '/app/models']
 					]

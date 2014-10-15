@@ -3,6 +3,9 @@
 namespace Tasks\Facebook;
 
 use \Vendor\Facebook\Extractor,
+	\Vendor\FacebookGraph\FacebookSession,
+	\Vendor\FacebookGraph\FacebookRequest,
+	\Vendor\FacebookGraph\FacebookRequestException,
 	\Queue\Producer\Producer,
 	\Models\Cron;
 
@@ -23,6 +26,18 @@ trait Grabable
 								   'routing_key' => $this -> config -> queue -> $source -> routing_key
 								  ]);
 		$this -> queue -> setExchange();		
+	}
+	
+	public function initGraph()
+	{
+		try {
+			FacebookSession::setDefaultApplication($this -> config -> facebook -> appId, 
+												   $this -> config -> facebook -> appSecret);
+			FacebookSession::enableAppSecretProof();
+			$this -> fbSession = FacebookSession::newAppSession();
+		} catch(\Exception $e) {
+			print_r($e);
+		}
 	}
 	
 
@@ -67,5 +82,12 @@ trait Grabable
 	{
 		$this -> state = $state;
 		return $this; 
+	}
+	
+	public function closeTask($arg)
+	{
+		$task = Cron::findFirst($arg);
+		$task -> state = Cron::STATE_EXECUTED;
+		$task -> update();		
 	}
 }

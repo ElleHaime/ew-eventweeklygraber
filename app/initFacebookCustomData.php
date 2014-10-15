@@ -4,7 +4,7 @@ require_once('init.php');
 
 try {
         $console -> handle(['task' => 'Tasks\Facebook\Custom\Observer',
-                            'action' => 'observe']);
+                            'action' => 'observedata']);
         
 		/*$console -> handle(['task' => 'Tasks\Facebook\Custom\Parse',
 				    		'action' => 'listen']); */ 

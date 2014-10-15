@@ -6,12 +6,13 @@ use \Models\Cron;
 
 class ObserverTask extends \Phalcon\CLI\Task
 {
-	const FB_TASK_NAME = 'extract_custom_facebook_events';
+	const FB_GET_ID_TASK_NAME = 'extract_custom_facebook_events_id';
+	const FB_BY_ID_TASK_NAME = 'extract_custom_facebook_events_data';
 
-	public function observeAction() 
+	public function observeidAction() 
 	{
 		while (true) {
-			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_TASK_NAME . '"');
+			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_GET_ID_TASK_NAME . '"');
 		
 			if ($tasks) {
 				foreach ($tasks as $task) {
@@ -20,7 +21,28 @@ class ObserverTask extends \Phalcon\CLI\Task
 			      //  $task -> update();
 			        
 	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
-						        				'action' => 'harvest',
+						        				'action' => 'harvestid',
+						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
+				}
+			} 
+			sleep(1);
+		}
+	}
+	
+	
+	public function observedataAction() 
+	{
+		while (true) {
+			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_BY_ID_TASK_NAME . '"');
+		
+			if ($tasks) {
+				foreach ($tasks as $task) {
+					$args = unserialize($task -> parameters);
+			        $task -> state = Cron::STATE_HANDLING;
+			      //  $task -> update();
+			        
+	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
+						        				'action' => 'harvestdata',
 						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
 				}
 			} 
