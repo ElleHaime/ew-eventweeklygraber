@@ -45,7 +45,7 @@ class GrabTask extends \Phalcon\CLI\Task
 		} elseif($this -> sourceType == self::READ_SOURCE_LOCATION) {
 			$queries = $this -> getLocations();
 		}
-
+		
 		if (!empty($queries)) {
 			$queriesChunked = array_chunk($queries, 200);
 			
@@ -53,7 +53,9 @@ class GrabTask extends \Phalcon\CLI\Task
 				$fq = fopen($this -> config -> facebook -> querySourceFile, 'a');
 							
 				foreach($queries as $query) {
-					$request = $this -> searchIdQuery . $query . '&access_token=' . $args[0];
+					$since = time();
+					$until = strtotime('+2 month');
+					$request = $this -> searchIdQuery . $query . '&since=' . $since . '&until=' . $until. '&access_token=' . $args[0];
 					$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 	
 					$data = $request -> execute() -> getGraphObject() -> asArray();
@@ -75,7 +77,7 @@ print_r("\n\r");
 
 print_r("sleeeping....\n\r");
 				
-				sleep(1800);
+				sleep(60);
 			}
 		}
 
@@ -184,6 +186,7 @@ print_r("done\n\r");
 		if ($tags) {
 			foreach ($tags as $key) {
 				$result[] = 'q=' . $key -> city; 
+				$venueIds[] = $key -> id;
 			}
 		}
 		
