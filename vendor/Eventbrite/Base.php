@@ -35,8 +35,7 @@ abstract class Base
 	protected $curlArgs 		= [];
 	protected $curlPageId		= 0;
 	protected $curlMaxPerPage	= 50;
-	protected $curlMaxObjects	= 5000;  
-	protected $curlPageNum		= 50;  # max 5.000 objects per day / 50 objects per page
+	protected $curlMaxObjects	= 500;  
 	protected $curlPaginate		= true;
 	
 	protected $curlOpts = [
@@ -62,6 +61,7 @@ abstract class Base
 		$result = [];
 		
 		if ($this -> curlPaginate) {
+			$requests = $this -> curlMaxObjects/$this -> curlMaxPerPage;
 			do  {
 				$this -> curlPageId++;
 				$data = $this -> makeRequest();
@@ -70,9 +70,9 @@ print_r(count($data[$this -> curlEntity]) . "\n\r");
 					$result[] = $val;	
 				}
 				if (count($data[$this -> curlEntity]) < $this -> curlMaxPerPage) {
-					$this -> curlPageId = $this -> curlPageNum;
+					$this -> curlPageId = $requests;
 				}
-			} while($this -> curlPageId != $this -> curlPageNum);
+			} while($this -> curlPageId != $requests);
 		} else {
 			$result = $this -> makeRequest();
 		}
@@ -95,9 +95,15 @@ print_r(count($data[$this -> curlEntity]) . "\n\r");
         
         $jsonData = curl_exec($ch);
 		$respInfo = curl_getinfo($ch);
-		$respData = get_object_vars(json_decode($jsonData));
-        curl_close($ch);
-        
+
+		if ($respInfo['http_code'] == 200) {
+			$respData = get_object_vars(json_decode($jsonData));
+		} else {
+			print_r($respInfo);
+			die();
+		}
+		
+	    curl_close($ch);        
         return $respData;
 	}	
 	
@@ -198,7 +204,7 @@ print_r(count($data[$this -> curlEntity]) . "\n\r");
 		if (!empty($this -> curlArgs)) {
 			foreach ($this -> curlArgs as $arg => $val) {
 				if ($arg != 'since_id' || ($arg == 'since_id' && $val != 1)) {
-					$this -> curlUrl .= '&' . $arg . '=' . $val;
+					$this -> curlUrl .= '&' . $arg . '=' . urlencode($val);
 				}
 			}
 		}

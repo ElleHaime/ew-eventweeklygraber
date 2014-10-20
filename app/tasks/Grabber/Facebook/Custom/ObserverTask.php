@@ -18,7 +18,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
 			        $task -> state = Cron::STATE_HANDLING;
-			      //  $task -> update();
+			        $task -> update();
 			        
 	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
 						        				'action' => 'harvestid',
@@ -39,7 +39,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
 			        $task -> state = Cron::STATE_HANDLING;
-			      //  $task -> update();
+			        $task -> update();
 			        
 	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
 						        				'action' => 'harvestdata',
