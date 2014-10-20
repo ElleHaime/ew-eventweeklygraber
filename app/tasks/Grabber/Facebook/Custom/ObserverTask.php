@@ -9,6 +9,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 	const FB_GET_ID_TASK_NAME = 'extract_custom_facebook_events_id';
 	const FB_BY_ID_TASK_NAME = 'extract_custom_facebook_events_data';
 
+	
 	public function observeidAction() 
 	{
 		while (true) {

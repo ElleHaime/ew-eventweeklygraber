@@ -9,3 +9,4 @@ app/inith.php
 app/imgSync.sh
 config/config.php
 vendor/Categoryzator/config.php
+source/facebook/*
