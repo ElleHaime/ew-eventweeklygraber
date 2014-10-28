@@ -38,6 +38,8 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> initGraph();
 		
+		isset($args[4]) ? $this -> sourceType = $args : $this -> sourceType = 3; 
+		
 		if ($this -> sourceType == self::READ_SOURCE_FILE) {
 			$queries = $this -> parseQueries();
 		} elseif($this -> sourceType == self::READ_SOURCE_KEYWORDS) {
@@ -80,15 +82,14 @@ print_r("sleeeping....\n\r");
 				sleep(60);
 			}
 		}
-
 print_r("done\n\r");
-		$this -> closeTask($args[3]);
+		$this -> harvestdataAction($args);
 	}
 	
 	
 	public function harvestdataAction(array $args)
 	{
-		$this -> initQueue('harvesterCustom');
+		$this -> initQueue('harvester');
 		$this -> initGraph();
 		
 		$queries = $this -> parseIds();

@@ -10,7 +10,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 	const FB_BY_ID_TASK_NAME = 'extract_custom_facebook_events_data';
 
 	
-	public function observeidAction() 
+	public function observeidAction($arg) 
 	{
 		while (true) {
 			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . self::FB_GET_ID_TASK_NAME . '"');
@@ -23,7 +23,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 			        
 	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
 						        				'action' => 'harvestid',
-						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
+						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id, $arg]]);
 				}
 			} 
 			sleep(1);
