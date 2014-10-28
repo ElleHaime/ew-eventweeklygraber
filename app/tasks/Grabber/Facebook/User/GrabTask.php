@@ -9,7 +9,7 @@ use \Vendor\Facebook\Extractor,
 
 class GrabTask extends \Phalcon\CLI\Task
 {
-	use Tasks\Facebook\GrabHepler;
+	use \Tasks\Facebook\Grabable;
 		
 	const IDLE = 'idle';
 	const RUNNING = 'running';
@@ -100,11 +100,7 @@ class GrabTask extends \Phalcon\CLI\Task
         	} 
         } 
 
-        $task = Cron::findFirst($args[3]);
-        $task -> state = Cron::STATE_EXECUTED;
-        $task -> update(); 
-        
-        //print_r("\n\r\n\rSummary:" . $this -> testCounter);
+		$this -> closeTask($args[3]);
 	}
 	
 	protected function processIds($query, $args, $replacements, $table, $id)
