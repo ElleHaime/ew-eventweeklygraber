@@ -173,7 +173,7 @@ print_r("saved\n\r");
 	            	$total -> update();
 	            	 
 	                if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
-	                    $this -> saveEventImage($ev['pic_big'], $eventObj);
+	                    $this -> saveEventImage('fb', $ev['pic_big'], $eventObj);
 	                }
 	                if (isset($ev['pic_cover']) && !empty($ev['pic_cover'])) {
 	                    $this -> saveEventImage('fb', $ev['pic_cover']['source'], $eventObj, 'cover');
