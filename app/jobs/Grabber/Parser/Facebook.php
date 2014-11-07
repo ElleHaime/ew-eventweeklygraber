@@ -34,7 +34,6 @@ class Facebook
 		} 
 		
 		if ($needHandle) {
-//print_r($ev['eid'] . " ");			
 			if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
 	        {
 //print_r("new event \n\r");	        	
@@ -277,7 +276,7 @@ print_r("saved\n\r");
                     break;
                 
                 default:
-                	print_r("can'\t identify type");
+                	print_r("cannot identify type");
         	}
         }
 //print_r("\n\r");

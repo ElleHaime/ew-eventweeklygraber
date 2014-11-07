@@ -84,6 +84,20 @@ trait Grabable
 		return $this; 
 	}
 	
+	
+	public function updateTask($arg, $state, $hash = false)
+	{
+		$task = Cron::findFirst($arg);
+		$task -> state = $state;
+		if ($hash) {
+			$task -> hash = $hash;	
+		} else {
+			$task -> hash = time();
+		}
+		$task -> update();		
+	}
+	
+	
 	public function closeTask($arg)
 	{
 		$task = Cron::findFirst($arg);

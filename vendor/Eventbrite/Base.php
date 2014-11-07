@@ -65,7 +65,6 @@ abstract class Base
 			do  {
 				$this -> curlPageId++;
 				$data = $this -> makeRequest();
-print_r(count($data[$this -> curlEntity]) . "\n\r");				
 				foreach ($data[$this -> curlEntity] as $val) {
 					$result[] = $val;	
 				}
