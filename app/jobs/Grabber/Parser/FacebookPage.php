@@ -19,17 +19,6 @@ class FacebookPage
 	{
 		$data = unserialize($item -> getBody());
 
-/*print_r("id = " . $data['id']);
-print_r("\n\r");		
-		
-if($data['id'] == 340290452649951) {
-	print_r("here\n\r");
-	print_r($data);
-	print_r("\n\r");
-	$test = Page::findFirst(['fb_uid = "' . $data['id'] . '"']);
-	print_r($test);
-	print_r("\n\r");	
-}*/
 		if (!Page::findFirst(['fb_uid = "' . $data['id'] . '"'])) 
 		{
 //print_r($data);
@@ -41,7 +30,9 @@ if($data['id'] == 340290452649951) {
 			}
 			$newPage['name'] = $data['name'];
 			$newPage['link'] = $data['link'];
-			$newPage['category'] = $data['category'];
+			if (isset($data['category'])) {
+				$newPage['category'] = $data['category'];
+			}
 			if (isset($data['phone'])) {
 				$newPage['phone'] = $data['phone'];
 			}

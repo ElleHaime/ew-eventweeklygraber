@@ -41,6 +41,8 @@ $di -> set('loader', [
 						'Queue\Consumer' => APPLICATION_PATH . '/app/library/Queue/Consumer',
 						'Categoryzator' => APPLICATION_PATH . '/vendor/Categoryzator/',
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
+				 		'Tasks\Facebook' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook',
+				 		'Tasks\Facebook\Creator' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creator',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
 						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
@@ -87,17 +89,6 @@ $di -> set('db',
 		return $connection;
 	} 
 );
-
-$di -> set('dispatcher', [
-	'className' => '\Phalcon\CLI\Dispatcher',
-	'calls' => [
-		['method' => 'setDefaultNamespace',
-		 'arguments' => [
-			['type' => 'parameter', 'value' => 'Tasks'],
-		]],
-	],
-]);
-
 
 $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);

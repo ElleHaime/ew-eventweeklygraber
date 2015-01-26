@@ -50,10 +50,9 @@ class Event extends \Phalcon\Mvc\Model
 	public function getCreators()
 	{
 		$result = [];		
-		$query = new \Phalcon\Mvc\Model\Query("SELECT DISTINCT Models\Event.fb_creator_uid
+		$query = new \Phalcon\Mvc\Model\Query("SELECT DISTINCT Models\Event.fb_creator_uid as fb_creator_uid
 													FROM Models\Event
-													WHERE Models\Event.fb_creator_uid IS NOT NULL
-													LIMIT 5", $this -> getDI());
+													WHERE Models\Event.fb_creator_uid IS NOT NULL", $this -> getDI());
 														
 		$creators = $query -> execute();
 		
