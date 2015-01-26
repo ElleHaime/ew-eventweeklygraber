@@ -61,7 +61,7 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 			foreach ($creators as $val) {
 				// get page info
 				$query = '/' . $val;
-//print_r($query . "\n\r");				
+print_r($query . "\n\r");				
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 					$data = $request -> execute() -> getGraphObject() -> asArray();
@@ -85,7 +85,9 @@ class harvestgraphTask extends \Phalcon\CLI\Task
 					if (!empty($data['data'])) {
 						foreach ($data['data'] as $event) {
 							$event -> creator = $val;
-							$event -> pic_cover = $event -> cover;
+							if (isset($event -> cover)) {
+								$event -> pic_cover = $event -> cover;
+							}
 							$this -> publishToEventBroker($event, $args, 'creators');
 						}
 					} 

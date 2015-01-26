@@ -6,6 +6,8 @@ class Event extends \Phalcon\Mvc\Model
 {
 	public $id;
 	public $fb_uid;
+	public $eb_uid;
+	public $eb_url;
 	public $fb_creator_uid;
 	public $member_id;
 	public $campaign_id;
