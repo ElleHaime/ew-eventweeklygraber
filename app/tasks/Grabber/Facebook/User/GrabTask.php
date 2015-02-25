@@ -101,6 +101,7 @@ class GrabTask extends \Phalcon\CLI\Task
         } 
 
 		$this -> closeTask($args[3]);
+		print_r("done\n\r");
 	}
 	
 	protected function processIds($query, $args, $replacements, $table, $id)

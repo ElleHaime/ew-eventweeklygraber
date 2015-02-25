@@ -21,7 +21,7 @@ class ParseTask extends \Phalcon\CLI\Task
                                    'exchangeType' => $this -> config -> queue -> harvester -> type,
 								   'routing_key' => $this -> config -> queue -> harvester -> routing_key
 								  ]);
-		$this -> queue -> setExchange();		
+		$this -> queue -> setExchange();	
 		$this -> queue -> getQueue();
 		
 		while (true) {

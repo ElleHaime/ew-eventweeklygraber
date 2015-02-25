@@ -4,6 +4,8 @@ namespace Models;
 
 class EventTag extends \Phalcon\Mvc\Model
 {
+    use \Sharding\Core\Env\Phalcon;	
+	
     public $id;
 
     public $event_id;

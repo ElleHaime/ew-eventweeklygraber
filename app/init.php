@@ -31,19 +31,20 @@ $di -> set('loader', [
 				 		'Tasks\Facebook\User' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/User',
 				 		'Tasks\Facebook\Creators' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creators',
 				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',				 	
-				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Grabber/Cache',
+				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Cache',
 				 		'Tasks\Application' => APPLICATION_PATH . '/app/tasks/Application',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
 						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
-						'Jobs\Grabber\Cacher' => APPLICATION_PATH . '/app/jobs/Grabber/Cacher',
+						'Jobs\Cache' => APPLICATION_PATH . '/app/jobs/Cache',
 						'Jobs\Grabber\Sync' => APPLICATION_PATH . '/app/jobs/Grabber/Sync',
 						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
 				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
-						'Models' => APPLICATION_PATH . '/app/models']
+						'Models' => APPLICATION_PATH . '/app/models',
+				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding']
 					]
 				 ]
 				],
@@ -58,6 +59,20 @@ if(is_readable(APPLICATION_PATH . '/config/config.php')) {
 	$config = new \Phalcon\Config($cfg);
 
 	$di -> set('config', $config);
+}
+
+if(is_readable(APPLICATION_PATH . '/config/sharding.php')) {
+	include APPLICATION_PATH . '/config/sharding.php';
+	$shardingConfig = new \Phalcon\Config($cfg_sharding);
+
+	$di -> set('shardingConfig', $shardingConfig);
+}
+
+if(is_readable(APPLICATION_PATH . '/config/shardingService.php')) {
+	include APPLICATION_PATH . '/config/shardingService.php';
+	$shardingServiceConfig = new \Phalcon\Config($cfg_sharding_service);
+
+	$di -> set('shardingServiceConfig', $shardingServiceConfig);
 }
 
 $di -> set('db',

@@ -20,6 +20,7 @@ class Facebook
 
 	public function run(\AMQPEnvelope $data)
 	{
+		print_r($this -> cacheData); die();
 		error_reporting(E_ALL & ~E_NOTICE);
 		
 		$msg = unserialize($data -> getBody());
@@ -164,7 +165,8 @@ class Facebook
 	
 	            $eventObj = new \Models\Event();
 	            $eventObj -> assign($result);
-	
+	            $eventObj -> setShardByCriteria($result['location_id']);
+print_r($eventObj -> getShardDb()); die();	
 	            if ($eventObj -> save() != false) {
 print_r("saved\n\r");	            	
 	            	$total = \Models\Total::findFirst('entity = "event"');

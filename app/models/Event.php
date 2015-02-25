@@ -4,6 +4,8 @@ namespace Models;
 
 class Event extends \Phalcon\Mvc\Model
 {
+    use \Sharding\Core\Env\Phalcon;	
+	
 	public $id;
 	public $fb_uid;
 	public $eb_uid;
