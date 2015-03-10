@@ -12,7 +12,6 @@ $di -> set('router', array(
 	'className' => '\Phalcon\CLI\Router',
 ));
 
-
 $di -> set('loader', [
 			'className' => '\Phalcon\Loader',
 			'calls' => [
@@ -75,7 +74,7 @@ if(is_readable(APPLICATION_PATH . '/config/shardingService.php')) {
 	$di -> set('shardingServiceConfig', $shardingServiceConfig);
 }
 
-$di -> set('db',
+$di -> set('dbMaster',
 	function () use ($config) {
 		$eventsManager = new \Phalcon\Events\Manager();
 
@@ -96,19 +95,17 @@ $di -> set('db',
 	} 
 );
 
-
 $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
 });
 
 $frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
 $cache = new \Library\Cache\Memcache($frontCache,
-		['host' => $config -> cache -> host,
-		'port' => $config -> cache -> port,
-		'persistent' => $config -> cache -> persistent,
-		'prefix' => $config -> database -> dbname]);
+			['host' => $config -> cache -> host,
+			'port' => $config -> cache -> port,
+			'persistent' => $config -> cache -> persistent,
+			'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
-
 
 $console = new ConsoleApp();
 $console -> setDI($di);

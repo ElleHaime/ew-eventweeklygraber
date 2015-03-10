@@ -30,7 +30,7 @@ abstract class Base
 	
 	protected $curlMethod 		= 'GET';
 	protected $curlEntity		= null;
-	protected $curlEntityId		= null;
+	protected $curlEntityId	= null;
 	protected $curlUrl			= null;
 	protected $curlArgs 		= [];
 	protected $curlPageId		= 0;

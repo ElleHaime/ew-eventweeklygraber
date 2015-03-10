@@ -10,17 +10,21 @@ class Facebook
 	use \Jobs\Grabber\Parser\Helper;
 		
 	public $cacheData;
+	private $fbUidCachePrefix = 'fbUid';
 
 
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
 		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
+        
+        if (isset($this -> config -> cache -> prefixes -> fbUid)) {
+        	$this -> fbUidCachePrefix = $this -> config -> cache -> prefixes -> fbUid;
+        }
 	}
 
 	public function run(\AMQPEnvelope $data)
 	{
-		print_r($this -> cacheData); die();
 		error_reporting(E_ALL & ~E_NOTICE);
 		
 		$msg = unserialize($data -> getBody());
@@ -35,10 +39,11 @@ class Facebook
 		} 
 		
 		if ($needHandle) {
-			if (!$eventExists = \Models\Event::findFirst('fb_uid = "' . $ev['eid'] . '"'))
+			if (!$this -> cacheData -> exists($this -> fbUidCachePrefix . $ev['eid']))
 	        {
 //print_r("new event \n\r");	        	
-	            $result = array();
+	            $result = $eventCategories = $eventTags = [];
+	            
 	            $result['fb_uid'] = $ev['eid'];
 	            $result['fb_creator_uid'] = $ev['creator'];
 	            $result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']);
@@ -88,11 +93,11 @@ class Facebook
 	            	}
 	            }
 	
-	            $result['location_id'] = '';
+	            $result['location_id'] = '0';
 	            $venueCreated = false;
 	
 	            if (isset($ev['venue']['id']) && $this -> cacheData -> exists('venue_' . $ev['venue']['id'])) {
-	                $venue = $this -> cacheData -> get('venue_' . $ev['venue']['id']);
+	                $venue = $this -> cacheData -> get($this -> fbUidCachePrefix . 'venue_' . $ev['venue']['id']);
 	                $result['venue_id'] = $venue['venue_id'];
 	                $result['address'] = $venue['address'];
 	                $result['latitude'] = $venue['latitude'];
@@ -134,7 +139,7 @@ class Facebook
 	
 	                    if ($venueObj -> save() != false) {
 	                        $venueCreated = $venueObj;
-	                        $this -> cacheData -> save('venue_' . $venueObj -> fb_uid, 
+	                        $this -> cacheData -> save($this -> fbUidCachePrefix . 'venue_' . $venueObj -> fb_uid, 
 	                                                array('venue_id' => $venueObj -> id,
 	                                                      'address' => $venueObj -> address,
 	                                                      'location_id' => $venueObj -> location_id,
@@ -158,17 +163,13 @@ class Facebook
 	                $result['address'] = '';
 	            }
 	
-	            if ($categories = $this -> categorize($result)) {
-					$result['event_category'] = $categories['cats'];
-	        		$result['event_tag'] = $categories['tags'];
-				}
-	
-	            $eventObj = new \Models\Event();
+	            $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	            $eventObj -> assign($result);
-	            $eventObj -> setShardByCriteria($result['location_id']);
-print_r($eventObj -> getShardDb()); die();	
+	
 	            if ($eventObj -> save() != false) {
-print_r("saved\n\r");	            	
+print_r($eventObj -> id . "saved\n\r");
+					$this -> categorize($eventObj);
+
 	            	$total = \Models\Total::findFirst('entity = "event"');
 	            	$total -> total = $total -> total + 1;
 	            	$total -> update();
@@ -180,14 +181,14 @@ print_r("saved\n\r");
 	                    $this -> saveEventImage('fb', $ev['pic_cover']['source'], $eventObj, 'cover');
 	                }
 	
-	                $this -> cacheData -> save('fbe_' . $eventObj -> fb_uid, $eventObj -> id);
-	                $newEvents[$eventObj -> fb_uid] = $eventObj -> id;
+	                $this -> cacheData -> save($this -> fbUidCachePrefix . $eventObj -> fb_uid, $eventObj -> id);
+	                $newEvents[$eventObj -> fb_uid] = $eventObj;
 	            } else {
 ///print_r("ooooooops, not saved\n\r");	            	
 	            }
 	        } else {
 //print_r("exists already\n\r");	        	
-	            $newEvents[$ev['eid']] = $eventExists -> id;
+	            $newEvents[$ev['eid']] = $eventExists;
 	        }
 		}
 
@@ -196,63 +197,41 @@ print_r("saved\n\r");
         	switch ($msg['type']) {
         		case 'friend_going_event':
         		case 'friend_event':
-        				foreach ($newEvents as $ev => $id) {
-        					if (!\Models\EventMemberFriend::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id)) {
-///print_r("not in counters: \n\r");
+        				foreach ($newEvents as $ev => $event) {
+        					if (!\Models\EventMemberFriend::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '"')) {
                             	if ($needHandle) {
 	                                $obj = new \Models\EventMemberFriend();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
-	                                   			 	'event_id' => $id]);
+	                                   			 	'event_id' => $event -> id]);
 	                                $obj -> save();
-///print_r("saved to table: \n\r");                                
-	                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-	                                if ($objC) {
-		                                $objC -> userFriendsGoing =  $objC -> userFriendsGoing + 1;
-		                                $objC -> update();
-///print_r("saved to counters: \n\r");		                                
-	                                }
                                 }
-                            } else {
-///print_r("already in counters: \n\r");
-                            }
+                            } 
                         }
         			break;
 
         		case 'user_going_event':
-        				foreach ($newEvents as $ev => $id) {
-        					if (!\Models\EventMember::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id . ' AND member_status = 1')) {
+        				foreach ($newEvents as $ev => $event) {
+        					if (!\Models\EventMember::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND member_status = 1')) {
         						if ($needHandle) {
 	                                $obj = new \Models\EventMember();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
 					                                'event_id' => $id,
 					                                'member_status' => 1]);
 	                                $obj -> save();
-                                
-	                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-	                                if ($objC) {
-		                                $objC -> userEventsGoing =  $objC -> userEventsGoing + 1;
-		                                $objC -> update();
-	                                }
                                 }
                             }
                         }
         			break;
 
         		case 'page_event':
-        				foreach ($newEvents as $ev => $id) {
-        					if (!\Models\EventLike::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = ' . $id . ' AND status = 1')) {
+        				foreach ($newEvents as $ev => $event) {
+        					if (!\Models\EventLike::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND status = 1')) {
         						if ($needHandle) {
 		                            $obj = new \Models\EventLike();
 		                            $obj -> assign(['member_id' => $msg['args'][2],
 	                                                'event_id' => $id,
 	                                                'status' => 1]);
 		                            $obj -> save();
-		                            
-		                            $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-		                            if ($objC) {
-		                                $objC -> userEventsLiked =  $objC -> userEventsLiked + 1;
-		                                $objC -> update();
-		                            }
                                 }
 	                        }
 	                    }
@@ -260,27 +239,20 @@ print_r("saved\n\r");
 
                 case 'user_page_event':
                 case 'user_event':
-                        foreach ($newEvents as $ev => $id) {
-                            if (!\Models\Event::findFirst('member_id = ' . $msg['args'][2] . ' AND id = ' . $id)) {
+                        foreach ($newEvents as $ev => $event) {
+                        	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
+                            if (!$obj::findFirst('member_id = ' . $msg['args'][2] . ' AND id = "' . $event -> id . '"')) {
                             	if ($needHandle) {
-	                                $obj = \Models\Event::findFirst($id);
 	                                $obj -> member_id = $msg['args'][2];
 	                                $obj -> update();
-	                                
-	                                $objC = \Models\EventMemberCounter::findFirst('member_id = ' . $msg['args'][2]);
-	                                if ($objC) {
-	                                	$objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
-	                                	$objC -> update();
-	                                }
                                 }  
                             } 
         				}
                     break;
                 
                 default:
-                	print_r("cannot identify type");
+                	print_r("cannot identify event type::" . $event -> id . "\n\r");
         	}
         }
-//print_r("\n\r");
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Grabber extends \Phalcon\Mvc\Model
+class Grabber extends \Library\Model
 {
 	public $id;
 	public $grabber;
@@ -10,9 +10,11 @@ class Grabber extends \Phalcon\Mvc\Model
 	public $value;
 	public $last_id;
 	
-	public function initialize()
+/*	public function initialize()
 	{
+		parent::initialize();
+				
 		$this -> belongsTo('location_id', '\Models\Location', 'id', array('alias' => 'location',
 																	 	   'baseField' => 'alias'));
-	}
+	} */
 }

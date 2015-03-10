@@ -3,18 +3,20 @@
 namespace Library\Cache;
 
 use Phalcon\Cache\Backend,
-    Phalcon\Cache\BackendInterface,
     Phalcon\Cache\Exceptions;
 
 
-class Memcache extends Backend implements BackendInterface
+class Memcache extends \Phalcon\Cache\Backend
 {
-    public $prefix = '';
-    public $memcache;
+    public $prefix 		= '';
+    public $di 			= false;
+    public $memcache	= false;
    
 
     public function __construct(\Phalcon\Cache\FrontendInterface $frontCache, $options = [])
     {
+		$this -> di = \Phalcon\DI::getDefault();
+    	
         if (empty($options)) {
             throw new \Exception('Memcache connection error: connection options are required');
         }
@@ -109,11 +111,6 @@ class Memcache extends Backend implements BackendInterface
     }
     
     
-    public function flush()
-    {
-    	parent::flush();
-    }
-
     /**
      * Query the existing cached keys
      *
@@ -134,5 +131,26 @@ class Memcache extends Backend implements BackendInterface
     public function exists($keyName = null, $lifetime = null)
     {
         return $this -> memcache -> exists($this -> prefix . $keyName);
+    }
+
+
+    /**
+     * Invalidates all existed items 
+     *
+     * @return boolean
+     */
+    public function flush()
+    {
+    	$this -> memcache -> flush();
+    }
+    
+    /**
+     * Return prefix of instance
+     *
+     * @return string
+     */
+    public function getCachePrefix()
+    {
+    	return $this -> prefix;
     }
 }

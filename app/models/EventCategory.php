@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class EventCategory extends \Phalcon\Mvc\Model
+class EventCategory extends \Library\Model
 {
     use \Sharding\Core\Env\Phalcon;	
 	
@@ -12,6 +12,8 @@ class EventCategory extends \Phalcon\Mvc\Model
 	
 	public function initialize()
 	{
+		parent::initialize();
+		
         $this -> belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_category'));
         $this -> belongsTo('category_id', '\Models\Category', 'id', array('alias' => 'eventpart2'));
 	}

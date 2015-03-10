@@ -2,8 +2,11 @@
 
 namespace Jobs\Grabber\Parser;
 
-use Models\EventTag,
-	Models\Tag;
+use Models\EventImage,
+	 Models\EventTag,
+	 Models\EventCategory,
+	 Models\Category,
+	 Models\Tag;
 
 trait Helper
 {
@@ -39,41 +42,50 @@ trait Helper
             fclose($f);
             chmod($fPath, 0777);
         }
-
-        $images = new \Models\EventImage();
+        $images = new EventImage();
+        $images->setShardById($event -> id);
         $images -> assign(array(
                 'event_id' => $event -> id,
                 'image' => $img,
                 'type' => $imgType));
         $images -> save();
+        print_r("img: " . $images -> image . "\n\r");       
     }	
     
     
-    public function categorize($result)
+    public function categorize($event)
     {
     	$Text = new \Categoryzator\Core\Text();
-	        if (!empty($result['name'])) {
-        	$Text -> addContent($result['name']);
-        } else {
-            $result['name'] = '';
-        }
-        if (!empty($result['description'])) {
-            $Text -> addContent($result['description']);
-        } else {
-            $result['description'] = '';
-        }
+	        if (!empty($event -> name)) {
+        	$Text -> addContent($event -> name);
+        } 
+        if (!empty($event -> description)) {
+            $Text -> addContent($event -> description);
+        } 
         $Text -> returnTag(true);
 
         $categoryzator = new \Categoryzator\Categoryzator($Text);
         $newText = $categoryzator->analiz(\Categoryzator\Categoryzator::MULTI_CATEGORY);
-        $cats = array();
-        $tags = array();
+        $cats = [];
+        $tags = [];
 
         foreach ($newText->category as $key => $c) {
-        	$Cat = \Models\Category::findFirst('key = \''.$c.'\'');
+        	$Cat = Category::findFirst('key = \''.$c.'\'');
             if ($Cat) {
-            	$cats[$key] = new \Models\EventCategory();
-            	$cats[$key]->category_id = $Cat->id;
+            	$cats = new EventCategory();
+            	$cats -> setShardById($event -> id);
+            	$cats -> assign(['category_id' => $Cat->id,
+            					 'event_id' => $event -> id]);
+            	print_r($cats -> toArray());
+            	print_r("\n\r");            	
+            	if (!$cats -> save()) {
+            		print_r("ooooooooops\n\r");
+            		print_r("db: " . $cats -> getShardDb() . "\n\r");
+            		print_r("tbl: " . $cats -> getShardTable() . "\n\r");
+            	} else {
+					print_r("db: " . $cats -> getShardDb() . "\n\r");
+					print_r("tbl: " . $cats -> getShardTable() . "\n\r");
+            	}
             }
         }
 
@@ -81,17 +93,16 @@ trait Helper
         	foreach ($c as $key => $tag) {
             	$Tag = Tag::findFirst('name = \''.$tag.'\'');
                 if ($Tag) {
-                	$tags[$key] = new EventTag();
-                    $tags[$key]->tag_id = $Tag->id;
+                	$tags = new EventTag();
+                	$tags -> setShardById($event -> id);
+                    $tags -> assign(['tag_id' => $Tag->id,
+                    				 'event_id' => $event -> id]);
+                    $tags -> save();
                 }
             }
         }
         
-        if (!empty($cats)) {
-        	return ['cats' => $cats, 'tags' => $tags];
-        } else {
-        	return false;
-        }
+        return;
     }
     
     

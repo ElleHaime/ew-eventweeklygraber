@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class EventMember extends \Phalcon\Mvc\Model
+class EventMember extends \Library\Model
 {
 	const
 	JOIN    = 1,
@@ -16,6 +16,8 @@ class EventMember extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> hasMany('event_id', '\Models\Event', 'id', array('alias' => 'eventpart'));
 		$this -> hasMany('member_id', '\Models\Member', 'id', array('alias' => 'memberpart'));
 	}

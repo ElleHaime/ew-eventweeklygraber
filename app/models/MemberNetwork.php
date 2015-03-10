@@ -4,7 +4,7 @@ namespace Models;
 
 use Models\Member;
 
-class MemberNetwork extends \Phalcon\Mvc\Model
+class MemberNetwork extends \Library\Model
 {
 	public $id;
 	public $member_id;
@@ -17,6 +17,8 @@ class MemberNetwork extends \Phalcon\Mvc\Model
 	
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> belongsTo('member_id', '\Models\Member', 'id', array('alias' => 'member'));
 		$this -> belongsTo('network_id', '\Models\Network', 'id', array('alias' => 'network'));
 		

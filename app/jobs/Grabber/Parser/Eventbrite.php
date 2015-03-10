@@ -12,11 +12,16 @@ class Eventbrite
 	use \Jobs\Grabber\Parser\Helper;
 	
 	public $cacheData;
+	private $ebUidCachePrefix = 'ebUid';
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
 		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
+        
+        if (isset($this -> config -> cache -> prefixes -> ebUid)) {
+        	$this -> ebUidCachePrefix = $this -> config -> cache -> prefixes -> ebUid;
+        }
 	}
 	
 	
@@ -27,7 +32,7 @@ class Eventbrite
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		
-		if (!Event::findFirst('eb_uid = "' . $ev['id'] . '"'))
+		if (!$this -> cacheData -> exists($this -> ebUidCachePrefix . $ev['id']))			
 		{
 			$result = array();
 
@@ -35,6 +40,7 @@ class Eventbrite
 			$result['eb_url'] = $ev['url'];
 			$result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']['text']);
 			$result['name'] = $ev['name']['text'];
+			$result['location_id'] = '0';
 			
 			if (isset($ev['logo_url']) && !empty($ev['logo_url'])) {
                 $ext = explode('.', $ev['logo_url']);
@@ -49,7 +55,6 @@ class Eventbrite
                     $result['start_time'] = $start[1]; 
                 }
             }
-            
 			if(!empty($ev['end'])) {
                 $end = explode('T', $ev['end']['local']);
                 $result['end_date'] = $end[0];
@@ -57,7 +62,6 @@ class Eventbrite
                     $result['end_time'] = $end[1]; 
                 }
             }
-            
 			$result = $this -> processDates($result);
             
             if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
@@ -93,7 +97,7 @@ class Eventbrite
 
                 if ($venueObj -> save() != false) {
                         $venueCreated = $venueObj;
-                        $this -> cacheData -> save('venue_' . $venueObj -> fb_uid, 
+                        $this -> cacheData -> save($this -> ebUidCachePrefix . 'venue_' . $venueObj -> eb_uid, 
                                                 array('venue_id' => $venueObj -> id,
                                                       'address' => $venueObj -> address,
                                                       'location_id' => $venueObj -> location_id,
@@ -111,16 +115,13 @@ class Eventbrite
                     }
                 }
 			}
-
-			if ($categories = $this -> categorize($result)) {
-				$result['event_category'] = $categories['cats'];
-        		$result['event_tag'] = $categories['tags'];
-			}
 			
-	        $eventObj = new \Models\Event();
+	        $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	        $eventObj -> assign($result);
 	        
 			if ($eventObj -> save() != false) {
+				$this -> categorize($eventObj);
+				
             	$total = Total::findFirst('entity = "event"');
             	$total -> total = $total -> total + 1;
             	$total -> update();
@@ -128,6 +129,8 @@ class Eventbrite
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
                 }
+                
+                $this -> cacheData -> save($this -> ebUidCachePrefix . $eventObj -> eb_uid, $eventObj -> id);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Keyword extends \Phalcon\Mvc\Model
+class Keyword extends \Library\Model
 {
     public $id;
     public $tag_id;

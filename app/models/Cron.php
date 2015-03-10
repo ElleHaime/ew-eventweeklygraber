@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Cron extends \Phalcon\Mvc\Model
+class Cron extends \Library\Model
 {
 	const STATE_PENDING 	= 0;
 	const STATE_HANDLING 	= 1;

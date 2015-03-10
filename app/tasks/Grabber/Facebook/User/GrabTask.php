@@ -20,11 +20,11 @@ class GrabTask extends \Phalcon\CLI\Task
 	
 	protected $userPagesUid 	= [];
 	protected $userGoingUid 	= [];
-	protected $pagesUid			= [];
+	protected $pagesUid		= [];
 	protected $friendsUid 		= [];
-	protected $friendsGoingUid 	= [];
+	protected $friendsGoingUid = [];
 	
-	protected $testCounter 		= 0;
+	protected $testCounter 	= 0;
 
 
 	public function harvestAction(array $args)
@@ -112,7 +112,7 @@ class GrabTask extends \Phalcon\CLI\Task
 		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
 //print_r($fql . "\n\r");		
 		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
+//print_r($result);
 		if (count($result -> $table) > 0) {
 			foreach ($result -> $table as $item) {
 				$resultScope[] = json_decode(json_encode($item), true)[$id];
@@ -191,9 +191,11 @@ class GrabTask extends \Phalcon\CLI\Task
 
 	protected function publishToBroker($event, $args, $resultType)
 	{
-       	$data = ['args' => $args,
-       			 'item' => json_decode(json_encode($event), true),
-        		 'type' => $resultType];
-        $this -> queue -> publish(serialize($data));
+       	$data = serialize(['args' => $args,
+			       		   'item' => json_decode(json_encode($event), true),
+			        	   'type' => $resultType]);
+//print_r($data);
+//print_r("\n\r");
+        $this -> queue -> publish($data);
 	}
 }

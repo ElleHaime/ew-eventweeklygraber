@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class EventMemberFriend extends \Phalcon\Mvc\Model
+class EventMemberFriend extends \Library\Model
 {
 	public $id;
 	public $event_id;
@@ -11,6 +11,8 @@ class EventMemberFriend extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> hasMany('event_id', '\Models\Event', 'id', array('alias' => 'eventfriendart'));
 		$this -> hasMany('member_id', '\Models\Member', 'id', array('alias' => 'memberfriendpart'));
 	}

@@ -3,7 +3,7 @@
 namespace Models;
 
 
-class Venue extends \Phalcon\Mvc\Model
+class Venue extends \Library\Model
 {
 	public $id;
 	public $fb_uid;
@@ -20,6 +20,8 @@ class Venue extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> belongsTo('location_id', '\Models\Location', 'id', array('alias' => 'location'));
 		$this -> hasOne('id', '\Models\Event', 'venue_id', array('alias' => 'event'));
 		
