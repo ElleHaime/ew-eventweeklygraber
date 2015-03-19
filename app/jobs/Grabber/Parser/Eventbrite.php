@@ -32,8 +32,6 @@ class Eventbrite
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		
-		if (!$this -> cacheData -> exists($this -> ebUidCachePrefix . $ev['id']))			
-		{
 			$result = array();
 
 			$result['eb_uid'] = $ev['id'];
@@ -129,9 +127,6 @@ class Eventbrite
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
                 }
-                
-                $this -> cacheData -> save($this -> ebUidCachePrefix . $eventObj -> eb_uid, $eventObj -> id);
 			}
 		}
-	}
 }
