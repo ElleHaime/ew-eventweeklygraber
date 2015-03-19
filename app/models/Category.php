@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Category extends \Phalcon\Mvc\Model
+class Category extends \Library\Model
 {
 	public $id;
 	public $key;
@@ -12,6 +12,8 @@ class Category extends \Phalcon\Mvc\Model
 	
 	public function initialize()
 	{
+		parent::initialize();
+				
 		$this -> hasMany('id', '\Models\EventCategory', 'category_id', array('alias' => 'eventpart'));
 	}
 }

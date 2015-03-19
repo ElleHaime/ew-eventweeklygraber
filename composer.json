@@ -1,0 +1,6 @@
+{
+    "require": {
+        "temafey/phalcon-engine": "0.7.3",    
+        "vendor/sharding": "dev-master"
+    }
+}

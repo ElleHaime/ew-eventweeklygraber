@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Member extends \Phalcon\Mvc\Model
+class Member extends \Library\Model
 {
 	public $id;
 	public $email;
@@ -18,6 +18,8 @@ class Member extends \Phalcon\Mvc\Model
 	
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> hasOne('location_id', '\Models\Location', 'id', array('alias' => 'location'));
 		$this -> hasMany('id', '\Models\Event', 'member_id', array('alias' => 'event'));
 		$this -> hasMany('id', '\Models\EventLike', 'member_id', array('alias' => 'event_like'));

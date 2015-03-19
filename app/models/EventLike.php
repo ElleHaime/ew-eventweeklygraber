@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class EventLike extends \Phalcon\Mvc\Model
+class EventLike extends \Library\Model
 {
 	public $id;
     public $event_id;
@@ -11,6 +11,8 @@ class EventLike extends \Phalcon\Mvc\Model
 	
 	public function initialize()
 	{
+		parent::initialize();		
+		
         $this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
         $this->belongsTo('member_id', '\Models\Member', 'id', array('alias' => 'event_like'));
     }

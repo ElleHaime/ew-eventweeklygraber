@@ -15,22 +15,6 @@ $di -> set('router', array(
 $di -> set('loader', [
 			'className' => '\Phalcon\Loader',
 			'calls' => [
-
-				['method' => 'registerDirs', 
-				 'arguments' => [
-					['type' => 'parameter', 
-					 'value' => [
-						'models' => APPLICATION_PATH . '/app/models',
-						'library' => APPLICATION_PATH . '/app/library',
-						'tasks' => APPLICATION_PATH . '/app/tasks',
-						'grabberJobs' => APPLICATION_PATH . '/app/jobs/Grabber',
-						'applicationJobs' => APPLICATION_PATH . '/app/jobs/Application',
-						'vendor' => APPLICATION_PATH . '/vendor',
-						'upload' => APPLICATION_PATH . '../upload']
-					]
-				 ]
-				],
-
 				['method' => 'registerNamespaces',
 				 'arguments' => [
 				 	['type' => 'parameter', 
@@ -41,20 +25,30 @@ $di -> set('loader', [
 						'Queue\Consumer' => APPLICATION_PATH . '/app/library/Queue/Consumer',
 						'Categoryzator' => APPLICATION_PATH . '/vendor/Categoryzator/',
 						'Tasks' => APPLICATION_PATH . '/app/tasks',
+						'Tasks\Eventbrite' => APPLICATION_PATH . '/app/tasks/Grabber/Eventbrite',
+				 		'Tasks\Facebook' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook',
+				 		'Tasks\Facebook\User' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/User',
+				 		'Tasks\Facebook\Creators' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creators',
+				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',				 	
+				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Cache',
+				 		'Tasks\Application' => APPLICATION_PATH . '/app/tasks/Application',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
 						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
-						'Jobs\Grabber\Cacher' => APPLICATION_PATH . '/app/jobs/Grabber/Cacher',
+						'Jobs\Cache' => APPLICATION_PATH . '/app/jobs/Cache',
 						'Jobs\Grabber\Sync' => APPLICATION_PATH . '/app/jobs/Grabber/Sync',
 						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
-						'Models' => APPLICATION_PATH . '/app/models']
+				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
+				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
+						'Models' => APPLICATION_PATH . '/app/models',
+				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding']
 					]
 				 ]
 				],
 				['method' => 'register'],
-			]
+			],
 		   ]);
 
 $di -> get('loader');
@@ -66,7 +60,21 @@ if(is_readable(APPLICATION_PATH . '/config/config.php')) {
 	$di -> set('config', $config);
 }
 
-$di -> set('db',
+if(is_readable(APPLICATION_PATH . '/config/sharding.php')) {
+	include APPLICATION_PATH . '/config/sharding.php';
+	$shardingConfig = new \Phalcon\Config($cfg_sharding);
+
+	$di -> set('shardingConfig', $shardingConfig);
+}
+
+if(is_readable(APPLICATION_PATH . '/config/shardingService.php')) {
+	include APPLICATION_PATH . '/config/shardingService.php';
+	$shardingServiceConfig = new \Phalcon\Config($cfg_sharding_service);
+
+	$di -> set('shardingServiceConfig', $shardingServiceConfig);
+}
+
+$di -> set('dbMaster',
 	function () use ($config) {
 		$eventsManager = new \Phalcon\Events\Manager();
 
@@ -87,35 +95,17 @@ $di -> set('db',
 	} 
 );
 
-$di -> set('dispatcher', [
-	'className' => '\Phalcon\CLI\Dispatcher',
-	'calls' => [
-		['method' => 'setDefaultNamespace',
-		 'arguments' => [
-			['type' => 'parameter', 'value' => 'Tasks'],
-		]],
-	],
-]);
-
-
 $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
 });
 
 $frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
 $cache = new \Library\Cache\Memcache($frontCache,
-		['host' => $config -> cache -> host,
-		'port' => $config -> cache -> port,
-		'persistent' => $config -> cache -> persistent,
-		'prefix' => $config -> database -> dbname]);
+			['host' => $config -> cache -> host,
+			'port' => $config -> cache -> port,
+			'persistent' => $config -> cache -> persistent,
+			'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
-
-/*$keys = $cache -> queryKeys();
-foreach ($keys as $key) {
-	$cache -> delete($key);
-}
-print_r('cache cleared');
-exit();*/
 
 $console = new ConsoleApp();
 $console -> setDI($di);

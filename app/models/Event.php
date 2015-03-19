@@ -2,10 +2,14 @@
 
 namespace Models;
 
-class Event extends \Phalcon\Mvc\Model
+class Event extends \Library\Model
 {
+    use \Sharding\Core\Env\Phalcon;	
+	
 	public $id;
 	public $fb_uid;
+	public $eb_uid;
+	public $eb_url;
 	public $fb_creator_uid;
 	public $member_id;
 	public $campaign_id;
@@ -31,6 +35,8 @@ class Event extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> belongsTo('venue_id', '\Models\Venue', 'id', array('alias' => 'venue',
 																	 'baseField' => 'name'));
 		$this -> belongsTo('location_id', '\Models\Location', 'id', array('alias' => 'location',

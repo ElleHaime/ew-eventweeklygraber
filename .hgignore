@@ -8,4 +8,11 @@ app/initp.php
 app/inith.php
 app/imgSync.sh
 config/config.php
+config/sharding.php
+config/shardingService.php
 vendor/Categoryzator/config.php
+vendor/vendor/*
+vendor/composer/*
+vendor/autoload.php
+source/facebook/*
+composer.lock

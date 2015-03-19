@@ -2,8 +2,10 @@
 
 namespace Models;
 
-class EventImage extends \Phalcon\Mvc\Model
+class EventImage extends \Library\Model
 {
+    use \Sharding\Core\Env\Phalcon;	
+	
 	public $id;
 	public $event_id;
 	public $image;
@@ -11,6 +13,8 @@ class EventImage extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event'));
 	}
 }

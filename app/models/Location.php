@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Location extends \Phalcon\Mvc\Model
+class Location extends \Library\Model
 {
 	public $id;
 	public $facebook_id;
@@ -22,6 +22,8 @@ class Location extends \Phalcon\Mvc\Model
 
 	public function initialize()
 	{
+		parent::initialize();		
+		
 		$this -> hasMany('id', '\Models\Member', 'location_id', array('alias' => 'member'));
 		$this -> hasMany('id', '\Models\Event', 'location_id', array('alias' => 'event'));
 		$this -> hasMany('id', '\Models\Venue', 'location_id', array('alias' => 'venue'));

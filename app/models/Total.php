@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Total extends \Phalcon\Mvc\Model
+class Total extends \Library\Model
 {
     public $id;
     public $entity;
