@@ -84,16 +84,6 @@ class Facebook
 	
 	            $result = $this -> processDates($result);
 	
-	            if ($fbMember = \Models\MemberNetwork::findFirst('account_uid = "' . $ev['creator'] . '"')) {
-	            	if ($fbMember -> member_id != $msg['args'][2]) {
-	            		$result['member_id'] = $fbMember -> member_id;
-	            		
-	            		$objC = \Models\EventMemberCounter::findFirst('member_id = ' . $fbMember -> member_id);
-	            		$objC -> userEventsCreated =  $objC -> userEventsCreated + 1;
-	            		$objC -> update();
-	            	}
-	            }
-	
 	            $result['location_id'] = '0';
 	            $venueCreated = false;
 	
