@@ -18,7 +18,7 @@ class EventMember extends \Library\Model
 	{
 		parent::initialize();		
 		
-		$this -> hasMany('event_id', '\Models\Event', 'id', array('alias' => 'eventpart'));
+		//$this -> hasMany('event_id', '\Models\Event', 'id', array('alias' => 'eventpart'));
 		$this -> hasMany('member_id', '\Models\Member', 'id', array('alias' => 'memberpart'));
 	}
 	

@@ -28,8 +28,8 @@ $di -> set('loader', [
 						'Tasks\Eventbrite' => APPLICATION_PATH . '/app/tasks/Grabber/Eventbrite',
 				 		'Tasks\Facebook' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook',
 				 		'Tasks\Facebook\User' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/User',
-				 		'Tasks\Facebook\Creators' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creators',
-				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',				 	
+				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',
+						'Tasks\Facebook\Creator' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creator',
 				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Cache',
 				 		'Tasks\Application' => APPLICATION_PATH . '/app/tasks/Application',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
@@ -43,7 +43,8 @@ $di -> set('loader', [
 				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
 						'Models' => APPLICATION_PATH . '/app/models',
-				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding']
+				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding'
+						]
 					]
 				 ]
 				],

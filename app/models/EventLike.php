@@ -13,7 +13,7 @@ class EventLike extends \Library\Model
 	{
 		parent::initialize();		
 		
-        $this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
+        //$this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
         $this->belongsTo('member_id', '\Models\Member', 'id', array('alias' => 'event_like'));
     }
     

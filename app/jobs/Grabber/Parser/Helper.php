@@ -49,7 +49,6 @@ trait Helper
                 'image' => $img,
                 'type' => $imgType));
         $images -> save();
-        print_r("img: " . $images -> image . "\n\r");       
     }	
     
     
@@ -76,16 +75,7 @@ trait Helper
             	$cats -> setShardById($event -> id);
             	$cats -> assign(['category_id' => $Cat->id,
             					 'event_id' => $event -> id]);
-            	print_r($cats -> toArray());
-            	print_r("\n\r");            	
-            	if (!$cats -> save()) {
-            		print_r("ooooooooops\n\r");
-            		print_r("db: " . $cats -> getShardDb() . "\n\r");
-            		print_r("tbl: " . $cats -> getShardTable() . "\n\r");
-            	} else {
-					print_r("db: " . $cats -> getShardDb() . "\n\r");
-					print_r("tbl: " . $cats -> getShardTable() . "\n\r");
-            	}
+            	$cats -> save();
             }
         }
 

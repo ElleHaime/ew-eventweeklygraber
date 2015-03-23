@@ -39,11 +39,12 @@ class Facebook
 		} 
 		
 		if ($needHandle) {
-			if (!$this -> cacheData -> exists($this -> fbUidCachePrefix . $ev['eid']))
-	        {
-//print_r("new event \n\r");	        	
+			if (!isset($ev['eid']) && isset($ev['id'])) {
+				$ev['eid'] = $ev['id'];
+			}	
+		
+			if (!$this -> cacheData -> exists($this -> fbUidCachePrefix . $ev['eid'])) {
 	            $result = $eventCategories = $eventTags = [];
-	            
 	            $result['fb_uid'] = $ev['eid'];
 	            $result['fb_creator_uid'] = $ev['creator'];
 	            $result['description'] = preg_replace('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.-]*(\?\S+)?)?)?)@', '<a href="$1" target="_blank">$1</a>', $ev['description']);
@@ -104,10 +105,14 @@ class Facebook
 	                $result['longitude'] = $venue['longitude'];
 	                $result['location_id'] = $venue['location_id'];
 	            } else {
-	                if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
+	            	if (isset($ev['location']) && !isset($ev['venue'])) {
+	            		$ev['venue'] = $ev['location'];
+	            	}
+	            		
+	            	if (isset($ev['venue']['latitude']) && isset($ev['venue']['longitude'])) {
 	                	$locations = new \Models\Location();
 	                	$locExists = $locations -> createOnChange(['latitude' => $ev['venue']['latitude'], 'longitude' => $ev['venue']['longitude']]);
-	                	
+
 	                	if ($locExists) {
 	                		$result['location_id'] = $locExists -> id;
 	                		
@@ -120,8 +125,13 @@ class Facebook
 	                				$result['address'] = $ev['location'];
 	                			}
 	                		} else {
-	                			$result['latitude'] = ($locExists['latMin'] + $locExists['latMax']) / 2;
-	                			$result['longitude'] = ($locExists['lonMin'] + $locExists['lonMax']) / 2;
+	                			//$result['latitude'] = ($locExists['latMin'] + $locExists['latMax']) / 2;
+	                			//$result['longitude'] = ($locExists['lonMin'] + $locExists['lonMax']) / 2;
+	                			if (isset($locExists -> latitudeMin) && isset($locExists -> latitudeMax) &&
+	                					isset($locExists -> longitudeMin) && isset($locExists -> longitudeMax)) {
+	                				$result['latitude'] = ($locExists -> latitudeMin + $locExists -> latitudeMax) / 2;
+	                				$result['longitude'] = ($locExists -> longitudeMin + $locExists -> longitudeMax) / 2;
+	                			}
 	                		}
 	                	}
 	                }
@@ -191,9 +201,8 @@ print_r($eventObj -> id . "saved\n\r");
 	            $newEvents[$ev['eid']] = $eventExists;
 	        }
 		}
-
+		
 		if (!empty($newEvents)) {
-//print_r($msg['type'] . "\n\r");			
         	switch ($msg['type']) {
         		case 'friend_going_event':
         		case 'friend_event':
@@ -215,7 +224,7 @@ print_r($eventObj -> id . "saved\n\r");
         						if ($needHandle) {
 	                                $obj = new \Models\EventMember();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
-					                                'event_id' => $id,
+					                                'event_id' => $event -> id,
 					                                'member_status' => 1]);
 	                                $obj -> save();
                                 }
@@ -225,11 +234,11 @@ print_r($eventObj -> id . "saved\n\r");
 
         		case 'page_event':
         				foreach ($newEvents as $ev => $event) {
-        					if (!\Models\EventLike::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND status = 1')) {
+        					if (!\Models\EventLike::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND status = 1'])) {
         						if ($needHandle) {
 		                            $obj = new \Models\EventLike();
 		                            $obj -> assign(['member_id' => $msg['args'][2],
-	                                                'event_id' => $id,
+	                                                'event_id' => $event -> id,
 	                                                'status' => 1]);
 		                            $obj -> save();
                                 }
@@ -249,9 +258,6 @@ print_r($eventObj -> id . "saved\n\r");
                             } 
         				}
                     break;
-                
-                default:
-                	print_r("cannot identify event type::" . $event -> id . "\n\r");
         	}
         }
 	}

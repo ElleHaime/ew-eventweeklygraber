@@ -12,6 +12,8 @@ config/sharding.php
 config/shardingService.php
 vendor/Categoryzator/config.php
 vendor/vendor/*
+vendor/temafey
+vendor/ruflin
 vendor/composer/*
 vendor/autoload.php
 source/facebook/*

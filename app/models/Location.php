@@ -66,13 +66,14 @@ class Location extends \Library\Model
 		}
 		$query = [];
 
-		if (isset($argument['longitude'])) {
+		if (isset($argument['longitude']) && isset($argument['latitude'])) {
 			$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'];
 			$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
-		}
-		if (isset($argument['latitude'])) {
 			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
 			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
+		} elseif (isset($argument['city']) && isset($argument['country'])) {
+			$query[] = 'city LIKE "%' . trim($argument['city']) . '%"';
+			$query[] = 'country LIKE "%' . trim($argument['country']) . '%"';
 		}
 
 		$query = implode(' and ', $query);
@@ -82,7 +83,7 @@ class Location extends \Library\Model
             $isLocationExists = false;
         }
 
-		if (!$isLocationExists) {
+		if (!$isLocationExists && isset($argument['longitude']) && isset($argument['latitude'])) {
 			if (!$isGeoObject) {
 				if (isset($argument['longitude']) && isset($argument['latitude'])) {
 					$newLoc = $geo -> getLocation($argument);
@@ -110,6 +111,10 @@ class Location extends \Library\Model
 		if (!empty($newLoc)) {
 			$isLocationExists -> latitude = $newLoc['latitude'];
 			$isLocationExists -> longitude = $newLoc['longitude'];
+			$isLocationExists -> latitudeMin = (float)$isLocationExists -> latitudeMin;
+			$isLocationExists -> latitudeMax = (float)$isLocationExists -> latitudeMax;
+			$isLocationExists -> longitudeMin = (float)$isLocationExists -> longitudeMin;
+			$isLocationExists -> longitudeMax = (float)$isLocationExists -> longitudeMax;
 		} elseif (!empty($argument) && isset($argument['resultSet'])) {
 			$isLocationExists -> latitude = (float)$argument['latitude'];
 			$isLocationExists -> longitude = (float)$argument['longitude'];

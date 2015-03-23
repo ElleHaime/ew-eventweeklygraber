@@ -197,6 +197,7 @@ class FacebookRequest
       && !isset($params["access_token"])) {
       $params["access_token"] = $session->getToken();
     }
+
    /* if (FacebookSession::useAppSecretProof()
       && !isset($params["appsecret_proof"])) {
       $params["appsecret_proof"] = $this->getAppSecretProof(

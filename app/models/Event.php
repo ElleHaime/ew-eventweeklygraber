@@ -52,24 +52,34 @@ class Event extends \Library\Model
         $this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
 	
-	public function getCreatedEventsCount($uId)
+	
+	public function getCreators()
 	{
-		if ($uId) {
-			$query = new \Phalcon\Mvc\Model\Query("SELECT Models\Event.id, Models\Event.fb_uid
-													FROM Models\Event
-													WHERE Models\Event.deleted = 0
-													AND Models\Event.member_id = " . $uId, $this -> getDI());
-			$event = $query -> execute();
-			return $event;
-		} else {
-			return 0;
-		}
+		$result = [];
+
+		$shards = $this -> getAvailableShards();
+
+		foreach ($shards as $cri) {
+			$this -> setShard($cri);
+			$this -> setSource('event_4');
+			$creators = self::find();
+//print_r($creators -> count(). "\n\r"); 
+			if ($creators -> count() != 0) {
+				foreach ($creators as $val) {
+					if (!is_null($val -> fb_creator_uid) && $val -> fb_creator_uid != '') {
+						$result[$val -> fb_creator_uid] = $val -> fb_creator_uid;
+					}
+				}
+			}
+		} 
+		
+		return $result;
 	}
 	
 
 	public function setCache()
 	{
-		$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid
+		/*$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid
 												FROM Models\Event
 												WHERE event_status = 1", $this -> getDI());
 		$events = $query -> execute();
@@ -81,7 +91,7 @@ class Event extends \Library\Model
 				}
 			}
 		}
-		$this -> cacheData -> save('fb_events', 'cached');
+		$this -> cacheData -> save('fb_events', 'cached'); */
 	}
 	
 }
