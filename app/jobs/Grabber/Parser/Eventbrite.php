@@ -133,6 +133,7 @@ class Eventbrite
 
                 $grid = new \Models\Event\Grid\Search\Event(['location' => $result['location_id']], $this->_di, null, ['adapter' => 'dbMaster']);
                 $indexer = new \Models\Event\Search\Indexer($grid);
+                $indexer->setDi($this->_di);
                 $indexer->addData($eventObj -> id);
 			}
 		}

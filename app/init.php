@@ -113,7 +113,7 @@ $di->set('elastic',
     function() use ($config) {
         $config = [
             'index' => $config -> elastic -> index,
-            'connections' => $config -> elastic -> connections
+            'connections' => $config -> elastic -> connections -> toArray()
         ];
 
         return new \Engine\Search\Elasticsearch\Client($config);
