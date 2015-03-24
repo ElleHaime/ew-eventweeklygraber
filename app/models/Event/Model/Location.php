@@ -102,6 +102,7 @@ class Location extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("parent_id", "\Models\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("parent_id", "Models\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("id", "Models\Event\Model\Event", "location_id", ['alias' => 'Event']);
     }
 }

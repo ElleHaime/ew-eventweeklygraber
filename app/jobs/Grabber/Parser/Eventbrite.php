@@ -13,6 +13,7 @@ class Eventbrite
 	
 	public $cacheData;
 	private $ebUidCachePrefix = 'ebUid';
+    private $_di;
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
@@ -22,6 +23,8 @@ class Eventbrite
         if (isset($this -> config -> cache -> prefixes -> ebUid)) {
         	$this -> ebUidCachePrefix = $this -> config -> cache -> prefixes -> ebUid;
         }
+
+        $this->_di = $dependencyInjector;
 	}
 	
 	

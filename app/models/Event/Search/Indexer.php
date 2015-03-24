@@ -162,8 +162,6 @@ class Indexer extends BaseIndexer
         }
         $itemDocument = $this->_processItemData($data, $grid, $shardCriteria);
 
-        $this->getType()->getDocument()
-
         return $this->getType()->updateDocument($itemDocument);
     }
 

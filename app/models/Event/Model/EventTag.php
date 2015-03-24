@@ -54,8 +54,8 @@ class EventTag extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("event_id", "Event\Model\Event", "id", ['alias' => 'Event']);
-        $this->belongsTo("tag_id", "Event\Model\Tag", "id", ['alias' => 'Tag']);
+        $this->belongsTo("event_id", "Models\Event\Model\Event", "id", ['alias' => 'Event']);
+        $this->belongsTo("tag_id", "Models\Event\Model\Tag", "id", ['alias' => 'Tag']);
     }
     public function onConstruct()
     {

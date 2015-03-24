@@ -156,13 +156,13 @@ class Event extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("member_id", "Event\Model\Member", "id", ['alias' => 'Member']);
-        $this->belongsTo("location_id", "Event\Model\Location", "id", ['alias' => 'Location']);
-        $this->belongsTo("campaign_id", "Event\Model\Campaign", "id", ['alias' => 'Campaign']);
-        $this->belongsTo("venue_id", "Event\Model\Venue", "id", ['alias' => 'Venue']);
-        $this->belongsTo("member_id", "Event\Model\Member", "id", ['alias' => 'Member']);
-        $this->belongsTo("id", "Event\Model\EventCategory", "event_id", ['alias' => 'Category']);
-        $this->belongsTo("id", "Event\Model\EventTag", "event_id", ['alias' => 'Tag']);
+        $this->belongsTo("member_id", "Models\Event\Model\Member", "id", ['alias' => 'Member']);
+        $this->belongsTo("location_id", "Models\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("campaign_id", "Models\Event\Model\Campaign", "id", ['alias' => 'Campaign']);
+        $this->belongsTo("venue_id", "Models\Event\Model\Venue", "id", ['alias' => 'Venue']);
+        $this->belongsTo("member_id", "Models\Event\Model\Member", "id", ['alias' => 'Member']);
+        $this->belongsTo("id", "Models\Event\Model\EventCategory", "event_id", ['alias' => 'Category']);
+        $this->belongsTo("id", "Models\Event\Model\EventTag", "event_id", ['alias' => 'Tag']);
     }
 
     public function onConstruct()
