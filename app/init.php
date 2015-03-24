@@ -43,7 +43,8 @@ $di -> set('loader', [
 				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
 						'Models' => APPLICATION_PATH . '/app/models',
-				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding'
+				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding',
+                         'Engine' => APPLICATION_PATH . '/vendor/tieste-group/phalcon-core/lib/Engine'
 						]
 					]
 				 ]
@@ -107,6 +108,17 @@ $cache = new \Library\Cache\Memcache($frontCache,
 			'persistent' => $config -> cache -> persistent,
 			'prefix' => $config -> database -> dbname]);
 $di -> set('cacheData', $cache);
+
+$di->set('elastic',
+    function() use ($config) {
+        $config = [
+            'index' => $config -> elastic -> index,
+            'connections' => $config -> elastic -> connections
+        ];
+
+        return new \Engine\Search\Elasticsearch\Client($config);
+    }
+);
 
 $console = new ConsoleApp();
 $console -> setDI($di);

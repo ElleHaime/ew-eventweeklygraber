@@ -1,6 +1,6 @@
 {
     "require": {
-        "temafey/phalcon-engine": "0.7.3",    
+        "tieste-group/phalcon-core": "0.8.8",
         "vendor/sharding": "dev-master"
     }
 }

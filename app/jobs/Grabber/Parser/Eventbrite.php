@@ -127,6 +127,10 @@ class Eventbrite
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
                 }
+
+                $grid = new SearchGrid(['location' => $result['location_id']], $this->_di, null, ['adapter' => 'dbMaster']);
+                $indexer = new \Models\Event\Search\Indexer($grid);
+                $indexer->addData($eventObj -> id);
 			}
 		}
 }
