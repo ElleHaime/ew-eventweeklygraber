@@ -63,12 +63,12 @@ print_r($creators);
 			foreach ($creators as $val) {
 				// get page info
 				$query = '/' . $val;
-print_r($query . "\n\r");				
+//print_r($query . "\n\r");				
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 					$data = $request -> execute() -> getGraphObject() -> asArray();
-print_r($data);
-print_r("\n\r");
+//print_r($data);
+//print_r("\n\r");
 					if (!empty($data)) {
 						$this -> publishToPageBroker($data);
 					} 
@@ -79,7 +79,7 @@ print_r("\n\r");
 				
 				// save events					
 				$query = '/' . $val . '/events?fields=id,owner,start_time,end_time,name,location,cover,venue,description,ticket_uri';
-print_r($query . "\n\r");				
+//print_r($query . "\n\r");				
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 					$data = $request -> execute() -> getGraphObject() -> asArray();

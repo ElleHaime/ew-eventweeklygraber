@@ -162,10 +162,14 @@ class Facebook
 	            if (is_array($result['address'])) {
 	                $result['address'] = '';
 	            }
+	            if (empty($result['location_id']) || is_null($result['location_id'])) {
+	            	$result['location_id'] = 0;
+	            }
 	
 	            $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	            $eventObj -> assign($result);
-	
+print_r($result);
+print_r("\n\r");	
 	            if ($eventObj -> save() != false) {
 print_r($eventObj -> id . "saved\n\r");
 					$this -> categorize($eventObj);
@@ -239,6 +243,9 @@ print_r($eventObj -> id . "saved\n\r");
                 case 'user_page_event':
                 case 'user_event':
                         foreach ($newEvents as $ev => $event) {
+                        	if (empty($event -> location_id) || is_null($event -> location_id)) {
+                        		$event -> location_id = 0;
+                        	}
                         	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
                             if (!$obj::findFirst('member_id = ' . $msg['args'][2] . ' AND id = "' . $event -> id . '"')) {
                             	if ($needHandle) {

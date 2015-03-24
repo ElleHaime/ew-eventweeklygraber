@@ -16,5 +16,6 @@ vendor/temafey
 vendor/ruflin
 vendor/composer/*
 vendor/autoload.php
-source/facebook/*
+source/facebook/id.txt
+source/facebook/query.txt
 composer.lock

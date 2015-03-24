@@ -113,6 +113,10 @@ class Eventbrite
                     }
                 }
 			}
+if (is_null($result['location_id'])) {
+	print_r($ev);
+	die();
+}
 			
 	        $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	        $eventObj -> assign($result);

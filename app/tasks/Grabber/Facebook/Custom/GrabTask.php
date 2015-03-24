@@ -57,7 +57,7 @@ class GrabTask extends \Phalcon\CLI\Task
 			$since = time();
 			$until = strtotime('+2 month');
 			$request = $this -> searchIdQuery . 'q=' . $query . '&since=' . $since . '&until=' . $until. '&access_token=' . $args[0];
-					
+print_r($request . "\n\r");					
 			try {
 				$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 				$data = $request -> execute() -> getGraphObject() -> asArray();

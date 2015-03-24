@@ -56,7 +56,8 @@ class ObserverTask extends \Phalcon\CLI\Task
 	{
 		while (true) {
 			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . Cron::FB_BY_ID_TASK_NAME . '"');
-		
+print_r($tasks -> toArray());
+print_r("\n\r");		
 			if ($tasks) {
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);
