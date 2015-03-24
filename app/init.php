@@ -44,7 +44,8 @@ $di -> set('loader', [
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
 						'Models' => APPLICATION_PATH . '/app/models',
 				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding',
-                         'Engine' => APPLICATION_PATH . '/vendor/tieste-group/phalcon-core/lib/Engine'
+                         'Engine' => APPLICATION_PATH . '/vendor/tieste-group/phalcon-core/lib/Engine',
+                         'Elastica' => APPLICATION_PATH . '/vendor/ruflin/elastica/lib/Elastica',
 						]
 					]
 				 ]
