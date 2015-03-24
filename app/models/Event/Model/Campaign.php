@@ -72,7 +72,7 @@ class Campaign extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("member_id", "\Event\Model\Member", "id", ['alias' => 'Member']);
-        $this->belongsTo("location_id", "\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("member_id", "\Models\Event\Model\Member", "id", ['alias' => 'Member']);
+        $this->belongsTo("location_id", "\Models\Event\Model\Location", "id", ['alias' => 'Location']);
     }
 }

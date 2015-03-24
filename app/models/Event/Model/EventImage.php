@@ -50,7 +50,7 @@ class EventImage extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("event_id", "\Event\Model\Event", "id", ['alias' => 'Event']);
+        $this->belongsTo("event_id", "\Models\Event\Model\Event", "id", ['alias' => 'Event']);
     }
      
 }

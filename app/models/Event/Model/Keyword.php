@@ -48,6 +48,6 @@ class Keyword extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("tag_id", "\Event\Model\Tag", "id", ['alias' => 'Tag']);
+        $this->belongsTo("tag_id", "\Models\Event\Model\Tag", "id", ['alias' => 'Tag']);
     }
 }

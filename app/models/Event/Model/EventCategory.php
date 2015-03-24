@@ -54,8 +54,8 @@ class EventCategory extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("event_id", "\Event\Model\Event", "id", ['alias' => 'Event']);
-        $this->belongsTo("category_id", "\Event\Model\Category", "id", ['alias' => 'Category']);
+        $this->belongsTo("event_id", "\Models\Event\Model\Event", "id", ['alias' => 'Event']);
+        $this->belongsTo("category_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
     }
 
     public function onConstruct()

@@ -60,8 +60,8 @@ class EventMember extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("member_id", "\Event\Model\Member", "id", ['alias' => 'Member']);
-        $this->belongsTo("event_id", "\Event\Model\Event", "id", ['alias' => 'Event']);
+        $this->belongsTo("member_id", "\Models\Event\Model\Member", "id", ['alias' => 'Member']);
+        $this->belongsTo("event_id", "\Models\Event\Model\Event", "id", ['alias' => 'Event']);
     }
     public function onConstruct()
     {

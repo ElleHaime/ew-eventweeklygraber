@@ -55,11 +55,11 @@ class Event extends Grid
             'id' => new Column\Primary('Id'),
             'name' => new Column\Text('Name', 'name'),
             'status' => new Column\Collection('Status', 'event_status', [1 => 'Active', 2 => 'Unpublished', 3 => 'Hidden']),
-            'member' => new Column\JoinOne("Member", "\Event\Model\Member"),
-            'campaign' => new Column\JoinOne("Campaign", "\Event\Model\Campaign"),
-            'location' => new Column\JoinOne("Location", "\Event\Model\Location"),
-            'venue' => new Column\JoinOne("Venue", "\Event\Model\Venue"),
-            //'category' => new Column\JoinOne("Category", "\Event\Model\Category"),
+            'member' => new Column\JoinOne("Member", "\Models\Event\Model\Member"),
+            'campaign' => new Column\JoinOne("Campaign", "\Models\Event\Model\Campaign"),
+            'location' => new Column\JoinOne("Location", "\Models\Event\Model\Location"),
+            'venue' => new Column\JoinOne("Venue", "\Models\Event\Model\Venue"),
+            //'category' => new Column\JoinOne("Category", "\Models\Event\Model\Category"),
             /*'member' => new Column\Numeric("Member", "member_id"),
             'campaign' => new Column\Numeric("Campaign", "campaign_id"),
             'location' => new Column\Numeric("Location", "location_id"),
@@ -99,11 +99,11 @@ class Event extends Grid
             ]),
             'name' => new Field\Name("Name"),
             'desc' => new Field\Standart("Description", 'description'),
-            'location' => new Field\Join("Location", "\Event\Model\Location"),
-            'campaign' => new Field\Join("Campaign", "\Event\Model\Campaign"),
-            'category' => new Field\Join("Category", "\Event\Model\Category", false, null, ["\Event\Model\EventCategory", "\Event\Model\Category"]),
-            'member' => new Field\Join("Member", "\Event\Model\Member"),
-            'tag' => new Field\Join("Tags", "\Event\Model\Tag", false, null, ["\Event\Model\EventTag", "\Event\Model\Tag"]),
+            'location' => new Field\Join("Location", "\Models\Event\Model\Location"),
+            'campaign' => new Field\Join("Campaign", "\Models\Event\Model\Campaign"),
+            'category' => new Field\Join("Category", "\Models\Event\Model\Category", false, null, ["\Models\Event\Model\EventCategory", "\Models\Event\Model\Category"]),
+            'member' => new Field\Join("Member", "\Models\Event\Model\Member"),
+            'tag' => new Field\Join("Tags", "\Models\Event\Model\Tag", false, null, ["\Models\Event\Model\EventTag", "\Models\Event\Model\Tag"]),
             'start_date' => new Field\Date('Event start', null, null, Criteria::CRITERIA_MORE),
         	'latitude' => new Field\Standart('Latitude', 'latitude', null, Criteria::CRITERIA_EQ),
         	'longitude' => new Field\Standart('Longitude', 'longitude', null, Criteria::CRITERIA_EQ),
@@ -112,6 +112,6 @@ class Event extends Grid
         ], null, 'get');
 
         //$tag = $this->_filter->getFieldByKey('tag');
-        //$tag->category = "\Event\Model\Category";
+        //$tag->category = "\Models\Event\Model\Category";
     }
 }

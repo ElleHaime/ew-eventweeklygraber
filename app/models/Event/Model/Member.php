@@ -117,6 +117,6 @@ class Member extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("location_id", "\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("location_id", "\Models\Event\Model\Location", "id", ['alias' => 'Location']);
     }
 }

@@ -54,7 +54,7 @@ class Tag extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("category_id", "\Event\Model\Category", "id", ['alias' => 'Category']);
-        $this->belongsTo("tag_id", "\Event\Model\EventTag", "id", ['alias' => 'Event']);
+        $this->belongsTo("category_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
+        $this->belongsTo("tag_id", "\Models\Event\Model\EventTag", "id", ['alias' => 'Event']);
     }
 }

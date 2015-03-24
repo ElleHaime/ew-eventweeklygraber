@@ -60,9 +60,9 @@ class Category extends \Engine\Mvc\Model
      */
     public function initialize()
     {
-        $this->belongsTo("parent_id", "\Event\Model\Category", "id", ['alias' => 'Category']);
-        $this->belongsTo("id", "\Event\Model\Tag", "category_id", ['alias' => 'Category']);
-        $this->belongsTo("id", "\Event\Model\EventCategory", "category_id", ['alias' => 'Event']);
+        $this->belongsTo("parent_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
+        $this->belongsTo("id", "\Models\Event\Model\Tag", "category_id", ['alias' => 'Category']);
+        $this->belongsTo("id", "\Models\Event\Model\EventCategory", "category_id", ['alias' => 'Event']);
     }
      
 }
