@@ -54,6 +54,91 @@ class Indexer extends BaseIndexer
     }
 
     /**
+     * Check if item exist in search index
+     *
+     * @param integer $page
+     * @param integer $pages
+     * @param integer $breakPage
+     * @return array
+     */
+    public function updateData($id)
+    {
+        $grid = clone $this->_grid;
+        list($data, $shardCriteria) = $this->_getEventDataById($grid, $id);
+
+        if (!$data) {
+            return false;
+        }
+
+        $data = $data->toArray();
+        
+        if (!$this->existItem($data, $grid, $shardCriteria)) {
+            return false;
+        }
+
+        $response = $this->updateItem($data, $grid, $shardCriteria);
+        if ($response->hasError()) {
+            var_dump($response->getError());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if item exist in search index
+     *
+     * @param integer $page
+     * @param integer $pages
+     * @param integer $breakPage
+     * @return array
+     */
+    public function deleteData($id)
+    {
+        $grid = clone $this->_grid;
+        list($data, $shardCriteria) = $this->_getEventDataById($grid, $id);
+
+        if (!$data) {
+            return false;
+        }
+
+        $data = $data->toArray();
+
+        if (!$this->existItem($data, $grid, $shardCriteria)) {
+            return false;
+        }
+
+        $response = $this->deleteItem($data, $grid, $shardCriteria);
+        if ($response->hasError()) {
+            var_dump($response->getError());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if item exist in search index
+     *
+     * @param integer $page
+     * @param integer $pages
+     * @param integer $breakPage
+     * @return array
+     */
+    public function existsData($id)
+    {
+        $grid = clone $this->_grid;
+        list($data, $shardCriteria) = $this->_getEventDataById($grid, $id);
+
+        if (!$data) {
+            return false;
+        }
+        $data = $data->toArray();
+
+        return $this->existItem($data, $grid, $shardCriteria);
+    }
+
+    /**
      * Apply grid sharding params and return event grid data
      *
      * @param \Engine\Crud\Grid $grid
