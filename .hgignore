@@ -1,4 +1,3 @@
-.idea/*:
 .settings/*
 .project
 .buildpath
@@ -14,8 +13,10 @@ vendor/Categoryzator/config.php
 vendor/vendor/*
 vendor/temafey
 vendor/ruflin
+vendor/tieste-group
 vendor/composer/*
 vendor/autoload.php
 source/facebook/id.txt
 source/facebook/query.txt
 composer.lock
+.idea/*

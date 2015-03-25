@@ -13,6 +13,7 @@ class Eventbrite
 	
 	public $cacheData;
 	private $ebUidCachePrefix = 'ebUid';
+    private $_di;
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
@@ -22,6 +23,8 @@ class Eventbrite
         if (isset($this -> config -> cache -> prefixes -> ebUid)) {
         	$this -> ebUidCachePrefix = $this -> config -> cache -> prefixes -> ebUid;
         }
+
+        $this->_di = $dependencyInjector;
 	}
 	
 	
@@ -131,6 +134,11 @@ if (is_null($result['location_id'])) {
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
                 }
+
+                $grid = new \Models\Event\Grid\Search\Event(['location' => $result['location_id']], $this->_di, null, ['adapter' => 'dbMaster']);
+                $indexer = new \Models\Event\Search\Indexer($grid);
+                $indexer->setDi($this->_di);
+                $indexer->addData($eventObj -> id);
 			}
 		}
 }

@@ -11,6 +11,7 @@ class Facebook
 		
 	public $cacheData;
 	private $fbUidCachePrefix = 'fbUid';
+	private $_di;
 
 
 	public function __construct(\Phalcon\DI $dependencyInjector)
@@ -21,6 +22,8 @@ class Facebook
         if (isset($this -> config -> cache -> prefixes -> fbUid)) {
         	$this -> fbUidCachePrefix = $this -> config -> cache -> prefixes -> fbUid;
         }
+        
+        $this->_di = $dependencyInjector;
 	}
 
 	public function run(\AMQPEnvelope $data)
@@ -187,6 +190,11 @@ print_r($eventObj -> id . "saved\n\r");
 	
 	                $this -> cacheData -> save($this -> fbUidCachePrefix . $eventObj -> fb_uid, $eventObj -> id);
 	                $newEvents[$eventObj -> fb_uid] = $eventObj;
+	                
+	                $grid = new \Models\Event\Grid\Search\Event(['location' => $result['location_id']], $this -> _di, null, ['adapter' => 'dbMaster']);
+	                $indexer = new \Models\Event\Search\Indexer($grid);
+	                $indexer -> setDi($this->_di);
+	                $indexer -> addData($eventObj -> id);
 	            } else {
 ///print_r("ooooooops, not saved\n\r");	            	
 	            }
