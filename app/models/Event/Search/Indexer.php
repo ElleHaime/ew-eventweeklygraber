@@ -162,6 +162,11 @@ class Indexer extends BaseIndexer
             $column->updateContainer($container);
         }
 
+        //Set primary filter param
+        $primaryFilterField = $grid->getFilter()->getPrimaryField();
+        $primaryFilterKey = $primaryFilterField->getKey();
+        $grid->setParam($primaryFilterKey, $id);
+
         $params = $grid->getFilterParams();
         $model = $container->getModel();
         $shardCriteria = $params['location'];
