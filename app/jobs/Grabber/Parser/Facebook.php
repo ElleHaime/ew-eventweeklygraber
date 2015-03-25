@@ -40,6 +40,8 @@ class Facebook
 				$needHandle = false;
 			}
 		} 
+print_r("type: " . $msg['type'] . "\n\r");
+print_r("member: " . $msg['args'][2] . "\n\r");
 		
 		if ($needHandle) {
 			if (!isset($ev['eid']) && isset($ev['id'])) {
@@ -171,8 +173,8 @@ class Facebook
 	
 	            $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	            $eventObj -> assign($result);
-print_r($result);
-print_r("\n\r");	
+//print_r($result);
+//print_r("\n\r");	
 	            if ($eventObj -> save() != false) {
 print_r($eventObj -> id . "saved\n\r");
 					$this -> categorize($eventObj);
@@ -255,10 +257,12 @@ print_r($eventObj -> id . "saved\n\r");
                         		$event -> location_id = 0;
                         	}
                         	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
-                            if (!$obj::findFirst('member_id = ' . $msg['args'][2] . ' AND id = "' . $event -> id . '"')) {
+                            $e = $obj::findFirst(['id = "' . $event -> id . '"']);
+                            if ($e) {
                             	if ($needHandle) {
-	                                $obj -> member_id = $msg['args'][2];
-	                                $obj -> update();
+                            		$e -> setShardByCriteria($event -> location_id);
+	                                $e -> member_id = $msg['args'][2];
+	                                $e -> update();
                                 }  
                             } 
         				}
