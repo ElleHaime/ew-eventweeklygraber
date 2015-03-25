@@ -211,7 +211,7 @@ print_r($eventObj -> id . "saved\n\r");
         		case 'friend_going_event':
         		case 'friend_event':
         				foreach ($newEvents as $ev => $event) {
-        					if (!\Models\EventMemberFriend::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '"')) {
+        					if (!\Models\EventMemberFriend::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '"'])) {
                             	if ($needHandle) {
 	                                $obj = new \Models\EventMemberFriend();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
@@ -224,7 +224,7 @@ print_r($eventObj -> id . "saved\n\r");
 
         		case 'user_going_event':
         				foreach ($newEvents as $ev => $event) {
-        					if (!\Models\EventMember::findFirst('member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND member_status = 1')) {
+        					if (!\Models\EventMember::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND member_status = 1'])) {
         						if ($needHandle) {
 	                                $obj = new \Models\EventMember();
 	                                $obj -> assign(['member_id' => $msg['args'][2],
