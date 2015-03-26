@@ -97,6 +97,7 @@ class Event extends Grid
                 'tag'                   => Criteria::CRITERIA_LIKE,
             	'id'          			=> Criteria::CRITERIA_EQ
             ]),
+            'id' => new Field\Primary("id"),
             'name' => new Field\Name("Name"),
             'desc' => new Field\Standart("Description", 'description'),
             'location' => new Field\Join("Location", "Models\Event\Model\Location"),
