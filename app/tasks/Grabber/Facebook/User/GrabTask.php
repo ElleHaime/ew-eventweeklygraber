@@ -3,6 +3,9 @@
 namespace Tasks\Facebook\User;
 
 use \Vendor\Facebook\Extractor,
+	\Vendor\FacebookGraph\FacebookSession,
+	\Vendor\FacebookGraph\FacebookRequest,
+	\Vendor\FacebookGraph\FacebookRequestException,
 	\Queue\Producer\Producer,
 	\Models\Cron;
 
@@ -31,7 +34,9 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		error_reporting(E_ALL & ~E_NOTICE);		
 		
-		$this -> fb = new Extractor($this -> getDi());
+		//$this -> fb = new Extractor($this -> getDi());
+		$this -> initQueue('harvester');
+		$this -> initGraph();
 
 		$this -> queue = new Producer();
 		$this -> queue -> connect(['host' => $this -> config -> queue -> host,
@@ -51,13 +56,12 @@ class GrabTask extends \Phalcon\CLI\Task
         		$replacements = array($args[1]);
         		$fql = preg_replace($query['patterns'], $replacements, $query['query']);
         		$result = $this -> fb -> getCurlFQL($fql, $args[0]);
-
         		if (count($result -> event) > 0) {
         			foreach ($result -> event as $key => $ev) {
         				$this -> publishToBroker($ev, $args, $query['name']);
         			}
         		}
-        	}
+        	}  
 
         	if ($query['name'] == 'user_page_uid') {
         		$this -> userPagesUid = $this -> processIds($query, $args, $args[1], 'page_admin', 'page_id');

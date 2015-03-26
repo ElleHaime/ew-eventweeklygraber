@@ -56,14 +56,12 @@ class Event extends \Library\Model
 	public function getCreators()
 	{
 		$result = [];
-
+		
 		$shards = $this -> getAvailableShards();
-
 		foreach ($shards as $cri) {
 			$this -> setShard($cri);
-			$this -> setSource('event_4');
 			$creators = self::find();
-//print_r($creators -> count(). "\n\r"); 
+
 			if ($creators -> count() != 0) {
 				foreach ($creators as $val) {
 					if (!is_null($val -> fb_creator_uid) && $val -> fb_creator_uid != '') {
@@ -72,8 +70,24 @@ class Event extends \Library\Model
 				}
 			}
 		} 
-		
+
 		return $result;
+	}
+	
+	
+	public function existsInShardsByFb($id)
+	{
+		$shards = $this -> getAvailableShards();
+		foreach ($shards as $cri) {
+			$this -> setShard($cri);
+			$event = self::findFirst('fb_uid = "' . $id . '"');
+			
+			if ($event) {
+				return $event;
+			}
+		}
+		
+		return false;
 	}
 	
 

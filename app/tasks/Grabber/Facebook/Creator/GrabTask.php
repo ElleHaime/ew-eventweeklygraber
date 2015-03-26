@@ -57,7 +57,7 @@ class GrabTask extends \Phalcon\CLI\Task
 		$model = new Event();
 		$creators = $model -> getCreators();
 		
-print_r($creators); 
+var_dump($creators); 
 
 		if (!empty($creators)) {
 			foreach ($creators as $val) {

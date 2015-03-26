@@ -9,20 +9,12 @@ class Facebook
 {
 	use \Jobs\Grabber\Parser\Helper;
 		
-	public $cacheData;
-	private $fbUidCachePrefix = 'fbUid';
 	private $_di;
 
 
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
-		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
-        
-        if (isset($this -> config -> cache -> prefixes -> fbUid)) {
-        	$this -> fbUidCachePrefix = $this -> config -> cache -> prefixes -> fbUid;
-        }
-        
         $this->_di = $dependencyInjector;
 	}
 
@@ -32,23 +24,16 @@ class Facebook
 		
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
-		$needHandle = true;
 
-		if ($msg['type'] == 'user_event' || $msg['type'] == 'user_page_event') {
-			$objM = \Models\Member::findFirst($msg['args'][2]);
-			if (!$objM) {
-				$needHandle = false;
-			}
-		} 
 print_r("type: " . $msg['type'] . "\n\r");
 print_r("member: " . $msg['args'][2] . "\n\r");
 		
-		if ($needHandle) {
 			if (!isset($ev['eid']) && isset($ev['id'])) {
 				$ev['eid'] = $ev['id'];
 			}	
 		
-			if (!$this -> cacheData -> exists($this -> fbUidCachePrefix . $ev['eid'])) {
+			$eventObj = (new \Models\Event()) -> existsInShardsByFb($ev['eid']);
+			if (!$eventObj) {
 	            $result = $eventCategories = $eventTags = [];
 	            $result['fb_uid'] = $ev['eid'];
 	            $result['fb_creator_uid'] = $ev['creator'];
@@ -92,8 +77,9 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 	            $result['location_id'] = '0';
 	            $venueCreated = false;
 	
-	            if (isset($ev['venue']['id']) && $this -> cacheData -> exists('venue_' . $ev['venue']['id'])) {
-	                $venue = $this -> cacheData -> get($this -> fbUidCachePrefix . 'venue_' . $ev['venue']['id']);
+	            if (isset($ev['venue']['id']) && $venue = \Models\Venue::findFirst('fb_uid = "' . $ev['venue']['id'] . '"')) {
+	            	$venue = $venue -> toArray();
+	            	
 	                $result['venue_id'] = $venue['venue_id'];
 	                $result['address'] = $venue['address'];
 	                $result['latitude'] = $venue['latitude'];
@@ -144,12 +130,6 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 	
 	                    if ($venueObj -> save() != false) {
 	                        $venueCreated = $venueObj;
-	                        $this -> cacheData -> save($this -> fbUidCachePrefix . 'venue_' . $venueObj -> fb_uid, 
-	                                                array('venue_id' => $venueObj -> id,
-	                                                      'address' => $venueObj -> address,
-	                                                      'location_id' => $venueObj -> location_id,
-	                                                      'latitude' => $venueObj->latitude,
-	                                                      'longitude' => $venueObj->longitude));
 	                    }
 	                }
 	
@@ -170,7 +150,7 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 	            if (empty($result['location_id']) || is_null($result['location_id'])) {
 	            	$result['location_id'] = 0;
 	            }
-	
+print_r("location id: " . $result['location_id'] . "\n\r");	
 	            $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
 	            $eventObj -> assign($result);
 //print_r($result);
@@ -190,21 +170,22 @@ print_r($eventObj -> id . "saved\n\r");
 	                    $this -> saveEventImage('fb', $ev['pic_cover']['source'], $eventObj, 'cover');
 	                }
 	
-	                $this -> cacheData -> save($this -> fbUidCachePrefix . $eventObj -> fb_uid, $eventObj -> id);
 	                $newEvents[$eventObj -> fb_uid] = $eventObj;
 	                
 	                $grid = new \Models\Event\Grid\Search\Event(['location' => $result['location_id']], $this -> _di, null, ['adapter' => 'dbMaster']);
 	                $indexer = new \Models\Event\Search\Indexer($grid);
 	                $indexer -> setDi($this->_di);
-	                $indexer -> addData($eventObj -> id);
+	                if (!$indexer -> addData($eventObj -> id)) {
+	                	print_r("ooooooops, not saved to index\n\r");
+	                }
+	                
 	            } else {
-///print_r("ooooooops, not saved\n\r");	            	
+print_r("ooooooops, not saved\n\r");	            	
 	            }
 	        } else {
-//print_r("exists already\n\r");	        	
-	            $newEvents[$ev['eid']] = $eventExists;
+print_r($eventObj -> fb_uid . " exists already\n\r");	        	
+	            $newEvents[$ev['eid']] = $eventObj;
 	        }
-		}
 		
 		if (!empty($newEvents)) {
         	switch ($msg['type']) {
@@ -212,12 +193,10 @@ print_r($eventObj -> id . "saved\n\r");
         		case 'friend_event':
         				foreach ($newEvents as $ev => $event) {
         					if (!\Models\EventMemberFriend::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '"'])) {
-                            	if ($needHandle) {
-	                                $obj = new \Models\EventMemberFriend();
-	                                $obj -> assign(['member_id' => $msg['args'][2],
-	                                   			 	'event_id' => $event -> id]);
-	                                $obj -> save();
-                                }
+                                $obj = new \Models\EventMemberFriend();
+                                $obj -> assign(['member_id' => $msg['args'][2],
+                                   			 	'event_id' => $event -> id]);
+                                $obj -> save();
                             } 
                         }
         			break;
@@ -225,13 +204,11 @@ print_r($eventObj -> id . "saved\n\r");
         		case 'user_going_event':
         				foreach ($newEvents as $ev => $event) {
         					if (!\Models\EventMember::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND member_status = 1'])) {
-        						if ($needHandle) {
-	                                $obj = new \Models\EventMember();
-	                                $obj -> assign(['member_id' => $msg['args'][2],
-					                                'event_id' => $event -> id,
-					                                'member_status' => 1]);
-	                                $obj -> save();
-                                }
+                                $obj = new \Models\EventMember();
+                                $obj -> assign(['member_id' => $msg['args'][2],
+				                                'event_id' => $event -> id,
+				                                'member_status' => 1]);
+                                $obj -> save();
                             }
                         }
         			break;
@@ -239,13 +216,11 @@ print_r($eventObj -> id . "saved\n\r");
         		case 'page_event':
         				foreach ($newEvents as $ev => $event) {
         					if (!\Models\EventLike::findFirst(['member_id = ' . $msg['args'][2] . ' AND event_id = "' . $event -> id . '" AND status = 1'])) {
-        						if ($needHandle) {
-		                            $obj = new \Models\EventLike();
-		                            $obj -> assign(['member_id' => $msg['args'][2],
-	                                                'event_id' => $event -> id,
-	                                                'status' => 1]);
-		                            $obj -> save();
-                                }
+	                            $obj = new \Models\EventLike();
+	                            $obj -> assign(['member_id' => $msg['args'][2],
+                                                'event_id' => $event -> id,
+                                                'status' => 1]);
+	                            $obj -> save();
 	                        }
 	                    }
         			break;
@@ -256,14 +231,21 @@ print_r($eventObj -> id . "saved\n\r");
                         	if (empty($event -> location_id) || is_null($event -> location_id)) {
                         		$event -> location_id = 0;
                         	}
+print_r("member event: location " . $event -> location_id . "\n\r");                        	
                         	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
-                            $e = $obj::findFirst(['id = "' . $event -> id . '"']);
+                            $e = $obj::findFirst('id = "' . $event -> id . '"');
                             if ($e) {
-                            	if ($needHandle) {
-                            		$e -> setShardByCriteria($event -> location_id);
-	                                $e -> member_id = $msg['args'][2];
-	                                $e -> update();
-                                }  
+                           		$e -> setShardByCriteria($event -> location_id);
+                                $e -> member_id = $msg['args'][2];
+                                $e -> update();
+                                
+                                $grid = new \Models\Event\Grid\Search\Event(['location' => $e -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+                                $indexer = new \Models\Event\Search\Indexer($grid);
+                                $indexer -> setDi($this->_di);
+print_r("id to index " . $e -> id . "\n\r");                               
+                                if (!$indexer -> updateData($e -> id)) {
+                                	print_r("ooooooops, not updated in index\n\r");
+                                }
                             } 
         				}
                     break;

@@ -43,7 +43,8 @@ class Indexer extends BaseIndexer
         if (!$data) {
             return false;
         }
-        $data = $data->toArray();
+        //$data = $data->toArray();
+        $data = (array)$data;
         $response = $this->addItem($data, $grid, $shardCriteria);
         if ($response->hasError()) {
             var_dump($response->getError());
@@ -70,7 +71,8 @@ class Indexer extends BaseIndexer
             return false;
         }
 
-        $data = $data->toArray();
+        //$data = $data->toArray();
+        $data = (array)$data;
         
         if (!$this->existItem($data, $grid, $shardCriteria)) {
             return false;

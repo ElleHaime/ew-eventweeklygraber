@@ -32,7 +32,6 @@ class Extractor
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE creator = $userUid
-            			AND NOT (eid = 532851033479333)
                      	AND start_time > ' . $timelimit . '
                     ORDER BY eid',
                 'type' => 'final',
@@ -53,7 +52,6 @@ class Extractor
         		'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
         				FROM event
         				WHERE (creator IN ($userPageUid) OR creator IN($userUid))
-        					AND NOT (eid = 532851033479333)
         					AND start_time > ' . $timelimit . '
         				ORDER BY eid',
         		'type' => 'final',
@@ -76,7 +74,6 @@ class Extractor
         		'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
         			FROM event
         			WHERE eid IN ($userEventsUid)
-        				AND NOT (eid = 532851033479333)
         				AND start_time > ' . $timelimit . '
         			ORDER BY eid',
         		'type' => 'final',
@@ -98,7 +95,6 @@ class Extractor
         			FROM event
         			WHERE creator IN ($pagesUid)
         				AND NOT (creator  = $userUid)
-        				AND NOT (eid = 532851033479333)
         				AND start_time > ' . $timelimit . '
         			ORDER BY eid',
         		'type' => 'final',
@@ -119,7 +115,6 @@ class Extractor
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                   	WHERE creator IN ($friendsUid)
-            		  	AND NOT (eid = 532851033479333)
                       	AND start_time > ' . $timelimit . ' 
                   ORDER BY eid',
                 'type' => 'final',
@@ -143,7 +138,6 @@ class Extractor
                 'query' => 'SELECT eid, name, description, location, venue, pic_big, pic_cover, ticket_uri, creator, start_time, end_time
                     FROM event
                     WHERE eid IN ($eventsUid) 
-            			AND NOT (eid = 532851033479333)
                       	AND start_time > ' . $timelimit . ' 
                     ORDER BY eid',
                 'type' => 'final',

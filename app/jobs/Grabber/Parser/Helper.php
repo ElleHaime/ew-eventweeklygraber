@@ -43,7 +43,7 @@ trait Helper
             chmod($fPath, 0777);
         }
         $images = new EventImage();
-        $images->setShardById($event -> id);
+        $images -> setShardById($event -> id);
         $images -> assign(array(
                 'event_id' => $event -> id,
                 'image' => $img,
