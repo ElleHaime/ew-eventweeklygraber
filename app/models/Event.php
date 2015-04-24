@@ -79,12 +79,13 @@ class Event extends \Library\Model
 	{
 		$shards = $this -> getAvailableShards();
 		foreach ($shards as $cri) {
-			$this -> setShard($cri);
-			$event = self::findFirst('fb_uid = "' . $id . '"');
+			$e = new $this;
+			$e -> setShard($cri);
+			$event = $e::findFirst('fb_uid="' . $id . '"');
 			
 			if ($event) {
 				return $event;
-			}
+			} 
 		}
 		
 		return false;

@@ -182,7 +182,7 @@ class Indexer extends BaseIndexer
 
         $filter = $grid->getFilter();
         if ($params['location'] == 0) {
-            $params['location'] = null;
+            //$params['location'] = null;
         }
         $filter->setParams($params);
         $filter->applyFilters($dataSource);

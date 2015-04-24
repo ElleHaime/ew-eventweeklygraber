@@ -90,7 +90,7 @@ $di -> set('dbMaster',
 				  'dbname' => $config -> database -> dbname,
 				  'port' => $config -> database -> port,
                   'charset' => $config -> database -> charset,
-				  'options' => $config -> options -> toArray()
+				  'options' => $config -> database -> options -> toArray()
 			)
 		);
         $connection -> setEventsManager($eventsManager);
