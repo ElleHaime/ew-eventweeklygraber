@@ -13,14 +13,19 @@ trait Helper
 	public function saveEventImage($parser = 'fb', $source, \Models\Event $event, $imgType = null, $width = false, $height = false)
 	{
 		$prop = $parser . '_uid';
-        $ext = explode('.', $source);
-        if (strpos(end($ext), '?')) {
-            $img = $parser . '_' . $event -> $prop . '.' . substr(end($ext), 0, strpos(end($ext), '?'));
-        } else {
-            $img = $parser . '_' . $event -> $prop . '.' . end($ext);
-        }
-        
-        $ch = curl_init($source);
+		
+		if ($parser == 'fb') {
+	        $ext = explode('.', $source);
+	        if (strpos(end($ext), '?')) {
+	            $img = $parser . '_' . $event -> $prop . '.' . substr(end($ext), 0, strpos(end($ext), '?'));
+	        } else {
+	        	$img = $parser . '_' . $event -> $prop . '.' . end($ext);
+	        }
+		} else {
+			$img = $event -> logo;
+		} 
+
+		$ch = curl_init($source);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
         $content = curl_exec($ch);
@@ -44,10 +49,9 @@ trait Helper
         }
         $images = new EventImage();
         $images -> setShardById($event -> id);
-        $images -> assign(array(
-                'event_id' => $event -> id,
-                'image' => $img,
-                'type' => $imgType));
+        $images -> assign(['event_id' => $event -> id,
+                		   'image' => $img,
+                		   'type' => $imgType]);
         $images -> save();
     }	
     

@@ -75,13 +75,13 @@ class Event extends \Library\Model
 	}
 	
 	
-	public function existsInShardsByFb($id)
+	public function existsInShardsBySourceId($id, $source = 'fb')
 	{
 		$shards = $this -> getAvailableShards();
 		foreach ($shards as $cri) {
 			$e = new $this;
 			$e -> setShard($cri);
-			$event = $e::findFirst('fb_uid="' . $id . '"');
+			$event = $e::findFirst($source . '_uid="' . $id . '"');
 			
 			if ($event) {
 				return $event;

@@ -35,7 +35,11 @@ class Eventbrite
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
 		
+		$eventObj = (new \Models\Event()) -> existsInShardsBySourceId($ev['id'], 'eb');
+		
+		if (!$eventObj) {
 			$result = array();
+print_r($ev['name']['text'] . "\n\r");
 
 			$result['eb_uid'] = $ev['id'];
 			$result['eb_url'] = $ev['url'];
@@ -43,11 +47,13 @@ class Eventbrite
 			$result['name'] = $ev['name']['text'];
 			$result['location_id'] = '0';
 			
-			if (isset($ev['logo_url']) && !empty($ev['logo_url'])) {
-                $ext = explode('.', $ev['logo_url']);
-                $logo = 'eb_' . $ev['id'] . '.' . end($ext);
-                $result['logo'] = $logo;
+            if (isset($ev['logo']) && isset($ev['logo']['url']) && !empty($ev['logo']['url'])) {
+            	$info = getimagesize($ev['logo']['url']);
+            	$logoExt = image_type_to_extension($info[2]);
+            	$logo = 'eb_' . $ev['id'] . $logoExt;
+            	$result['logo'] = $logo;
             }
+            
 
 			if(!empty($ev['start'])) {
                 $start = explode('T', $ev['start']['local']);
@@ -137,4 +143,5 @@ class Eventbrite
                 $indexer->addData($eventObj -> id);
 			}
 		}
+	}
 }

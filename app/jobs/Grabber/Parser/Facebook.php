@@ -32,7 +32,7 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 				$ev['eid'] = $ev['id'];
 			}	
 		
-			$eventObj = (new \Models\Event()) -> existsInShardsByFb($ev['eid']);
+			$eventObj = (new \Models\Event()) -> existsInShardsBySourceId($ev['eid'], 'fb');
 
 			if (!$eventObj) {
 	            $result = $eventCategories = $eventTags = [];
