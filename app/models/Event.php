@@ -91,6 +91,38 @@ class Event extends \Library\Model
 		return false;
 	}
 	
+	
+	public function archive()
+	{
+		// move: event_image, event_site, event_tag, event_category
+		unset($this -> memberlike);
+		unset($this -> memberpart);
+		unset($this -> memberfriendpart);
+		
+		if (!is_null($this -> member_id)) {
+			$this -> member = \Models\Member::findFirst('id = ' . $this -> member_id);
+		}
+
+		$archive = new \Models\EventArchive();
+		$archive -> assign(['event' => serialize($this),
+							'archived' => date('Y-m-d H:i:s')]);
+		if ($archive -> save()) {
+			$rating = EventRating::findFirst(['event_id = "' . $this -> id . '"']);
+			if ($rating) {
+				$rating -> delete();
+			}
+			
+			$featured = Featured::findFirst(['event_id = "' . $this -> id . '"']);
+			if ($featured) {
+				$featured -> delete();
+			}
+			
+			$this -> delete();
+		}		
+		return;		
+		// delete: event_rating, event_like, event_member, event_member_friend, featured
+	}
+	
 
 	public function setCache()
 	{
