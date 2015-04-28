@@ -9,7 +9,8 @@ use
     Engine\Crud\Grid\Column,
     Engine\Crud\Grid\Filter as Filter,
     Engine\Crud\Grid\Filter\Field,
-    Engine\Filter\SearchFilterInterface as Criteria;
+    Engine\Filter\SearchFilterInterface as Criteria,
+    Engine\Search\Elasticsearch\Filter\AbstractFilter;
 
 /**
  * Class Events.
@@ -106,11 +107,15 @@ class Event extends Grid
             'member' => new Field\Join("Member", "\Models\Event\Model\Member"),
             'tag' => new Field\Join("Tags", "Models\Event\Model\Tag", false, null, ["Models\Event\Model\EventTag", "Models\Event\Model\Tag"]),
             'start_date' => new Field\Date('Event start', null, null, Criteria::CRITERIA_MORE),
+            'end_date' => new Field\Date('End start', null, null, Criteria::CRITERIA_LESS),
         	'latitude' => new Field\Standart('Latitude', 'latitude', null, Criteria::CRITERIA_EQ),
         	'longitude' => new Field\Standart('Longitude', 'longitude', null, Criteria::CRITERIA_EQ),
         	'address' => new Field\Standart('Address', 'address', null, Criteria::CRITERIA_LIKE),
         	'logo' => new Field\Standart('Logo', 'logo', null, Criteria::CRITERIA_EQ)
         ], null, 'get');
+
+        $this->_filter->getFieldByKey('start_date')->setValueType(AbstractFilter::VALUE_TYPE_DATE);
+        $this->_filter->getFieldByKey('end_date')->setValueType(AbstractFilter::VALUE_TYPE_DATE);
 
         //$tag = $this->_filter->getFieldByKey('tag');
         //$tag->category = "\Models\Event\Model\Category";
