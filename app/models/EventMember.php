@@ -40,4 +40,16 @@ class EventMember extends \Library\Model
 			return 0;
 		}
 	}
+	
+	public function deleteEventJoined($event)
+	{
+		$events = self::findFirst(['event_id = "' . $event . '"']);
+		if ($events) {
+			foreach ($events -> $ev) {
+				$ev -> delete();
+			}
+		}
+	
+		return;
+	}
 }

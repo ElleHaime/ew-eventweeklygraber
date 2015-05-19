@@ -34,4 +34,17 @@ class EventMemberFriend extends \Library\Model
 			return 0;
 		}
 	}
+	
+	
+	public function deleteEventFriend($event)
+	{
+		$events = self::findFirst(['event_id = "' . $event . '"']);
+		if ($events) {
+			foreach ($events -> $ev) {
+				$ev -> delete();
+			}
+		}
+	
+		return;
+	}
 }

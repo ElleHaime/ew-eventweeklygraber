@@ -26,7 +26,7 @@ class Expired
 					$indexer = new \Models\Event\Search\Indexer($grid);
 					$indexer -> setDi($this -> di);
 					if (!$indexer -> deleteData($eventObj -> id)) {
-						print_r("ooooooops, " . $eventObj -> id . " not removed index\n\r");
+						print_r("ooooooops, " . $eventObj -> id . " not removed from index\n\r");
 					}
 					
 					$event -> archive(); 
@@ -34,45 +34,4 @@ class Expired
 			}
 		}
 	}
-	
-	/*public function run()
-	{
-		$events = [];
-		$query = new \Phalcon\Mvc\Model\Query("SELECT Models\Event.id
-												FROM Models\Event
-												WHERE Models\Event.end_date < '" . date('Y-m-d H:i:s') . "'", $this -> di);
-		$result = $query -> execute();
-		foreach($result as $ev) {
-			$events[] = $ev -> id;
-		}
-		
-		if (!empty($events)) {
-			$query = new \Phalcon\Mvc\Model\Query("DELETE FROM Models\EventLike 
-													WHERE Models\EventLike.event_id IN(" . implode(',', $events) . ")", $this -> di);
-			try {
-				$query -> execute();
-			} catch(\Phalcon\Exception $e) {
-				print_r($e -> getMessage() . "\n\r");
-			} 
-			
-			$query = new \Phalcon\Mvc\Model\Query("DELETE FROM Models\EventMember
-													WHERE Models\EventMember.event_id IN(" . implode(',', $events) . ")", $this -> di);
-			try {
-				$query -> execute();
-			} catch(\Phalcon\Exception $e) {
-				print_r($e -> getMessage() . "\n\r");
-			} 
-			
-			$query = new \Phalcon\Mvc\Model\Query("DELETE FROM Models\EventMemberFriend
-													WHERE Models\EventMemberFriend.event_id IN(" . implode(',', $events) . ")", $this -> di);
-			try {
-				$query -> execute();
-			} catch(\Phalcon\Exception $e) {
-				print_r($e -> getMessage() . "\n\r");
-			} 
-		}
-		
-		$eventCounters = new \Models\EventMemberCounter();
-		$eventCounters -> syncMemberCounter(); 
-	}*/
 }

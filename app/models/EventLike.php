@@ -35,4 +35,16 @@ class EventLike extends \Library\Model
     		return 0;
     	}
     }
+    
+    public function deleteEventLiked($event)
+    {
+    	$events = self::findFirst(['event_id = "' . $event . '"']);
+    	if ($events) {
+    		foreach ($events -> $ev) {
+    			$ev -> delete();
+    		}
+    	}
+    
+    	return;
+    }
 }
