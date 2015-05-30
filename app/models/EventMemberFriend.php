@@ -40,7 +40,7 @@ class EventMemberFriend extends \Library\Model
 	{
 		$events = self::findFirst(['event_id = "' . $event . '"']);
 		if ($events) {
-			foreach ($events -> $ev) {
+			foreach ($events as $ev) {
 				$ev -> delete();
 			}
 		}

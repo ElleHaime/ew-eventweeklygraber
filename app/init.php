@@ -30,22 +30,20 @@ $di -> set('loader', [
 				 		'Tasks\Facebook\User' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/User',
 				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',
 						'Tasks\Facebook\Creator' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creator',
-				 		'Tasks\Cache' => APPLICATION_PATH . '/app/tasks/Cache',
-				 		'Tasks\Application' => APPLICATION_PATH . '/app/tasks/Application',
+						'Tasks\Categorization' => APPLICATION_PATH . '/app/tasks/Categorization',
+						'Tasks\Synchronization' => APPLICATION_PATH . '/app/tasks/Synchronization',
 						'Jobs\Grabber' => APPLICATION_PATH . '/app/jobs/Grabber',
-						'Jobs\Application' => APPLICATION_PATH . '/app/jobs/Application',
 						'Jobs\Grabber\Parser' => APPLICATION_PATH . '/app/jobs/Grabber/Parser',
-						'Jobs\Cache' => APPLICATION_PATH . '/app/jobs/Cache',
 						'Jobs\Grabber\Sync' => APPLICATION_PATH . '/app/jobs/Grabber/Sync',
-						'Jobs\Application\Cacher' => APPLICATION_PATH . '/app/jobs/Application/Cacher',
+						'Jobs\Grabber\Categorize' => APPLICATION_PATH . '/app/jobs/Grabber/Categorize',
 						'Vendor' => APPLICATION_PATH . '/vendor',
 						'Vendor\Facebook' => APPLICATION_PATH . '/vendor/Facebook',
 				 		'Vendor\FacebookGraph' => APPLICATION_PATH . '/vendor/FacebookGraph',
 				 		'Vendor\Eventbrite' => APPLICATION_PATH . '/vendor/Eventbrite',
 						'Models' => APPLICATION_PATH . '/app/models',
 				 		'Sharding' => APPLICATION_PATH . '/vendor/vendor/sharding/Sharding',
-                         'Engine' => APPLICATION_PATH . '/vendor/tieste-group/phalcon-core/lib/Engine',
-                         'Elastica' => APPLICATION_PATH . '/vendor/ruflin/elastica/lib/Elastica',
+                        'Engine' => APPLICATION_PATH . '/vendor/tieste-group/phalcon-core/lib/Engine',
+                        'Elastica' => APPLICATION_PATH . '/vendor/ruflin/elastica/lib/Elastica'
 						]
 					]
 				 ]

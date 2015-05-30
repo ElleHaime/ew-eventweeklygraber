@@ -15,7 +15,7 @@ class Featured extends \Library\Model
 	{
 		$events = self::find(['event_id = "' . $event . '"']);
 		if ($events) {
-			foreach ($events -> $ev) {
+			foreach ($events as $ev) {
 				$ev -> delete();
 			}
 		}

@@ -43,6 +43,7 @@ print_r($ev['name']['text'] . "\n\r");
 
 			$result['eb_uid'] = $ev['id'];
 			$result['eb_url'] = $ev['url'];
+			$result['deleted'] = "0";
 			$result['description'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['description']['text']);
 			$result['name'] = $ev['name']['text'];
 			$result['location_id'] = '0';

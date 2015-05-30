@@ -14,6 +14,8 @@ class Cron extends \Library\Model
 	const FB_BY_ID_TASK_NAME	= 'extract_custom_facebook_events_data';
 	const FB_CREATOR_TASK_NAME = 'extract_creators_facebook_events';
 	
+	const RECAT_TASK_NAME 		= 'recategorize_events';
+	
 	public $id;
 	public $name;
 	public $description;

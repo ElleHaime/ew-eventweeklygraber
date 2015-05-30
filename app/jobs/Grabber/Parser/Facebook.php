@@ -37,6 +37,7 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 			if (!$eventObj) {
 	            $result = $eventCategories = $eventTags = [];
 	            $result['fb_uid'] = $ev['eid'];
+	            $result['deleted'] = "0";
 	            $result['fb_creator_uid'] = $ev['creator'];
 	            $result['description'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['description']);
 	            $result['name'] = $ev['name'];
