@@ -24,6 +24,7 @@ class Facebook
 		
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
+		$eventObj = false;
 
 print_r("type: " . $msg['type'] . "\n\r");
 print_r("member: " . $msg['args'][2] . "\n\r");
