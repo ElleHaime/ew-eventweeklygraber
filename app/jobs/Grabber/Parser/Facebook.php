@@ -181,7 +181,7 @@ print_r($eventObj -> id . "saved\n\r");
 	                if (!$indexer -> addData($eventObj -> id)) {
 	                	print_r("ooooooops, not saved to index\n\r");
 	                }
-	                
+print_r("after addData\n\r");	                
 	            } else {
 print_r("ooooooops, not saved\n\r");	            	
 	            }

@@ -39,7 +39,7 @@ class Indexer extends BaseIndexer
     {
         $grid = clone $this->_grid;
         list($data, $shardCriteria) = $this->_getEventDataById($grid, $id);
-
+        
         if (!$data) {
             return false;
         }
@@ -163,17 +163,17 @@ class Indexer extends BaseIndexer
         foreach ($columns as $column) {
             $column->updateContainer($container);
         }
-
+        
         //Set primary filter param
         $primaryFilterField = $grid->getFilter()->getPrimaryField();
         $primaryFilterKey = $primaryFilterField->getKey();
         $grid->setParam($primaryFilterKey, $id);
 
-        $params = $grid->getFilterParams();
+        //$params = $grid->getFilterParams();
+        $params = $grid->getParams();
         $model = $container->getModel();
         $shardCriteria = $params['location'];
         $model->setShardByCriteria($shardCriteria);
-
         $dataSource = $container->getDataSource();
 
         foreach ($columns as $column) {
@@ -184,6 +184,7 @@ class Indexer extends BaseIndexer
         if ($params['location'] == 0) {
             //$params['location'] = null;
         }
+        
         $filter->setParams($params);
         $filter->applyFilters($dataSource);
 
