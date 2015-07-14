@@ -13,7 +13,7 @@ vendor/Categoryzator/config.php
 vendor/vendor/*
 vendor/temafey
 vendor/ruflin
-vendor/tieste-group
+vendor/tieste
 vendor/composer/*
 vendor/autoload.php
 source/facebook/id.txt
