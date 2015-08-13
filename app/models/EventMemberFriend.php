@@ -36,9 +36,9 @@ class EventMemberFriend extends \Library\Model
 	}
 	
 	
-	public function deleteEventFriend($event)
+	public function deleteEventFriend($eventId)
 	{
-		$events = self::findFirst(['event_id = "' . $event . '"']);
+		$events = self::find(['event_id = "' . $eventId . '"']);
 		if ($events) {
 			foreach ($events as $ev) {
 				$ev -> delete();

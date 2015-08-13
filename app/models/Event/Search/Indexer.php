@@ -104,7 +104,8 @@ class Indexer extends BaseIndexer
             return false;
         }
 
-        $data = $data->toArray();
+        //$data = $data->toArray();
+        $data = (array)$data;
 
         if (!$this->existItem($data, $grid, $shardCriteria)) {
             return false;
@@ -135,9 +136,16 @@ class Indexer extends BaseIndexer
         if (!$data) {
             return false;
         }
-        $data = $data->toArray();
-
-        return $this->existItem($data, $grid, $shardCriteria);
+        //$data = $data->toArray();
+        $data = (array)$data;
+        
+        try {
+        	$isDocumentExists = $this->existItem($data, $grid, $shardCriteria);
+        } catch (\Exception $e) {
+        	$isDocumentExists = false;
+        }
+        
+        return $isDocumentExists;
     }
 
     /**

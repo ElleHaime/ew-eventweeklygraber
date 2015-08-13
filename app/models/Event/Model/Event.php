@@ -178,7 +178,8 @@ class Event extends \Engine\Mvc\Model
                     "host" => $options->host,
                     "username" => $options->user,
                     "password" => $options->password,
-                    "dbname" => $options->database
+                    "dbname" => $options->database,
+                	"port" => $options->port
                 ]);
 
                 return $db;

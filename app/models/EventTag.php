@@ -18,4 +18,16 @@ class EventTag extends \Library\Model
         $this->belongsTo('event_id', '\Objects\Event', 'id', array('alias' => 'event_tag'));
         $this->belongsTo('tag_id', '\Objects\Tag', 'id', array('alias' => 'event_tag'));
     }
+    
+    
+    public function deleteEventTag($eventObject)
+    {
+		$tags = $eventObject -> event_tag;
+		
+		if ($tags) {
+			foreach ($tags as $tag) {
+				$tag -> setShardById($eventObject -> id) -> delete();
+			} 
+		} 
+    } 
 }

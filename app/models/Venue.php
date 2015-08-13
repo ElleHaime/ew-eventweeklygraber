@@ -16,7 +16,7 @@ class Venue extends \Library\Model
 	public $latitude;  	
 	public $longitude;
 
-	public $cacheData;
+	//public $cacheData;
 
 	public function initialize()
 	{
@@ -25,7 +25,7 @@ class Venue extends \Library\Model
 		$this -> belongsTo('location_id', '\Models\Location', 'id', array('alias' => 'location'));
 		$this -> hasOne('id', '\Models\Event', 'venue_id', array('alias' => 'event'));
 		
-		$this -> cacheData = $this -> getDI() -> get('cacheData');
+		//$this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
 
 	
@@ -36,15 +36,15 @@ class Venue extends \Library\Model
 	
 		if ($venues) {
 			foreach ($venues as $venue) {
-				$this -> cacheData -> save('venue_' . $venue -> fb_uid,
+			/*	$this -> cacheData -> save('venue_' . $venue -> fb_uid,
 						array('venue_id' => $venue -> id,
 								'address' => $venue -> address,
 								'location_id' => $venue -> location_id,
 								'latitude' => $venue -> latitude,
-								'longitude' => $venue -> longitude));
+								'longitude' => $venue -> longitude)); */
 			}
 				
-			$this -> cacheData -> save('fb_venues', 'cached');
+			//$this -> cacheData -> save('fb_venues', 'cached');
 		}
 	}
 	

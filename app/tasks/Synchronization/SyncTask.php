@@ -1,10 +1,10 @@
 <?php
 
-namespace Tasks;
+namespace Tasks\Synchronization;
 
 use \Models\Cron;
 
-class syncTask extends \Phalcon\CLI\Task
+class SyncTask extends \Phalcon\CLI\Task
 {
 	public function expiredAction() 
 	{

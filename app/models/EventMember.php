@@ -41,9 +41,9 @@ class EventMember extends \Library\Model
 		}
 	}
 	
-	public function deleteEventJoined($event)
+	public function deleteEventJoined($eventId)
 	{
-		$events = self::findFirst(['event_id = "' . $event . '"']);
+		$events = self::find(['event_id = "' . $eventId . '"']);
 		if ($events) {
 			foreach ($events as $ev) {
 				$ev -> delete();

@@ -11,6 +11,6 @@ class Total extends \Library\Model
     public function setCache()
     {
     	$evTotal = self::findFirst('entity = "event"');
-    	$this -> cacheData -> save('eventsGTotal', $evTotal -> total);
+    	//$this -> cacheData -> save('eventsGTotal', $evTotal -> total);
     }
 }

@@ -4,7 +4,7 @@ namespace Models;
 
 class Event extends \Library\Model
 {
-    use \Sharding\Core\Env\Phalcon;	
+    use \Sharding\Core\Env\Phalcon;
 	
 	public $id;
 	public $fb_uid;
@@ -29,8 +29,6 @@ class Event extends \Library\Model
 	public $logo;
 	public $is_description_full = 0;
     public $deleted = 0;
-    
-    public $cacheData; 
 
 
 	public function initialize()
@@ -48,10 +46,8 @@ class Event extends \Library\Model
 		$this -> hasMany('id', '\Models\EventCategory', 'event_id', array('alias' => 'event_category'));
 		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'event_like'));
         $this -> hasMany('id', '\Models\EventTag', 'event_id', array('alias' => 'event_tag'));
-
-        $this -> cacheData = $this -> getDI() -> get('cacheData');
+        $this -> hasOne('id', '\Models\EventRating', 'event_id', array('alias' => 'event_rating'));
 	}
-	
 	
 	public function getCreators()
 	{
@@ -102,7 +98,7 @@ class Event extends \Library\Model
 		if (!is_null($this -> member_id)) {
 			$this -> member = \Models\Member::findFirst('id = ' . $this -> member_id);
 		}
-
+		
 		$archive = new \Models\EventArchive();
 		$archive -> assign(['event' => serialize($this),
 							'archived' => date('Y-m-d H:i:s')]);
@@ -112,6 +108,10 @@ class Event extends \Library\Model
 			(new \Models\EventLike) -> deleteEventLiked($this -> id);
 			(new \Models\EventMember) -> deleteEventJoined($this -> id);
 			(new \Models\EventMemberFriend) -> deleteEventFriend($this -> id);
+			
+			(new \Models\EventTag) -> deleteEventTag($this);
+			(new \Models\EventCategory) -> deleteEventCategory($this);
+			
 			$this -> delete();
 		}		
 		return;		
@@ -120,19 +120,5 @@ class Event extends \Library\Model
 
 	public function setCache()
 	{
-		/*$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid
-												FROM Models\Event
-												WHERE event_status = 1", $this -> getDI());
-		$events = $query -> execute();
-	
-		if ($events) {
-			foreach ($events as $event) {
-				if ($event -> fb_uid && !$this -> cacheData -> exists('fbe_' . $event -> fb_uid)) {
-					$this -> cacheData -> save('fbe_' . $event -> fb_uid, $event -> id);
-				}
-			}
-		}
-		$this -> cacheData -> save('fb_events', 'cached'); */
 	}
-	
 }

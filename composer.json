@@ -4,7 +4,7 @@
     { "type": "vcs", "url": "https://bitbucket.org/tieste/shardingtrait.git" }
   ],
   "require": {
-    "tieste/phalcon-core": "0.11.6",
-    "tieste/sharding": "0.6.1"
+    "tieste/phalcon-core": "0.11.11",
+    "tieste/sharding": "0.7.0"
   }
 }

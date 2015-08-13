@@ -6,12 +6,8 @@ use \Models\Page as Page;
 
 class FacebookPage
 {
-    public $cacheData;
-
-
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
-		$this -> cacheData = $dependencyInjector -> get('cacheData');
         $this -> config = $dependencyInjector -> get('config');
 	}
 

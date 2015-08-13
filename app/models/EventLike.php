@@ -13,7 +13,7 @@ class EventLike extends \Library\Model
 	{
 		parent::initialize();		
 		
-        //$this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
+        $this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
         $this->belongsTo('member_id', '\Models\Member', 'id', array('alias' => 'event_like'));
     }
     
@@ -36,9 +36,9 @@ class EventLike extends \Library\Model
     	}
     }
     
-    public function deleteEventLiked($event)
+    public function deleteEventLiked($eventId)
     {
-    	$events = self::findFirst(['event_id = "' . $event . '"']);
+    	$events = self::find(['event_id = "' . $eventId . '"']);
     	if ($events) {
     		foreach ($events as $ev) {
     			$ev -> delete();

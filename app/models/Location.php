@@ -18,8 +18,6 @@ class Location extends \Library\Model
 	public $longitudeMax;
 	public $parent_id = 0;
 
-	public $cacheData;
-
 	public function initialize()
 	{
 		parent::initialize();		
@@ -27,8 +25,6 @@ class Location extends \Library\Model
 		$this -> hasMany('id', '\Models\Member', 'location_id', array('alias' => 'member'));
 		$this -> hasMany('id', '\Models\Event', 'location_id', array('alias' => 'event'));
 		$this -> hasMany('id', '\Models\Venue', 'location_id', array('alias' => 'venue'));
-		
-		$this -> cacheData = $this -> getDI() -> get('cacheData');
 	}
 	
 	
@@ -48,7 +44,7 @@ class Location extends \Library\Model
 						'country' => $loc -> country);
 			}
 		}
-		$this -> cacheData -> save('locations', $locationsCache);
+//		$this -> cacheData -> save('locations', $locationsCache);
 	}
 	
 

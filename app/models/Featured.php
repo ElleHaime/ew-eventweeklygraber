@@ -4,6 +4,8 @@ namespace Models;
 
 class Featured extends \Library\Model
 {
+	const OBJECT_TYPE = 'event';
+	
 	public $id;
 	public $object_type;
 	public $object_id;
@@ -13,7 +15,7 @@ class Featured extends \Library\Model
 	
 	public function deleteEventFeatured($event)
 	{
-		$events = self::find(['event_id = "' . $event . '"']);
+		$events = self::find(['object_id = "' . $event . '" AND object_type = "' . self::OBJECT_TYPE . '"']);
 		if ($events) {
 			foreach ($events as $ev) {
 				$ev -> delete();

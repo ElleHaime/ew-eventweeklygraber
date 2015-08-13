@@ -101,13 +101,14 @@ $di -> set('geo', function() use ($di) {
 	return new \Library\Geo($di);
 });
 
-$frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
+//$frontCache = new \Phalcon\Cache\Frontend\Data(['lifetime' => $config -> cache -> lifetime]);
+$frontCache = new \Phalcon\Cache\Frontend\None();
 $cache = new \Library\Cache\Memcache($frontCache,
-			['host' => $config -> cache -> host,
-			'port' => $config -> cache -> port,
-			'persistent' => $config -> cache -> persistent,
-			'prefix' => $config -> database -> dbname]);
-$di -> set('cacheData', $cache);
+		['host' => $config -> cache -> host,
+		'port' => $config -> cache -> port,
+		'persistent' => $config -> cache -> persistent,
+		'prefix' => $config -> database -> dbname]);
+$di -> set('cacheData', $cache); 
 
 $di->set('elastic',
     function() use ($config) {
