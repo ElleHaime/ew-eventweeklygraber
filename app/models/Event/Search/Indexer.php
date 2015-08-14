@@ -245,7 +245,13 @@ class Indexer extends BaseIndexer
             return false;
         }
 
-        return ($this->getType()->getDocument($itemDocument->getId())) ? true : false;
+        try {
+        	$isDocumentExists = $this->getType()->getDocument($itemDocument->getId());
+        } catch (\Exception $e) {
+        	$isDocumentExists = false;
+        }
+        
+        return $isDocumentExists;
     }
 
     /**
