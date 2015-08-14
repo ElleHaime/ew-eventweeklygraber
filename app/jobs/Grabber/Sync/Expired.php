@@ -32,10 +32,8 @@ print_r(".");
 					$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> di, null, ['adapter' => 'dbMaster']);
 					$indexer = new \Models\Event\Search\Indexer($grid);
 					$indexer -> setDi($this -> di);
-					if ($indexer -> existsData($eventObj -> id)) {
-						if (!$indexer -> deleteData($eventObj -> id)) {
-							print_r("ooooooops, " . $eventObj -> id . " not removed from index\n\r");
-						} 
+					if (!$indexer -> deleteData($eventObj -> id)) {
+						print_r("\n\rooooooops, " . $eventObj -> id . " not removed from index\n\r");
 					} 
 						
 					$eventObj -> archive(); 
