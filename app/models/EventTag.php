@@ -22,12 +22,18 @@ class EventTag extends \Library\Model
     
     public function deleteEventTag($eventObject)
     {
-		$tags = $eventObject -> event_tag;
-		
-		if ($tags) {
-			foreach ($tags as $tag) {
-				$tag -> setShardById($eventObject -> id) -> delete();
-			} 
-		} 
+    	$tags = $this -> setShardById($eventObject -> id) 
+    				  -> strictSqlQuery()
+					  -> addQueryCondition('event_id = "' . $eventObject -> id . '"')
+					  -> addQueryFetchStyle('\Models\EventTag')
+    				  -> selectRecords();
+  	
+    	if (!empty($tags)) {
+    		foreach ($tags as $tag) {
+    			$tag -> setShardById($tag -> event_id) -> delete(); 
+    		}
+    	}
+
+		return;
     } 
 }

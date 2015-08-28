@@ -20,12 +20,19 @@ class EventCategory extends \Library\Model
 	
 	public function deleteEventCategory($eventObject)
 	{
-		$categories = $eventObject -> event_category;
-		if ($categories) {
-			foreach ($categories as $category) {
-				$category -> setShardById($eventObject -> id) -> delete();
-			}
-		}
+    	$categories = $this -> setShardById($eventObject -> id) 
+    				  		-> strictSqlQuery()
+							-> addQueryCondition('event_id = "' . $eventObject -> id . '"')
+							-> addQueryFetchStyle('\Models\EventCategory')
+		    				-> selectRecords();
+  	
+    	if (!empty($categories)) {
+    		foreach ($categories as $ct) {
+    			$ct -> setShardById($ct -> event_id) -> delete(); 
+    		}
+    	}
+		
+		return;
 	}
 	
 }

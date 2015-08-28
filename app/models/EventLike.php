@@ -13,7 +13,7 @@ class EventLike extends \Library\Model
 	{
 		parent::initialize();		
 		
-        $this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_like'));
+        $this->belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'memberlike'));
         $this->belongsTo('member_id', '\Models\Member', 'id', array('alias' => 'event_like'));
     }
     
@@ -38,13 +38,22 @@ class EventLike extends \Library\Model
     
     public function deleteEventLiked($eventId)
     {
-    	$events = self::find(['event_id = "' . $eventId . '"']);
-    	if ($events) {
-    		foreach ($events as $ev) {
-    			$ev -> delete();
-    		}
-    	}
-    
+//     	$events = self::find(['event_id = "' . $eventId . '"']);
+//     	if ($events) {
+//     		foreach ($events as $obj) {
+//     			//$obj -> delete();
+//     		}
+//     	}
+
+//     	$result = $this -> getReadConnection() -> query("SELECT * FROM event_like WHERE event_id = '" . $eventId . "'");
+//     	$result -> setFetchMode(\Phalcon\Db::FETCH_OBJ);
+//     	while ($event = $result -> fetch()) {
+//     		$e = self::findFirst($event -> id);
+//     	}
+
+     	$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
+//     	$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
+    	
     	return;
     }
 }

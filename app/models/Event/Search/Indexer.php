@@ -115,7 +115,7 @@ class Indexer extends BaseIndexer
         if ($response->hasError()) {
             var_dump($response->getError());
             return false;
-        }
+         }
 
         return true;
     }

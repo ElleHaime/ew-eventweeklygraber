@@ -44,7 +44,6 @@ class Event extends \Library\Model
 		$this -> hasMany('id', '\Models\EventMemberFriend', 'event_id', array('alias' => 'memberfriendpart'));
 		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'memberlike'));
 		$this -> hasMany('id', '\Models\EventCategory', 'event_id', array('alias' => 'event_category'));
-		$this -> hasMany('id', '\Models\EventLike', 'event_id', array('alias' => 'event_like'));
         $this -> hasMany('id', '\Models\EventTag', 'event_id', array('alias' => 'event_tag'));
         $this -> hasOne('id', '\Models\EventRating', 'event_id', array('alias' => 'event_rating'));
 	}
@@ -95,27 +94,62 @@ class Event extends \Library\Model
 		unset($this -> memberpart);
 		unset($this -> memberfriendpart);
 		
-		if (!is_null($this -> member_id)) {
-			$this -> member = \Models\Member::findFirst('id = ' . $this -> member_id);
-		}
-		
-		$archive = new \Models\EventArchive();
-		$archive -> assign(['event' => serialize($this),
-							'archived' => date('Y-m-d H:i:s')]);
+ 		$archive = new \Models\EventArchive();
+ 		$archive -> assign(['event' => serialize($this),
+ 							'archived' => date('Y-m-d H:i:s')]);
 		if ($archive -> save()) {
-			(new \Models\EventRating) -> deleteEventRating($this -> id);
-			(new \Models\Featured) -> deleteEventFeatured($this -> id);
+ 			(new \Models\Featured) -> deleteEventFeatured($this -> id);
+ 			(new \Models\EventRating) -> deleteEventRating($this -> id);
 			(new \Models\EventLike) -> deleteEventLiked($this -> id);
-			(new \Models\EventMember) -> deleteEventJoined($this -> id);
-			(new \Models\EventMemberFriend) -> deleteEventFriend($this -> id);
+ 			(new \Models\EventMember) -> deleteEventJoined($this -> id);
+ 			(new \Models\EventMemberFriend) -> deleteEventFriend($this -> id);
 			
 			(new \Models\EventTag) -> deleteEventTag($this);
 			(new \Models\EventCategory) -> deleteEventCategory($this);
 			
 			$this -> delete();
 		}		
+		
 		return;		
 	}
+	
+	
+	public function archivePhalc()
+	{
+		// move: event_image, event_site, event_tag, event_category
+		$archive = new \Models\EventArchive();
+		$archive -> assign(['event' => serialize($this),
+				'archived' => date('Y-m-d H:i:s')]);
+		if ($archive -> save()) {
+			if ($this -> memberlike) {
+				$this -> memberlike -> delete();
+			}
+			if ($this -> memberpart) {
+				$this -> memberpart -> delete();
+			}
+			if ($this -> memberfriendpart) {
+				$this -> memberfriendpart -> delete();
+			}
+			if ($this -> event_rating) {
+				$this -> event_rating -> delete();
+			}
+			if ($this -> image) {
+				$this -> image -> delete();
+			}
+			if ($this -> event_tag) {
+				$this -> event_tag -> delete();
+			}
+			if ($this -> event_category) {
+				$this -> event_category -> delete();
+			}
+			(new \Models\Featured) -> deleteEventFeatured($this -> id);
+				
+			$this -> delete();
+		}
+	
+		return;
+	}
+	
 	
 
 	public function setCache()

@@ -4,7 +4,7 @@ namespace Models;
 
 class Featured extends \Library\Model
 {
-	const OBJECT_TYPE = 'event';
+	const EVENT_OBJECT_TYPE = 'event';
 	
 	public $id;
 	public $object_type;
@@ -13,14 +13,20 @@ class Featured extends \Library\Model
 	public $location_id;
 	
 	
-	public function deleteEventFeatured($event)
+	public function deleteEventFeatured($eventId)
 	{
-		$events = self::find(['object_id = "' . $event . '" AND object_type = "' . self::OBJECT_TYPE . '"']);
-		if ($events) {
-			foreach ($events as $ev) {
-				$ev -> delete();
-			}
-		}
+// 		$query = new \Phalcon\Mvc\Model\Query("SELECT * FROM Models\Featured WHERE Models\Featured.object_type = '" . self::EVENT_OBJECT_TYPE . "' AND Models\Featured.object_id = '" . $eventId . "'" , $this -> getDI());
+// 		$events = $query -> execute();
+// 		if ($events) {
+// 			foreach ($events as $obj) {
+// 				//$obj -> delete();
+// 			}
+// 		}
+		
+		$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE object_type = '" . self::EVENT_OBJECT_TYPE . "' AND object_id  = '" . $eventId . "'");
+// 		$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE object_type = '" . self::EVENT_OBJECT_TYPE . "' AND object_id = '" . $eventId . "'");
+		
+		
 	
 		return;
 	}

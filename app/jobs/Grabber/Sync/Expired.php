@@ -5,7 +5,7 @@ namespace Jobs\Grabber\Sync;
 class Expired
 {
 	public $di;
-	protected $batchSize = 500;
+	protected $batchSize = 200;
 	
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
@@ -17,23 +17,27 @@ class Expired
 	public function run()
 	{
 		$shards = (new \Models\Event()) -> getAvailableShards();
+		$finishDate = date('Y-m-d H:i:s');
+		//$finishDate = '2015-08-20 00:00:00';
 		
 		foreach ($shards as $cri) {
 			$events = (new \Models\Event()) -> setShard($cri);
 			$expiredTotal = $events -> strictSqlQuery()
-									-> addQueryCondition('end_date < "' . date('Y-m-d H:i:s') . '"')
+									-> addQueryCondition('end_date < "' . $finishDate . '"')
 									-> selectCount();
+$mem_usage = memory_get_usage();
+echo "\nUse memory ".round($mem_usage/1048576,2)." megabytes";
+print_r("\n\r" . $events -> getShardTable() . ": " . $expiredTotal . " events\n\r");
 			
 			if ($expiredTotal > 0) {
 				$offset = 0; 
 				do {
 					$expired = $events -> strictSqlQuery()
-									   -> addQueryCondition('end_date < "' . date('Y-m-d H:i:s') . '"')
+									   -> addQueryCondition('end_date < "' . $finishDate . '"')
 									   -> addQueryFetchStyle('\Models\Event')
 									   -> addQueryLimits($this -> batchSize, $offset)
 									   -> selectRecords();
 					$expCount = count($expired);
-print_r($events -> getShardTable() . ": " . $expCount . " events\n\r");
 					if ($expired) {
 						foreach ($expired as $eventObj) {
 							print_r(".");
@@ -41,37 +45,17 @@ print_r($events -> getShardTable() . ": " . $expCount . " events\n\r");
 							$indexer = new \Models\Event\Search\Indexer($grid);
 							$indexer -> setDi($this -> di);
 							$indexer -> deleteData($eventObj -> id);
-							$eventObj -> archive();
+
+							$eventObj -> archivePhalc();
 						}
 						$offset += $this -> batchSize;
 					}
-				} while ($expCount >= $this -> batchSize);
+ 				} while ($expCount >= $this -> batchSize);
+$mem_usage = memory_get_usage();
+echo "\n\rUse memory ".round($mem_usage/1048576,2)." megabytes\n";
+				
 print_r("\n\r");
 			}
-print_r("\n\r\n\r");			
 		}
-		
-		
-// 		foreach ($shards as $cri) {
-// 			$events = (new \Models\Event()) -> setShard($cri);
-// 			$query = 'select * from Event where Models\Event.end_date < "' . date('Y-m-d H:i:s') . '"';
-			
-// 			$expired = $events -> strictSqlQuery()
-// 							   -> addQueryCondition('end_date < "' . date('Y-m-d H:i:s') . '"')
-// 							   -> addQueryFetchStyle('\Models\Event')
-// 							   -> select();
-// print_r(count($expired) . "\n\r");			
-// 			if ($expired) {
-// 				foreach ($expired as $eventObj) {
-// print_r(".");					
-// 					$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> di, null, ['adapter' => 'dbMaster']);
-// 					$indexer = new \Models\Event\Search\Indexer($grid);
-// 					$indexer -> setDi($this -> di);
-// 					$indexer -> deleteData($eventObj -> id);
-// 					$eventObj -> archive(); 
-// 				}
-// 			}
-// print_r("\n\r\n\r");			
-// 		}
 	}
 }

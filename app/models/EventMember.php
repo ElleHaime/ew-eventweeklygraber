@@ -43,13 +43,17 @@ class EventMember extends \Library\Model
 	
 	public function deleteEventJoined($eventId)
 	{
-		$events = self::find(['event_id = "' . $eventId . '"']);
-		if ($events) {
-			foreach ($events as $ev) {
-				$ev -> delete();
-			}
-		}
-	
+// 	    $query = new \Phalcon\Mvc\Model\Query("SELECT * FROM Models\EventMember WHERE Models\EventMember.event_id = '" . $eventId . "'" , $this -> getDI());
+//     	$events = $query -> execute();
+//     	if ($events) {
+//     		foreach ($events as $obj) {
+//     			//$obj -> delete();
+//     		}
+//     	}
+
+ 		$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
+// 		$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
+			
 		return;
 	}
 }
