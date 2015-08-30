@@ -73,17 +73,23 @@ class Event extends \Library\Model
 	public function existsInShardsBySourceId($id, $source = 'fb')
 	{
 		$shards = $this -> getAvailableShards();
+		$result = false;
+		
 		foreach ($shards as $cri) {
-			$e = new $this;
-			$e -> setShard($cri);
-			$event = $e::findFirst($source . '_uid="' . $id . '"');
+			$events = (new \Models\Event()) -> setShard($cri);
+			$eventExists = $events -> strictSqlQuery()
+								   -> addQueryCondition($source . '_uid="' . $id . '"')
+								   -> addQueryFetchStyle('\Models\Event')
+								   -> selectRecords();
 			
-			if ($event) {
-				return $event;
-			} 
+			if (!empty($eventExists)) {
+				foreach ($expired as $eventObj) {
+					$result = $eventObj;
+				}
+			}
 		}
 		
-		return false;
+		return $result;
 	}
 	
 	
