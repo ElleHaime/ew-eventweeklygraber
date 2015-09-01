@@ -120,13 +120,19 @@ class Event extends \Library\Model
 	}
 	
 	
-	public function archivePhalc()
+	public function archivePhalc($needArchive = true)
 	{
 		// move: event_image, event_site, event_tag, event_category
-		$archive = new \Models\EventArchive();
-		$archive -> assign(['event' => serialize($this),
-				'archived' => date('Y-m-d H:i:s')]);
-		if ($archive -> save()) {
+		$ready = true;
+		
+		if ($needArchive) {
+			$archive = new \Models\EventArchive();
+			$archive -> assign(['event' => serialize($this),
+								'archived' => date('Y-m-d H:i:s')]);
+			$ready = $archive -> save();
+		} 
+		
+		if ($ready) {
 			if ($this -> memberlike) {
 				$this -> memberlike -> delete();
 			}
@@ -155,7 +161,6 @@ class Event extends \Library\Model
 	
 		return;
 	}
-	
 	
 
 	public function setCache()
