@@ -5,7 +5,7 @@ namespace Jobs\Grabber\Clean;
 class Events
 {
 	public $di;
-	protected $batchSize = 5;
+	protected $batchSize = 200;
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
@@ -35,7 +35,7 @@ class Events
 					$itemsCount = count($items);
 
 					
-					if ($itemsCount > 0) {
+					if (!empty($items)) {
 						$drop = [];
 						
 						foreach ($items as $eventObj) {
@@ -43,7 +43,7 @@ class Events
 									? $stack[$eventObj -> fb_uid] = $eventObj -> id
 									: $drop[$eventObj -> id] = $eventObj;
 						}
-						
+print_r(count($stack) . " : " . count($drop) . "\n\r");						
 						if (!empty($drop)) {
 							foreach ($drop as $key => $object) {
 								print_r("\n\r" . $key);
