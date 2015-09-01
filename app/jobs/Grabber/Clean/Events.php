@@ -5,7 +5,7 @@ namespace Jobs\Grabber\Clean;
 class Events
 {
 	public $di;
-	protected $batchSize = 200;
+	protected $batchSize = 5;
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
 	{
@@ -24,6 +24,7 @@ class Events
 									-> selectCount();
 			if ($eventsTotal > 0) {
 				$offset = 0;
+				$stack = [];
 				
 				do {
 					$items = $events -> strictSqlQuery()
@@ -32,9 +33,9 @@ class Events
 									  -> addQueryLimits($this -> batchSize, $offset)
 									  -> selectRecords();
 					$itemsCount = count($items);
+
 					
-					if ($items) {
-						$stack = [];
+					if ($itemsCount > 0) {
 						$drop = [];
 						
 						foreach ($items as $eventObj) {
@@ -42,6 +43,7 @@ class Events
 									? $stack[$eventObj -> fb_uid] = $eventObj -> id
 									: $drop[$eventObj -> id] = $eventObj;
 						}
+						
 						if (!empty($drop)) {
 							foreach ($drop as $key => $object) {
 								print_r("\n\r" . $key);
