@@ -40,6 +40,24 @@ trait Grabable
 		}
 	}
 	
+	public function setGraphAccessToken()
+	{
+		$query = '/oauth/access_token?client_id=' . $this -> config -> facebook -> appId . '&client_secret=' . $this -> config -> facebook -> appSecret . '&grant_type=client_credentials';
+		try {
+			$request = new FacebookRequest($this -> fbSession, 'GET', $query);
+			$data = $request -> execute() -> getGraphObject() -> asArray();
+			
+			if ($data['access_token']) {
+				$this -> fbAppAccessToken = $data['access_token'];
+				return;
+			} else {
+				return false;
+			}
+		} catch (FacebookRequestException $ex) {
+			print_r($ex);
+		}
+	}
+	
 
     public function testAction(array $args)
     {

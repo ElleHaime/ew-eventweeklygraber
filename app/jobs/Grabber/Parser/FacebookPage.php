@@ -17,7 +17,7 @@ class FacebookPage
 
 		if (!\Models\Page::findFirst(['fb_uid = "' . $data['id'] . '"'])) 
 		{
-print_r($data);
+print_r($data['name']);
 print_r("\n\r");		
 			$newPage = [];
 			$newPage['fb_uid'] = $data['id'];

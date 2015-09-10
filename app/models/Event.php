@@ -81,10 +81,10 @@ class Event extends \Library\Model
 								   -> addQueryCondition($source . '_uid="' . $id . '"')
 								   -> addQueryFetchStyle('\Models\Event')
 								   -> selectRecords();
-			
+	
 			if (!empty($eventExists)) {
-				foreach ($expired as $eventObj) {
-					$result = $eventObj;
+				foreach ($eventExists as $eventObj) {
+					return $eventObj;
 				}
 			}
 		}

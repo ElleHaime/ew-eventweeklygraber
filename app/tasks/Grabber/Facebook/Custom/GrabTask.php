@@ -18,26 +18,34 @@ class GrabTask extends \Phalcon\CLI\Task
 {
 	use \Tasks\Facebook\Grabable;
 	
-	const IDLE 					= 'idle';
-	const RUNNING 				= 'running';
-	const READ_SOURCE_FILE		= 1;
-	const READ_SOURCE_DATABASE	= 2;
-	const READ_SOURCE_TABLES	= 3;
+	const IDLE 						= 'idle';
+	const RUNNING 					= 'running';
 	
-	protected $fbGraphEnabled	= false;
+	const READ_SOURCE_FILE			= 1;
+	const READ_SOURCE_TABLES		= 2;
+	const READ_SOURCE_DATABASE		= 3;
+	const READ_EXTRACTED_FILE		= 4;
+	
+	const MAX_FB_QUERIES_ID			= 100;
+	const MAX_FB_QUERIES_DATA		= 200;
+	
+	
+	protected $fbGraphEnabled		= false;
 	protected $fbSession;
-	protected $state 			= self::IDLE;
+	protected $fbAppAccessToken 	= false;
+	protected $state 				= self::IDLE;
 	protected $fb;
 	protected $queue;
-	protected $sourceType 		= 3;
+	protected $sourceType 			= 1;
 	
-	protected $queries			= [];
-	protected $lastSearchIndex	= 0;
+	protected $queries				= [];
+	protected $lastSearchIndex		= 0;
 	
-	protected $searchIdTypes 	= ['tag', 'keyword', 'location', 'venue'];
-	protected $searchIdQuery 	= '/search?type=event&fields=id&';
+// 	protected $searchIdTypes 		= ['tag', 'keyword', 'location', 'venue'];
+	protected $searchIdTypes 		= ['tag', 'keyword'];
+	protected $searchIdQuery 		= '/search?type=event&fields=id&';
 	protected $searchDataQuery 	= '/';
-	protected $searchDataFields = 'fields=id,owner,start_time,end_time,name,location,cover,venue,description,ticket_uri';
+	protected $searchDataFields 	= 'fields=id,owner,start_time,end_time,name,location,cover,venue,description,ticket_uri';
 	
 	
 	public function harvestidAction(array $args)
@@ -46,25 +54,40 @@ class GrabTask extends \Phalcon\CLI\Task
 			$this -> initGraph();
 		}
 		
+		$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
 		if ($this -> sourceType == self::READ_SOURCE_FILE) {
-			$this -> queries = $this -> parseQueries();
+			$this -> queries = $this -> parseQueries($lastFetch);
 		} else {
-			$lastFetch = Grabber::findFirst('grabber = "facebook" AND param = "id"');
 			$this -> composeQueries($lastFetch);
 		}
 		
+		$queriesCounter = 0;
 		foreach($this -> queries as $index => $query) {
+			$queriesCounter++;
+			if ($queriesCounter > self::MAX_FB_QUERIES_ID) {
+				$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+				$lastFetch -> last_id = $index;
+				if ($this -> sourceType == self::READ_SOURCE_FILE) {
+					$lastFetch -> value = $query;
+				}
+				$lastFetch -> update();
+			
+				$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
+				print_r("\n\rInterrupted by query limit, app session is going on\n\n");
+				die();
+			}
+			
 			$since = time();
 			$until = strtotime('+2 month');
+			
 			$request = $this -> searchIdQuery . 'q=' . $query . '&since=' . $since . '&until=' . $until. '&access_token=' . $args[0];
-print_r($request . "\n\r");					
-			try {
-				$request = new FacebookRequest($this -> fbSession, 'GET', $request);
+			
+ 			try {
+ 				$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 				$data = $request -> execute() -> getGraphObject() -> asArray();
-	
+
 				if (!empty($data['data'])) {
 					$dataString = count($data['data']);
-					$queryString =  $query . ": " . $dataString;				
 
 					$fp = fopen($this -> config -> facebook -> idSourceFile, 'a');
 					foreach ($data['data'] as $event) {
@@ -73,7 +96,7 @@ print_r($request . "\n\r");
 					fclose($fp);
 				}
 			} catch (FacebookRequestException $ex) {
-				$lastFetch = Grabber::findFirst('grabber = "facebook" AND param = "id"');
+				$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
 				$lastFetch -> last_id = $index;
 				$lastFetch -> update();
 				
@@ -95,32 +118,33 @@ print_r($request . "\n\r");
 				die();
 			}
 		}
-		
-		if ($this -> lastSearchIndex < count($this -> searchIdTypes)-1) {
-			$this -> lastSearchIndex++;
-			
-			$lastFetch = Grabber::findFirst('grabber = "facebook" AND param = "id"');
-			$lastFetch -> value = $this -> searchIdTypes[$this -> lastSearchIndex];
-			$lastFetch -> last_id = 0;					
-			$lastFetch -> update();
-			
-			$this -> composeQueries($lastFetch);
-			$this -> harvestidAction($args);
+
+		if ($this -> sourceType == self::READ_SOURCE_TABLES) {
+			if ($this -> lastSearchIndex < count($this -> searchIdTypes)-1) {
+				$this -> lastSearchIndex++;
+				
+				$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+				$lastFetch -> value = $this -> searchIdTypes[$this -> lastSearchIndex];
+				$lastFetch -> last_id = 0;					
+				$lastFetch -> update();
+				
+				$this -> composeQueries($lastFetch);
+				$this -> harvestidAction($args);
+			} else {
+				$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+				$lastFetch -> value = $this -> searchIdTypes[0];
+				$lastFetch -> last_id = 0;					
+				$lastFetch -> update();
+				
+				$this -> initDataGrab($args);
+			}
 		} else {
-			$lastFetch = Grabber::findFirst('grabber = "facebook" AND param = "id"');
-			$lastFetch -> value = $this -> searchIdTypes[0];
-			$lastFetch -> last_id = 0;					
+			$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+			$lastFetch -> value = 'Dublin';
+			$lastFetch -> last_id = 0;
 			$lastFetch -> update();
 			
-			$taskData = Cron::findFirst($args[3]);
-			// create task to process ids			
-			$taskCustom = new Cron(); 
-			$taskCustom -> name = \Tasks\Facebook\Custom\ObserverTask::FB_BY_ID_TASK_NAME;
-			$taskCustom -> member_id = $taskData -> member_id;
-			$taskCustom -> parameters = $taskData -> parameters;
-			$taskCustom -> state = Cron::STATE_PENDING;
-			$taskCustom -> hash = time();
-			$taskCustom -> save();
+			$this -> initDataGrab($args);			
 		}
 		
 		print_r("done\n\r");
@@ -132,20 +156,37 @@ print_r($request . "\n\r");
 	{
 		$this -> initQueue('harvester');
 		$this -> initGraph();
+		$this -> sourceType = self::READ_EXTRACTED_FILE;
 		
-		$queries = $this -> parseIds();
+		$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+		$queries = $this -> parseIds($lastFetch);
+		
 		if (!empty($queries)) {
-			foreach($queries as $query) {
+			$queriesCounter = 0;
+			
+			foreach($queries as $index => $query) {
+				$queriesCounter++;
+				
+				if ($queriesCounter > self::MAX_FB_QUERIES_DATA) {
+					$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+					$lastFetch -> last_id = $index;
+					$lastFetch -> value = $query;
+					$lastFetch -> update();
+						
+					$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
+					print_r("\n\rInterrupted by query limit, app session is going on\n\n");
+					die();
+				}
 				$request = $this -> searchDataQuery . $query . '?access_token=' . $args[0] . '&' . $this -> searchDataFields;
 			
 				try {
 					$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 					$event = $request -> execute() -> getGraphObject() -> asArray();
 
+					if (isset($event['owner'])) {
+						$event['creator'] = $event['owner'] -> id;
+					}
 					if (!empty($event)) {
-						if (isset($event['owner'])) {
-							$event['creator'] = $event['owner'] -> id;
-						}
 						if (isset($event['cover'])) {
 							$event['pic_cover'] = $event['cover'];
 						}
@@ -175,14 +216,14 @@ print_r($request . "\n\r");
 						 $this -> queries = $this -> getKeywords($lastFetch -> last_id);
 						 $this -> lastSearchIndex = 1;
 					 break;
-				case $this -> searchIdTypes[2]:
-						 $this -> queries = $this -> getLocations($lastFetch -> last_id);
-						 $this -> lastSearchIndex = 2;
-					 break;
-				case $this -> searchIdTypes[3]:
-						 $this -> queries = $this -> getVenues($lastFetch -> last_id);
-						 $this -> lastSearchIndex = 3;
-					 break;
+// 				case $this -> searchIdTypes[2]:
+// 						 $this -> queries = $this -> getLocations($lastFetch -> last_id);
+// 						 $this -> lastSearchIndex = 2;
+// 					 break;
+// 				case $this -> searchIdTypes[3]:
+// 						 $this -> queries = $this -> getVenues($lastFetch -> last_id);
+// 						 $this -> lastSearchIndex = 3;
+// 					 break; 
 				default:
 					$this -> queries = $this -> getTags($lastFetch -> last_id);
 					$this -> lastSearchIndex = 0;
@@ -205,13 +246,18 @@ print_r($request . "\n\r");
 	}
 	
 	
-	protected function parseQueries()
+	protected function parseQueries($lastFetch = false)
 	{
 		$result = [];
+		$offsetFetch = 0;
 		
 		$qSource = file_get_contents($this -> config -> facebook -> querySourceFile);
+		
 		if (strlen($qSource) > 0) {
-			$queries = explode(';', $qSource);
+			$source = explode(';', $qSource);
+			if ($lastFetch) $offsetFetch = $lastFetch -> last_id;
+			
+			$queries = array_slice($source, $offsetFetch, count($source), true); 
 			foreach ($queries as $q) {
 				if (strlen($q) > 0) {
 					$result[] = trim($q);
@@ -223,16 +269,23 @@ print_r($request . "\n\r");
 	}
 	
 	
-	protected function parseIds()
+	protected function parseIds($lastFetch = false)
 	{
 		$result = [];
+		$source = [];
+		$offsetFetch = 0;
 		
+		if ($lastFetch) $offsetFetch = $lastFetch -> last_id;
 		$fp = fopen($this -> config -> facebook -> idSourceFile, 'r');
 		while (($data = fgetcsv($fp)) !== false) {
-			$result[] = $data[0];
+			$source[] = $data[0];
 		}
 		fclose($fp);
 		
+		if (!empty($source)) {
+			$result = array_slice($source, $offsetFetch, count($source), true);
+		}
+		 
 		return $result;
 	}
 	
@@ -295,6 +348,17 @@ print_r($request . "\n\r");
 		}
 		
 		return $result;
+	}
+	
+	protected function initDataGrab($args)
+	{
+		$taskData = Cron::findFirst($args[3]);
+		
+		// create task to process ids
+		$taskData -> name = Cron::FB_BY_ID_TASK_NAME;
+		$taskData -> state = Cron::STATE_PENDING;
+		$taskData -> hash = time();
+		$taskData -> update();
 	}
 	
 }

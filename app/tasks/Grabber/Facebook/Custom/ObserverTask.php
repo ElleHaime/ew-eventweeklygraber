@@ -6,6 +6,10 @@ use \Models\Cron;
 
 class ObserverTask extends \Phalcon\CLI\Task
 {
+	const SLEEP_INTERRUPTED 	= 1800;
+	const SLEEP_EXECUTED 		= 86400;
+	
+	
 	public function observeidAction() 
 	{
 		while (true) {
@@ -15,8 +19,8 @@ class ObserverTask extends \Phalcon\CLI\Task
 			
 			if (!$taskCustom 
 				|| $taskCustom -> state == Cron::STATE_PENDING
-				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > 3600)
-				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > 86400)) 
+				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > self::SLEEP_INTERRUPTED)
+				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > self::SLEEP_EXECUTED)) 
 			{
 				$maxTime = time() - 1300;
 				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime,
@@ -56,8 +60,6 @@ class ObserverTask extends \Phalcon\CLI\Task
 	{
 		while (true) {
 			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . Cron::FB_BY_ID_TASK_NAME . '"');
-print_r($tasks -> toArray());
-print_r("\n\r");		
 			if ($tasks) {
 				foreach ($tasks as $task) {
 					$args = unserialize($task -> parameters);

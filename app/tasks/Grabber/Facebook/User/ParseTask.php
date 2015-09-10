@@ -11,7 +11,7 @@ class ParseTask extends \Phalcon\CLI\Task
 	protected $queue;
 
 	public function listenAction()
-	{	
+	{
 		$this -> queue = new Consumer();
 		$this -> queue -> connect(['host' => $this -> config -> queue -> host,
 								   'port' => $this -> config -> queue -> port,

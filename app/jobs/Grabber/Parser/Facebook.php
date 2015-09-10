@@ -43,6 +43,11 @@ print_r("member: " . $msg['args'][2] . "\n\r");
 	            $result['description'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['description']);
 	            $result['name'] = $ev['name'];
 	            $result['address'] = '';
+	            
+	            if ($result['fb_creator_uid'] == $msg['args'][1]) {
+	            	$result['member_id'] = $msg['args'][2];
+	            }
+	            
 	            if (!empty($ev['ticket_uri'])) {
 	                $result['tickets_url'] = $ev['ticket_uri'];
 	            }
@@ -181,12 +186,20 @@ print_r($eventObj -> id . "saved\n\r");
 	                if (!$indexer -> addData($eventObj -> id)) {
 	                	print_r("ooooooops, not saved to index\n\r");
 	                }
-print_r("after addData\n\r");	                
 	            } else {
 print_r("ooooooops, not saved\n\r");	            	
 	            }
 	        } else {
-print_r($eventObj -> fb_uid . " exists already\n\r");	        	
+				print_r($eventObj -> fb_uid . " exists already\n\r");
+				
+				$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+				$indexer = new \Models\Event\Search\Indexer($grid);
+				$indexer -> setDi($this->_di);
+				if (!$indexer -> existsData($eventObj -> id)) {
+					if (!$indexer -> addData($eventObj -> id)) {
+						print_r("ooooooops, not saved to index\n\r");
+					}
+				}	        	
 	            $newEvents[$ev['eid']] = $eventObj;
 	        }
 		
@@ -213,6 +226,28 @@ print_r($eventObj -> fb_uid . " exists already\n\r");
 				                                'member_status' => 1]);
                                 $obj -> save();
                             }
+                            
+                            if ($event -> fb_creator_uid == $msg['args'][1] && $event -> member_id != $msg['args'][2]) {
+                            	if (empty($event -> location_id) || is_null($event -> location_id)) {
+                            		$event -> location_id = 0;
+                            	}
+                            	
+                            	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
+                            	$e = $obj::findFirst('id = "' . $event -> id . '"');
+                            	if ($e && (int)$e -> member_id != (int)$msg['args'][2]) {
+                            		$e -> setShardByCriteria($event -> location_id);
+                            		$e -> member_id = $msg['args'][2];
+                            		$e -> update();
+                            	
+                            		$grid = new \Models\Event\Grid\Search\Event(['location' => $e -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+                            		$indexer = new \Models\Event\Search\Indexer($grid);
+                            		$indexer -> setDi($this->_di);
+                            		print_r("id to index " . $e -> id . "\n\r");
+                            		if (!$indexer -> updateData($e -> id)) {
+                            			print_r("ooooooops, not updated in index\n\r");
+                            		}
+                            	}
+                            }
                         }
         			break;
 
@@ -237,7 +272,7 @@ print_r($eventObj -> fb_uid . " exists already\n\r");
 print_r("member event: location " . $event -> location_id . "\n\r");                        	
                         	$obj = (new \Models\Event()) -> setShardByCriteria($event -> location_id);
                             $e = $obj::findFirst('id = "' . $event -> id . '"');
-                            if ($e) {
+                            if ($e && $e -> member_id != $msg['args'][2]) {
                            		$e -> setShardByCriteria($event -> location_id);
                                 $e -> member_id = $msg['args'][2];
                                 $e -> update();
