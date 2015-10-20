@@ -12,20 +12,18 @@ use \Vendor\Facebook\Extractor,
 
 trait Grabable
 {
-	public function initQueue($source)
+	public function initQueue($source, $queueName = 'queue')
 	{
-		$this -> fb = new Extractor($this -> getDi());
-
-		$this -> queue = new Producer();
-		$this -> queue -> connect(['host' => $this -> config -> queue -> host,
-								   'port' => $this -> config -> queue -> port,
-								   'login' => $this -> config -> queue -> login,
-								   'password' => $this -> config -> queue -> password,
-								   'exchangeName' => $this -> config -> queue -> $source -> exchange,
-                                   'exchangeType' => $this -> config -> queue -> $source -> type,
-								   'routing_key' => $this -> config -> queue -> $source -> routing_key
-								  ]);
-		$this -> queue -> setExchange();		
+		$this -> $queueName = new Producer();
+		$this -> $queueName -> connect(['host' => $this -> config -> queue -> host,
+									    'port' => $this -> config -> queue -> port,
+									    'login' => $this -> config -> queue -> login,
+									    'password' => $this -> config -> queue -> password,
+									    'exchangeName' => $this -> config -> queue -> $source -> exchange,
+	                                    'exchangeType' => $this -> config -> queue -> $source -> type,
+									    'routing_key' => $this -> config -> queue -> $source -> routing_key
+								  	]);
+		$this -> $queueName -> setExchange();		
 	}
 	
 	public function initGraph()
@@ -40,7 +38,7 @@ trait Grabable
 		}
 	}
 	
-	public function setGraphAccessToken()
+	public function setGraphAuthAccessToken()
 	{
 		$query = '/oauth/access_token?client_id=' . $this -> config -> facebook -> appId . '&client_secret=' . $this -> config -> facebook -> appSecret . '&grant_type=client_credentials';
 		try {
@@ -58,7 +56,15 @@ trait Grabable
 		}
 	}
 	
+	
+	public function setGraphSimpleAccessToken()
+	{
+		$this -> fbAppAccessToken = $this -> config -> facebook -> appId . '|' . $this -> config -> facebook -> appSecret;
+		
+		return;
+	}
 
+	
     public function testAction(array $args)
     {
         $this -> queue = new Producer();

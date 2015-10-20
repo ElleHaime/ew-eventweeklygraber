@@ -55,13 +55,12 @@ class Event extends \Library\Model
 		$shards = $this -> getAvailableShards();
 		foreach ($shards as $cri) {
 			$this -> setShard($cri);
-			$creators = self::find();
+			$creators = self::find(['fb_creator_uid is not null',
+									 'distinct' => 'fb_creator_uid']);
 
 			if ($creators -> count() != 0) {
 				foreach ($creators as $val) {
-					if (!is_null($val -> fb_creator_uid) && $val -> fb_creator_uid != '') {
-						$result[$val -> fb_creator_uid] = $val -> fb_creator_uid;
-					}
+					$result[$val -> fb_creator_uid] = $val -> fb_creator_uid;
 				}
 			}
 		} 
@@ -162,6 +161,16 @@ class Event extends \Library\Model
 		return;
 	}
 	
+	
+	public static function checkExpirationDate($date)
+	{
+		print_r(date('Y-m-d H:i:s', strtotime($date)) . "\n\r"); 
+		if (strtotime($date) > time()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	public function setCache()
 	{

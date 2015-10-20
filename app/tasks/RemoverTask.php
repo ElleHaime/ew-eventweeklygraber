@@ -14,6 +14,6 @@ class RemoverTask extends \Phalcon\CLI\Task
 	public function removeEventsAction()
 	{
 		$job = new \Jobs\Grabber\Clean\Events($this -> getDi());
-		$job -> run();
+		$job -> runEb();
 	}
 }

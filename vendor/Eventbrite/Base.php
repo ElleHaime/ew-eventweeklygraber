@@ -31,6 +31,7 @@ abstract class Base
 	protected $curlMethod 		= 'GET';
 	protected $curlEntity		= null;
 	protected $curlEntityId	= null;
+	protected $curlSource		= null;
 	protected $curlUrl			= null;
 	protected $curlArgs 		= [];
 	protected $curlPageId		= 0;
@@ -163,21 +164,33 @@ abstract class Base
 		return $this;
 	}
 	
+	public function clearFilters()
+	{
+		$this -> curlArgs = [];
+		return $this;
+	}
+	
 	public function setEntity($arg)
 	{
 		$this -> curlEntity = $arg;
+		$this -> curlSource = $this -> curlEntity;
+		
 		return $this;
 	}
 	
 	public function setEntityId($arg)
 	{
 		$this -> curlEntityId = $arg;
+		
+		if (!empty($this -> curlEntity)) {
+			$this -> curlSource = $this -> curlEntity . '/' . $this -> curlEntityId;
+		}
 		return $this;
 	}
 	
 	public function setPagination($arg = true)
 	{
-		$this -> curlPagination = $arg;
+		$this -> curlPaginate = $arg;
 		return $this;
 	}
 	
@@ -191,15 +204,14 @@ abstract class Base
 			throw new Exception('Oooops, you forgot about auth token, dude. With love, you EventbriteAPI');
 			return false;
 		}
-
-		if ($this -> curlEntity == 'events') {
-			$source = 'events/search';
-		}
+		
 		$this -> curlUrl = $this -> requestUrl . '/' . 
 			   			   $this -> apiVersion . '/' .
-			   			   $source . '/?token=' .
-			   			   $this -> authToken . '&page=' . 
-			   			   $this -> curlPageId;
+			   			   $this -> curlSource . '/?token=' .
+			   			   $this -> authToken;
+		if ($this -> curlPaginate) {
+			$this -> curlUrl .= '&page=' . $this -> curlPageId;
+		}
 		if (!empty($this -> curlArgs)) {
 			foreach ($this -> curlArgs as $arg => $val) {
 				if ($arg != 'since_id' || ($arg == 'since_id' && $val != 1)) {

@@ -34,7 +34,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		error_reporting(E_ALL & ~E_NOTICE);		
 		
-		//$this -> fb = new Extractor($this -> getDi());
+		$this -> fb = new Extractor($this -> getDi());
 		$this -> initQueue('harvester');
 		$this -> initGraph();
 

@@ -100,39 +100,49 @@ trait Helper
     }
     
     
-    public function processDates($result)
+    public function processDates($result, $source)
     {
-    	if (isset($result['start_date']) && isset($result['end_date'])) {
-			if (isset($result['start_time']) && isset($result['end_time'])) {
-				$result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
+    	if (isset($source['start_time']) && isset($source['end_time']) && !empty($source['end_time'])) {
+    		$result['start_date'] = date('Y-m-d H:i:s', strtotime($source['start_time']));
+    		$result['end_date'] = date('Y-m-d H:i:s', strtotime($source['end_time']));
 
-				if(strtotime($result['start_date'] . ' ' . $result['start_time']) >= strtotime($result['end_date'] . ' ' . $result['end_time'])) {
-					$result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-				} else {
-					$result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
-				}
-				unset($result['start_time']);
-				unset($result['end_time']);
-
-			} elseif(isset($result['start_time']) && !isset($result['end_time'])) {
-				$result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];
-				$result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-
-				unset($result['start_time']);
-
-			} elseif(!isset($result['start_time']) && isset($result['end_time'])) {
-				$result['end_date'] = $result['end_date'] . ' ' . $result['end_time'];
-				unset($result['end_time']);
-			}
-		} elseif (isset($result['start_date']) && !isset($result['end_date'])) {
-			$result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
-			if (isset($result['start_time'])) {
-				$result['start_date'] = $result['start_date'] . ' ' . $result['start_time'];    
-				unset($result['start_time']);
-			} 
-			unset($result['start_time']);
-		}
+    		if(strtotime($result['start_date']) >= strtotime($result['end_date'])) {
+    			$result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+    		}
+    		 
+    	} elseif (isset($source['start_time']) && (!isset($source['end_time']) || empty($source['end_time']))) {
+    		$result['start_date'] = date('Y-m-d H:i:s', strtotime($source['start_time']));
+    		$result['end_date'] = date('Y-m-d H:i:s', strtotime($result['start_date'] . ' tomorrow -1 minute'));
+    		
+    	} elseif (!isset($source['start_time']) && isset($source['end_time'])) {
+    		$result['end_date'] = date('Y-m-d H:i:s', strtotime($source['end_time']));
+    	}	
 		
 		return $result;
+    }
+    
+    
+    public function increaseEventTotal()
+    {
+    	$total = \Models\Total::findFirst('entity = "event"');
+    	$total -> total = $total -> total + 1;
+    	$total -> update();
+    	
+    	return;
+    }
+    
+    
+    public function addToIndex($eventObj)
+    {
+    	$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+    	$indexer = new \Models\Event\Search\Indexer($grid);
+    	$indexer -> setDi($this->_di);
+    	if (!$indexer -> existsData($eventObj -> id)) {
+	    	if (!$indexer -> addData($eventObj -> id)) {
+	    		print_r("ooooooops, not saved to index\n\r");
+	    	}
+    	}
+    	
+    	return;
     }
 }

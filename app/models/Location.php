@@ -52,6 +52,7 @@ class Location extends \Library\Model
 	{
 		$geo = $this -> getDi() -> get('geo');
 		$isGeoObject = false;
+		$isLocationExists = false;
 		$newLoc = array();
 		
 		if (empty($argument)) {
@@ -67,17 +68,17 @@ class Location extends \Library\Model
 			$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
 			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
 			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
-		} elseif (isset($argument['city']) && isset($argument['country'])) {
+		} 
+		if (isset($argument['city']) && isset($argument['country'])) {
 			$query[] = 'city LIKE "%' . trim($argument['city']) . '%"';
 			$query[] = 'country LIKE "%' . trim($argument['country']) . '%"';
 		}
 
 		$query = implode(' and ', $query);
+		
         if (!empty($query)) {
             $isLocationExists = self::findFirst($query);
-        } else {
-            $isLocationExists = false;
-        }
+        } 
 
 		if (!$isLocationExists && isset($argument['longitude']) && isset($argument['latitude'])) {
 			if (!$isGeoObject) {
