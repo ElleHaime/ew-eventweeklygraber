@@ -28,10 +28,10 @@ class Venue extends \Library\Model
 	
 	public function getCreators($location_id = false)
 	{
-		if ($location_id) {
+		if ($location_id !== false ) {
 			$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid FROM Models\Venue
-														WHERE fb_uid is not null and location_id = " . $location_id . "
-														GROUP BY fb_uid", $this -> getDI());
+														WHERE fb_uid is not null and location_id = " . $location_id, 
+												$this -> getDI());
 		} else {
 			$query = new \Phalcon\Mvc\Model\Query("SELECT id, fb_uid FROM Models\Venue
 														WHERE fb_uid is not null 

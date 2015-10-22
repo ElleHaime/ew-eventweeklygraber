@@ -122,25 +122,21 @@ trait Helper
     }
     
     
-    public function increaseEventTotal()
-    {
-    	$total = \Models\Total::findFirst('entity = "event"');
-    	$total -> total = $total -> total + 1;
-    	$total -> update();
-    	
-    	return;
-    }
-    
-    
     public function addToIndex($eventObj)
     {
     	$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+    	
     	$indexer = new \Models\Event\Search\Indexer($grid);
     	$indexer -> setDi($this->_di);
+    	
     	if (!$indexer -> existsData($eventObj -> id)) {
 	    	if (!$indexer -> addData($eventObj -> id)) {
 	    		print_r("ooooooops, not saved to index\n\r");
 	    	}
+    	} else {
+    		if (!$indexer -> updateData($eventObj -> id)) {
+    			print_r("ooooooops, not updated in index\n\r");
+    		}
     	}
     	
     	return;

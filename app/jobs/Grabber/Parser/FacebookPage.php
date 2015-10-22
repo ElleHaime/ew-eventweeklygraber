@@ -14,11 +14,13 @@ class FacebookPage
 	public function run(\AMQPEnvelope $item)
 	{
 		$data = unserialize($item -> getBody());
+		$venueObj = \Models\Venue::findFirst(['fb_uid = "' . $data['id'] . '"']);
 
-		if (!\Models\Page::findFirst(['fb_uid = "' . $data['id'] . '"'])) 
-		{
+		if (!$venueObj) {
+		//if (!\Models\Page::findFirst(['fb_uid = "' . $data['id'] . '"'])) { 
 print_r($data['name']);
 print_r("\n\r");		
+die();
 			$newPage = [];
 			$newPage['fb_uid'] = $data['id'];
 			if (isset($data['username'])) {
@@ -51,25 +53,9 @@ print_r("\n\r");
 			
 			if (isset($data['location'])) {
 				$locations = new \Models\Location();
-				$arguments = [];
-				
-				if (isset($data['location'] -> latitude) && isset($data['location'] -> longitude)) {
-					$arguments['latitude'] = $data['location'] -> latitude;
-					$arguments['longitude'] = $data['location'] -> longitude; 
-				}
-				if (isset($data['city'])) {
-					$arguments['city'] = $data['city'];
-				}
-				if (isset($data['country'])) {
-					$arguments['country'] = $data['country'];
-				}
-
-				if (!empty($arguments)) {
-					$locations = new \Models\Location();
-			       	$locExists = $locations -> createOnChange($arguments);
-			        if ($locExists) {
-						$newPage['location_id'] = $locExists -> id;
-					}
+		       	$locExists = $locations -> createOnChange($data['location']);
+		        if ($locExists) {
+					$newPage['location_id'] = $locExists -> id;
 				}
 			}
 						
@@ -79,6 +65,22 @@ print_r("\n\r");
 				return $page -> id;
 			} else {
 				return false;
+			}
+		} else {
+print_r($venueObj -> fb_uid . " venue existenz\n\r");
+			
+			if (isset($data['location'])) {
+				$locations = new \Models\Location();
+				$locExists = $locations -> createOnChange(get_object_vars($data['location']));
+				if ($locExists) {
+print_r($locExists -> id . ": new location\n\r");
+					$venueObj -> location_id = $locExists -> id;
+					if (!$venueObj -> update()) {
+						print_r($venueObj -> fb_uid . ": ooops, venue not updated\n\r");
+					} else {
+print_r($venueObj -> fb_uid . ": updated\n\r");
+					}
+				}
 			}
 		}
 	}

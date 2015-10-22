@@ -79,7 +79,7 @@ print_r(count($stack) . " : " . count($drop) . "\n\r");
 
 			if (!empty($items)) {
 				foreach ($items as $object) {
-					print_r("\n\r" . $key);
+					print_r("\n\r" . $object -> eb_uid);
 					
 					$grid = new \Models\Event\Grid\Search\Event(['location' => $object -> location_id], $this -> di, null, ['adapter' => 'dbMaster']);
 					$indexer = new \Models\Event\Search\Indexer($grid);

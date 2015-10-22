@@ -108,7 +108,6 @@ print_r($ev['name']['text'] . "\n\r");
 	        
 			if ($eventObj -> save() != false) {
 				$this -> categorize($eventObj);
-            	$this -> increaseEventTotal();
 
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);

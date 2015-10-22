@@ -27,8 +27,6 @@ class Locate
 		
 		if ($events) {
 			foreach ($events as $eventObj) {
-				print_r(".");
-				
 				if (!empty($eventObj -> latitude) && !empty($eventObj -> longitude)) {
 					$eventLocation = (new Location()) -> createOnChange(['latitude' => $eventObj -> latitude, 'longitude' => $eventObj -> longitude]);
 				}

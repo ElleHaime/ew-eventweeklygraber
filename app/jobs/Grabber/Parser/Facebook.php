@@ -4,6 +4,7 @@ namespace Jobs\Grabber\Parser;
 
 use Models\EventTag,
 	Models\Tag,
+	Models\Event,
 	Models\Cron,
 	Models\Venue,
 	Models\Location;
@@ -45,7 +46,7 @@ print_r("type: " . $msg['type'] . "\n\r");
             
             $result['fb_uid'] = $ev['eid'];
             $result['deleted'] = "0";
-            $result['fb_creator_uid'] = $ev['creator'];
+            $result['fb_creator_uid'] = $ev['fb_creator_uid'];
             $result['description'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['description']);
             $result['name'] = $ev['name'];
             $result['address'] = '';
@@ -71,7 +72,6 @@ print_r("type: " . $msg['type'] . "\n\r");
             $result = $this -> processDates($result, $ev);
 
             $result['location_id'] = '0';
-            $venueCreated = false;
 	
             if (isset($ev['venue']['id']) && $venue = Venue::findFirst(['fb_uid = "' . $ev['venue']['id'] . '"'])) {
                 $result['venue_id'] = $venue -> id;
@@ -120,18 +120,9 @@ print_r("type: " . $msg['type'] . "\n\r");
                             'latitude' => $ev['venue']['latitude'],
                             'longitude' => $ev['venue']['longitude']]);
 
-                    if ($venueObj -> save() != false) {
-                        $venueCreated = $venueObj;
-                    }
-                }
-
-                if ($venueCreated !== false) {
-                    $result['venue_id'] = $venueObj -> id;
-                    $result['address'] = $venueObj -> address;
-                } else {
-                    $result['venue_id'] = null;
-                    if (isset($ev['location'])) {
-                        $result['address'] = $ev['location'];
+                    if ($venueObj -> save()) {
+	                    $result['venue_id'] = $venueObj -> id;
+	                    $result['address'] = $venueObj -> address;
                     }
                 }
             }
@@ -148,9 +139,8 @@ print_r("location id: " . $result['location_id'] . "\n\r");
 print_r($eventObj -> name . " | " . $eventObj -> start_date); 
 print_r("\n\r");	
             if ($eventObj -> save() != false) {
-print_r($eventObj -> id . "saved\n\r");
+print_r($eventObj -> id . " saved\n\r");
 				$this -> categorize($eventObj);
-            	$this -> increaseEventTotal();
 	            	 
                 if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
                     $this -> saveEventImage('fb', $ev['pic_big'], $eventObj);
@@ -163,15 +153,48 @@ print_r($eventObj -> id . "saved\n\r");
 print_r("ooooooops, not saved\n\r");	            	
             }
         } else {
-			print_r($eventObj -> fb_uid . " exists already\n\r");
+print_r($eventObj -> fb_uid . " exists already with venue " . $eventObj -> venue_id . " and location " . $eventObj -> location_id . "\n\r");
 
 			// check is event has appropriate venue fb_uid and update if not
-			if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE && $ev['creator'] != $eventObj -> venue_id) {
-				$eventObj -> setShardById($eventObj -> id);
-				$eventObj -> venue_id = $ev['creator'];
-				$eventObj -> update();
+			if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE) {
+print_r($ev['fb_creator_uid'] . " venue for existenz\n\r");
+
+				if (isset($ev['location']) && !isset($ev['venue'])) {
+					$ev['venue'] = $ev['location'];
+				}
+				
+				// check and fix location if not exists
+				if (isset($ev['venue']['latitude']) && empty($eventObj -> location_id)) {
+					$locations = new Location();
+					$locExists = $locations -> createOnChange($ev['venue']);
+					
+print_r("try to create for existenz\n\r");
+					if ($locExists) {
+print_r("ready, location " . $locExists -> id. " found for existenz\n\r");						
+						if ($eventObjNew = (new Event()) -> transferEventBetweenShards($eventObj, $locExists -> id)) {
+print_r("existenz old id " . $eventObj -> id . "\n\r");							
+							$eventObj = $eventObjNew;
+print_r("existenz new id " . $eventObj -> id . "\n\r");
+						} 
+                	}
+				}
+				
+				// check and fix venue
+				if (isset($ev['venue']['id'])) {
+					$venueId = Venue::findFirst(['fb_uid = "' . $ev['venue']['id'] . '"']);
+print_r("found venue for existenz with id " . $venueId -> id . "\n\r");					
+					if ($venueId) {
+						$eventObj -> setShardById($eventObj -> id);
+						$eventObj -> venue_id = $venueId -> id;
+						if (!$eventObj -> update()) {
+							print_r($ev['fb_creator_uid'] . ": ooops, venue not updated\n\r");
+						}
+					}
+				} else {
+					print_r($ev['fb_creator_uid'] . ": no venue in existenz\n\r");
+				}
 			}
-			$this -> addToIndex($eventObj);	        	
+			$this -> addToIndex($eventObj);			
         }
         
         $newEventCreated = $eventObj;
@@ -211,6 +234,7 @@ print_r("ooooooops, not saved\n\r");
         			break;
         	}
         }
+print_r("\n\r\n\r");        
 	}
 	
 	

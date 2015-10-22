@@ -34,5 +34,4 @@ class EventCategory extends \Library\Model
 		
 		return;
 	}
-	
 }

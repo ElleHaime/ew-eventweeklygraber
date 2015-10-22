@@ -51,7 +51,7 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 						}
 					}	
 					
-					if (isset($localityLevel)) {
+					if (isset($localityLevel) && !empty($localityLevel)) {
 						foreach ($localityLevel as $obj => $lvl) {
 							if ($lvl -> types[0] == 'locality') {
 								$location['alias'] = $lvl -> long_name;
@@ -97,7 +97,7 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 	}
 	
 	
-	protected function _buildQuery($lat, $lon)
+	protected function _buildQuery($lat, $lon, $countryCode = false)
 	{
 		$result = array();
 

@@ -46,6 +46,7 @@ class Event extends \Library\Model
 		$this -> hasMany('id', '\Models\EventCategory', 'event_id', array('alias' => 'event_category'));
         $this -> hasMany('id', '\Models\EventTag', 'event_id', array('alias' => 'event_tag'));
         $this -> hasOne('id', '\Models\EventRating', 'event_id', array('alias' => 'event_rating'));
+        $this -> hasOne('id', '\Models\Featured', 'object_id', array('alias' => 'event_featured'));
 	}
 	
 	public function getCreators()
@@ -164,14 +165,62 @@ class Event extends \Library\Model
 	
 	public static function checkExpirationDate($date)
 	{
-		print_r(date('Y-m-d H:i:s', strtotime($date)) . "\n\r"); 
 		if (strtotime($date) > time()) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+	
+	
+	public function transferEventBetweenShards($eventObj, $criteria)
+	{
+		$eventObjNew = clone $eventObj;
+		unset($eventObjNew -> id);
+		
+		$eventObjNew -> location_id = $criteria;
+		$eventObjNew -> setShardByCriteria($criteria);
+		
+		if (!$eventObjNew -> save()) {
+			print_r($ev['fb_creator_uid'] . ": ooops, location not updated\n\r");
+			
+			return false;
+		}
+print_r("... saved to new shard...\n\r");
+		(new \Models\EventImage()) -> transferBetweenShards('image', $eventObj, $eventObjNew -> id);
+print_r("... save image...\n\r");		
+		(new \Models\EventTag()) -> transferBetweenShards('event_tag', $eventObj, $eventObjNew -> id);
+print_r("... save tag...\n\r");		
+		(new \Models\EventCategory()) -> transferBetweenShards('event_category', $eventObj, $eventObjNew -> id);
+print_r("... save category...\n\r");		
+		(new \Models\EventMember()) -> transferInShards('memberpart', $eventObj, $eventObjNew -> id);
+		(new \Models\EventMemberFriend()) -> transferInShards('memberfriendpart', $eventObj, $eventObjNew -> id);
+		(new \Models\EventLike()) -> transferInShards('memberlike', $eventObj, $eventObjNew -> id);
+		(new \Models\EventRating()) -> transferInShards('event_rating',$eventObj, $eventObjNew -> id);
+		(new \Models\Featured()) -> transferInShards('event_featured', $eventObj, $eventObjNew -> id);
 
+		$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObjNew -> location_id], $this -> getDi(), null, ['adapter' => 'dbMaster']);
+		$indexer = new \Models\Event\Search\Indexer($grid);
+		$indexer -> setDi($this -> getDi());
+		if (!$indexer -> addData($eventObjNew -> id)) {
+			print_r("ooooooops, did not deleted from index\n\r");
+		}
+		
+		
+		$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> getDi(), null, ['adapter' => 'dbMaster']);
+		$indexer = new \Models\Event\Search\Indexer($grid);
+		$indexer -> setDi($this -> getDi());
+		if (!$indexer -> deleteData($eventObj -> id)) {
+			print_r("ooooooops, did not deleted from index\n\r");
+		}
+		
+		$eventObj -> setShardById($eventObj -> id);
+		$eventObj -> delete();
+print_r("... old events removed ...\n\r");		
+		return $eventObjNew;
+	}
+
+	
 	public function setCache()
 	{
 	}

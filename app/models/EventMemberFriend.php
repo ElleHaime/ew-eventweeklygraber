@@ -38,16 +38,7 @@ class EventMemberFriend extends \Library\Model
 	
 	public function deleteEventFriend($eventId)
 	{
-// 		$query = new \Phalcon\Mvc\Model\Query("SELECT * FROM Models\EventMemberFriend WHERE Models\EventMemberFriend.event_id = '" . $eventId . "'" , $this -> getDI());
-//     	$events = $query -> execute();
-//     	if ($events) {
-//     		foreach ($events as $obj) {
-//     			//$obj -> delete();
-//     		}
-//     	}
-
  		$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
-// 		$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
 			
 		return;
 	}

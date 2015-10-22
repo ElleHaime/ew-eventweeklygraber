@@ -43,16 +43,17 @@ print_r($item -> value . "\n\r");
 				if ($events) {
 					$lastId = $item -> last_id;
 					foreach ($events as $ev) {
+						$item -> last_id = $ev -> id;
+						$item -> update();
+						
 						if (isset($ev -> venue_id)) {
-print_r("\n\r\n\rGet venue for " . $ev -> id . "\n\r");
+print_r("Get venue for " . $ev -> id . "\n\r");
 							$ev -> venue = $this -> ebrite -> getVenueById($ev -> venue_id);
 						}
 						$ev -> location_id = $item -> param;
 						$this -> publishToBroker($ev);
 						$lastId = $ev -> id;
 					}
-					$item -> last_id = $lastId;
-					$item -> update();
 				}				
 			 }
 		}

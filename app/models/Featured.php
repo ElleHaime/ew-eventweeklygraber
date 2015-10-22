@@ -15,18 +15,21 @@ class Featured extends \Library\Model
 	
 	public function deleteEventFeatured($eventId)
 	{
-// 		$query = new \Phalcon\Mvc\Model\Query("SELECT * FROM Models\Featured WHERE Models\Featured.object_type = '" . self::EVENT_OBJECT_TYPE . "' AND Models\Featured.object_id = '" . $eventId . "'" , $this -> getDI());
-// 		$events = $query -> execute();
-// 		if ($events) {
-// 			foreach ($events as $obj) {
-// 				//$obj -> delete();
-// 			}
-// 		}
-		
 		$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE object_type = '" . self::EVENT_OBJECT_TYPE . "' AND object_id  = '" . $eventId . "'");
-// 		$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE object_type = '" . self::EVENT_OBJECT_TYPE . "' AND object_id = '" . $eventId . "'");
-		
-		
+	
+		return;
+	}
+	
+	
+	public function transferInShards($relationName, $oldObject, $parentId)
+	{
+		if ($current = $oldObject -> $relationName) {
+	
+			foreach ($current as $obj) {
+				$obj -> object_id = $parentId;
+				$obj -> update();
+			}
+		}
 	
 		return;
 	}

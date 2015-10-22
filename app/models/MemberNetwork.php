@@ -27,14 +27,5 @@ class MemberNetwork extends \Library\Model
 	
 	public function setCache()
 	{
-		/*$query = new \Phalcon\Mvc\Model\Query("SELECT member_id, account_uid FROM Models\MemberNetwork", $this -> getDI());
-		$members = $query -> execute() -> toArray();
-	
-		if ($members) {
-			foreach($members as $key => $member) {
-				$this -> cacheData -> save('member_' . $member['account_uid'], $member['member_id']);
-			}
-			$this -> cacheData -> save('fb_members', 'cached');
-		}*/
 	}
 }

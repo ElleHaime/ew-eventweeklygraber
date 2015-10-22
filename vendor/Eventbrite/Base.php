@@ -100,7 +100,8 @@ abstract class Base
 			$respData = get_object_vars(json_decode($jsonData));
 		} else {
 			print_r($respInfo);
-			die();
+			
+			return false;
 		}
 		
 	    curl_close($ch);        
@@ -219,7 +220,5 @@ abstract class Base
 				}
 			}
 		}
-//print_r($this -> curlUrl . "\n\r");
-//die();				
 	}
 }

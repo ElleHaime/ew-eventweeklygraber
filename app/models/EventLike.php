@@ -38,21 +38,7 @@ class EventLike extends \Library\Model
     
     public function deleteEventLiked($eventId)
     {
-//     	$events = self::find(['event_id = "' . $eventId . '"']);
-//     	if ($events) {
-//     		foreach ($events as $obj) {
-//     			//$obj -> delete();
-//     		}
-//     	}
-
-//     	$result = $this -> getReadConnection() -> query("SELECT * FROM event_like WHERE event_id = '" . $eventId . "'");
-//     	$result -> setFetchMode(\Phalcon\Db::FETCH_OBJ);
-//     	while ($event = $result -> fetch()) {
-//     		$e = self::findFirst($event -> id);
-//     	}
-
      	$this -> getReadConnection() -> query("DELETE FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
-//     	$this -> getReadConnection() -> query("SELECT * FROM " . $this -> getSource() . " WHERE event_id = '" . $eventId . "'");
     	
     	return;
     }
