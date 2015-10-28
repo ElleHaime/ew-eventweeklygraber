@@ -156,7 +156,7 @@ print_r("ooooooops, not saved\n\r");
 print_r($eventObj -> fb_uid . " exists already with venue " . $eventObj -> venue_id . " and location " . $eventObj -> location_id . "\n\r");
 
 			// check is event has appropriate venue fb_uid and update if not
-			if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE) {
+			if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE || $msg['type'] == Cron::FB_CREATOR_TASK_TYPE) {
 print_r($ev['fb_creator_uid'] . " venue for existenz\n\r");
 
 				if (isset($ev['location']) && !isset($ev['venue'])) {

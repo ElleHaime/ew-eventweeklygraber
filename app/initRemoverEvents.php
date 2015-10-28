@@ -4,7 +4,7 @@ require_once('init.php');
 
 try {
 	$console -> handle(['task' => 'Tasks\Remover',
-						'action' => 'removeEvents']);
+						'action' => 'removeEventsIncorrectLocations']);
 	 
 } catch (\Phalcon\Exception $e) {
 	echo $e -> getMessage();

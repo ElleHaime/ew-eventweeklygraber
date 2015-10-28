@@ -16,4 +16,11 @@ class RemoverTask extends \Phalcon\CLI\Task
 		$job = new \Jobs\Grabber\Clean\Events($this -> getDi());
 		$job -> runEb();
 	}
+	
+	
+	public function removeEventsIncorrectLocationsAction()
+	{
+		$job = new \Jobs\Grabber\Clean\Events($this -> getDi());
+		$job -> runIncorrectLocations();
+	}
 }

@@ -71,17 +71,24 @@ print_r($venueObj -> fb_uid . " venue existenz\n\r");
 			
 			if (isset($data['location'])) {
 				$locations = new \Models\Location();
+print_r("\n\r");
+print_r(get_object_vars($data['location']));
+print_r("\n\r");
+				
 				$locExists = $locations -> createOnChange(get_object_vars($data['location']));
 				if ($locExists) {
 print_r($locExists -> id . ": new location\n\r");
 					$venueObj -> location_id = $locExists -> id;
 					if (!$venueObj -> update()) {
-						print_r($venueObj -> fb_uid . ": ooops, venue not updated\n\r");
+print_r($venueObj -> fb_uid . ": ooops, venue not updated\n\r");
 					} else {
 print_r($venueObj -> fb_uid . ": updated\n\r");
 					}
+				} else {
+print_r("no location\n\r");					
 				}
 			}
+print_r("\n\rdone\n\r");			
 		}
 	}
 }

@@ -91,4 +91,32 @@ print_r(count($stack) . " : " . count($drop) . "\n\r");
 			}
 		}
 	}
+	
+	
+	
+	public function runIncorrectLocations()
+	{
+		$shards = (new \Models\Event()) -> getAvailableShards();
+		
+		foreach ($shards as $cri) {
+			$events = (new \Models\Event()) -> setShard($cri);
+				
+			$items = $events -> strictSqlQuery()
+								-> addQueryCondition('location_id in (select id from location where latitudeMin = 0.00000000 order by id)')
+								-> addQueryFetchStyle('\Models\Event')
+								-> selectRecords();
+			if (!empty($items)) {
+				foreach ($items as $object) {
+					print_r("\n\r" . $object -> fb_uid . " in " . $object -> location_id . "\n\r");
+					
+					$grid = new \Models\Event\Grid\Search\Event(['location' => $object -> location_id], $this -> di, null, ['adapter' => 'dbMaster']);
+					$indexer = new \Models\Event\Search\Indexer($grid);
+					$indexer -> setDi($this -> di);
+					$indexer -> deleteData($object -> id);
+					
+					$object -> archivePhalc(false);
+				}
+			}
+		}
+	}
 }
