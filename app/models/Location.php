@@ -50,6 +50,13 @@ class Location extends \Library\Model
 
 	public function createOnChange($argument = array(), $network = 'facebook')
 	{
+
+		$argument = ['city' => 'Boston',
+					 'country' => 'United Kingdom',
+					 'latitude' => 52.92427376276,
+					 'longitude' => -0.058267248355777,
+					 'zip' => 'PE20 1'];
+	
 		$geo = $this -> getDi() -> get('geo');
 		$isGeoObject = false;
 		$isLocationExists = false;
@@ -98,10 +105,17 @@ class Location extends \Library\Model
 			}
 			
 			if (!empty($newLoc)) {
-				$this -> assign($newLoc);
-				$this -> save();
-
-				$isLocationExists = $this;
+				$checkExistense = self::findFirst('city like "%' . $newLoc['city']. '%" and country like "%' . $newLoc['country']. '%"
+														and latitudeMin = ' . $newLoc['latitudeMin'] . ' and longitudeMin = ' . $newLoc['longitudeMin'] . '
+														and latitudeMax = ' . $newLoc['latitudeMax'] . ' and longitudeMax = ' . $newLoc['longitudeMax']);
+				if ($checkExistense) {
+					$isLocationExists = $checkExistense;					
+				} else {
+					$this -> assign($newLoc);
+					$this -> save();
+	
+					$isLocationExists = $this;
+				}
 			}
 		}
 
