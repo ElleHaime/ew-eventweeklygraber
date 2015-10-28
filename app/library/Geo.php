@@ -80,9 +80,13 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 					{
 						if (in_array($details -> types[0], $this -> _unitTypes)) $units[$details -> types[0]] = $object;
 					}
-					$firstUnit = array_keys($units)[0];
-					$baseType = $firstUnit;
-					$localityScope = $result -> results[$units[$firstUnit]];
+					if (!empty($units)) {
+						$firstUnit = array_keys($units)[0];
+						$baseType = $firstUnit;
+						$localityScope = $result -> results[$units[$firstUnit]];
+					} else {
+						return false;
+					}
 				}	
 			}
 // print_r("\n\r");

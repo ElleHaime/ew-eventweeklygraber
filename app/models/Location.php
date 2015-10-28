@@ -50,13 +50,6 @@ class Location extends \Library\Model
 
 	public function createOnChange($argument = array(), $network = 'facebook')
 	{
-
-		$argument = ['city' => 'Boston',
-					 'country' => 'United Kingdom',
-					 'latitude' => 52.92427376276,
-					 'longitude' => -0.058267248355777,
-					 'zip' => 'PE20 1'];
-	
 		$geo = $this -> getDi() -> get('geo');
 		$isGeoObject = false;
 		$isLocationExists = false;
