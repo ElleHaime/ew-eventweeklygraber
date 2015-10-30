@@ -59,7 +59,28 @@ print_r("Get venue for " . $ev -> id . "\n\r");
 		}
 print_r("done\n\r");
 	}
+
 	
+	public function harvestIncorrectAction()
+	{
+		$this -> init();
+		
+		$args = ['eb_uid is not null', 'start_date is null', 'end_date is null'];
+		$existed = (new \Models\Event()) -> getAllByParams($args);
+
+		if (!empty($existed)) {
+			foreach ($existed as $index => $ebUid) {
+				$event = $this -> ebrite -> getEventById($ebUid);
+				if ($event) {
+					$this -> publishToBroker($event);
+				}
+			}
+		}
+		
+		print_r("done\n\r");
+		die();
+	}
+
 	
 	protected function publishToBroker($event)
 	{

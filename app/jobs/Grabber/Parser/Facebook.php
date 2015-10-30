@@ -13,7 +13,7 @@ class Facebook
 {
 	use \Jobs\Grabber\Parser\Helper;
 		
-	private $_di;
+	protected $_di;
 
 
 	public function __construct(\Phalcon\DI $dependencyInjector)

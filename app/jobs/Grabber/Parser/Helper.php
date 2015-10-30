@@ -129,15 +129,15 @@ trait Helper
     	$indexer = new \Models\Event\Search\Indexer($grid);
     	$indexer -> setDi($this->_di);
     	
-    	if (!$indexer -> existsData($eventObj -> id)) {
+//     	if (!$indexer -> existsData($eventObj -> id)) {
 	    	if (!$indexer -> addData($eventObj -> id)) {
 	    		print_r("ooooooops, not saved to index\n\r");
 	    	}
-    	} else {
+//     	} else {
     		if (!$indexer -> updateData($eventObj -> id)) {
     			print_r("ooooooops, not updated in index\n\r");
     		}
-    	}
+//     	}
     	
     	return;
     }

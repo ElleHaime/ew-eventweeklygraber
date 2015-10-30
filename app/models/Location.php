@@ -98,9 +98,13 @@ class Location extends \Library\Model
 			}
 			
 			if (!empty($newLoc)) {
-				$checkExistense = self::findFirst('city like "%' . $newLoc['city']. '%" and country like "%' . $newLoc['country']. '%"
-														and latitudeMin = ' . $newLoc['latitudeMin'] . ' and longitudeMin = ' . $newLoc['longitudeMin'] . '
-														and latitudeMax = ' . $newLoc['latitudeMax'] . ' and longitudeMax = ' . $newLoc['longitudeMax']);
+				$checkExistense = false;
+				if (isset($newLoc['latitudeMin']) && isset($newLoc['latitudeMax']) && isset($newLoc['longitudeMin']) && isset($newLoc['longitudeMax']))
+				{
+					$checkExistense = self::findFirst('city like "%' . $newLoc['city']. '%" and country like "%' . $newLoc['country']. '%"
+															and latitudeMin = ' . $newLoc['latitudeMin'] . ' and longitudeMin = ' . $newLoc['longitudeMin'] . '
+															and latitudeMax = ' . $newLoc['latitudeMax'] . ' and longitudeMax = ' . $newLoc['longitudeMax']);
+					}
 				if ($checkExistense) {
 					$isLocationExists = $checkExistense;					
 				} else {

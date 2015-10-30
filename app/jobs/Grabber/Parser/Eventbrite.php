@@ -56,6 +56,12 @@ print_r($ev['name']['text'] . "\n\r");
             	$result['logo'] = $logo;
             }
 
+            if (isset($ev['start']) && !empty($ev['start'])) {
+            	$ev['start_time'] = $ev['start']['local'];
+            }
+            if (isset($ev['end']) && !empty($ev['end'])) {
+            	$ev['end_time'] = $ev['end']['local'];
+            }
             $result = $this -> processDates($result, $ev);
 
             if (isset($ev['venue']['id']) && $venue = Venue::findFirst(['eb_uid = "' . $ev['venue']['id'] . '"'])) {
@@ -112,11 +118,27 @@ print_r($ev['name']['text'] . "\n\r");
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);
                 }
+				$this -> addToIndex($eventObj);
+			}
+		} else {
+			$result = [];
+			if (isset($ev['start']) && !empty($ev['start'])) {
+				$ev['start_time'] = $ev['start']['local'];
+			}
+			if (isset($ev['end']) && !empty($ev['end'])) {
+				$ev['end_time'] = $ev['end']['local'];
+			}
+			$result = $this -> processDates($result, $ev);
 
-                $grid = new \Models\Event\Grid\Search\Event(['location' => $result['location_id']], $this->_di, null, ['adapter' => 'dbMaster']);
-                $indexer = new \Models\Event\Search\Indexer($grid);
-                $indexer->setDi($this->_di);
-                $indexer->addData($eventObj -> id);
+			if (!empty($result)) {
+				foreach ($result as $field => $val) {
+					$eventObj -> $field = $val;
+				}
+				$eventObj -> setShardById($eventObj -> id);
+				if (!$eventObj -> update()) {
+					print_r($eventObj -> id . ": ooops, dates not updated\n\r");
+				}
+				$this -> addToIndex($eventObj);
 			}
 		}
 	}

@@ -36,6 +36,8 @@ class Eventbrite extends Base
 	
 	public function getEventsByCity($city, $lastId)
 	{
+		$this -> clearFilters();
+		
 		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
 			  			-> setEntity('events')
 			  			-> setEntityId('search')
@@ -59,9 +61,16 @@ class Eventbrite extends Base
 		return $result;
 	}
 	
-	public function getEventDetails()
+	public function getEventById($id)
 	{
+		$this -> clearFilters();
 		
+		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
+						-> setEntity('events')
+						-> setEntityId($id)
+						-> setPagination(false)
+						-> getData();
+		return $result;
 	}
 	
 	public function getUserDetails()

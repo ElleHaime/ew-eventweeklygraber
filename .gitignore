@@ -5,7 +5,6 @@ logs/*
 upload/*
 app/initp.php
 app/inith.php
-app/imgSync.sh
 config/config.php
 config/sharding.php
 config/shardingService.php

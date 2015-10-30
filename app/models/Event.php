@@ -49,23 +49,31 @@ class Event extends \Library\Model
         $this -> hasOne('id', '\Models\Featured', 'object_id', array('alias' => 'event_featured'));
 	}
 	
-	public function getCreators()
+	
+	public function getAllByParams($args = [])
 	{
+		if (empty($args)) {
+			throw new \Exception('Arguments can\'t be empty');
+		}
 		$result = [];
 		
 		$shards = $this -> getAvailableShards();
 		foreach ($shards as $cri) {
-			$this -> setShard($cri);
-			$creators = self::find(['fb_creator_uid is not null',
-									 'distinct' => 'fb_creator_uid']);
-
-			if ($creators -> count() != 0) {
-				foreach ($creators as $val) {
-					$result[$val -> fb_creator_uid] = $val -> fb_creator_uid;
+			$events = (new \Models\Event()) -> setShard($cri);
+			
+			$query = implode(' AND ', $args);
+			$eventExists = $events -> strictSqlQuery()
+								   -> addQueryCondition($query)
+								   -> addQueryFetchStyle('\Models\Event')
+								   -> selectRecords();
+			
+			if (!empty($eventExists)) {
+				foreach ($eventExists as $eventObj) {
+					$result[] = $eventObj -> eb_uid;
 				}
 			}
-		} 
-
+		}
+		
 		return $result;
 	}
 	
