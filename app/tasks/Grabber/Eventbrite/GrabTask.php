@@ -10,8 +10,12 @@ use \Vendor\Eventbrite\Eventbrite,
 
 class GrabTask extends \Phalcon\CLI\Task
 {
+	const MAX_RATE_LIMIT	= 3000;
+	const BATCH_SIZE		= 50;
+	
 	protected $ebrite;
 	protected $queue;
+
 	
 	public function init()
 	{
@@ -36,7 +40,7 @@ class GrabTask extends \Phalcon\CLI\Task
 
 		$existed = Grabber::find(['grabber = "eventbrite"']);
 		if ($existed) {
-			 foreach ($existed as $item) {
+			foreach ($existed as $item) {
 print_r($item -> value . "\n\r");
 				$events = $this -> ebrite -> getEventsByCity($item -> value, 
 															 $item -> last_id);
@@ -46,16 +50,12 @@ print_r($item -> value . "\n\r");
 						$item -> last_id = $ev -> id;
 						$item -> update();
 						
-						if (isset($ev -> venue_id)) {
-print_r("Get venue for " . $ev -> id . "\n\r");
-							$ev -> venue = $this -> ebrite -> getVenueById($ev -> venue_id);
-						}
 						$ev -> location_id = $item -> param;
 						$this -> publishToBroker($ev);
 						$lastId = $ev -> id;
 					}
 				}				
-			 }
+			}
 		}
 print_r("done\n\r");
 	}

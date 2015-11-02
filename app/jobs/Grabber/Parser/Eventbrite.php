@@ -36,7 +36,7 @@ class Eventbrite
 		
 		if (!$eventObj) {
 			$result = array();
-print_r($ev['name']['text'] . "\n\r");
+print_r("\n\r" . $ev['name']['text'] . "\n\r");
 
 			$result['eb_uid'] = $ev['id'];
 			$result['eb_url'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['url']);
@@ -113,6 +113,8 @@ print_r($ev['name']['text'] . "\n\r");
 	        $eventObj -> assign($result);
 	        
 			if ($eventObj -> save() != false) {
+print_r($eventObj -> id . "\n\r");
+print_r($eventObj -> eb_uid . "\n\r");				
 				$this -> categorize($eventObj);
 
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
@@ -121,24 +123,26 @@ print_r($ev['name']['text'] . "\n\r");
 				$this -> addToIndex($eventObj);
 			}
 		} else {
-			$result = [];
-			if (isset($ev['start']) && !empty($ev['start'])) {
-				$ev['start_time'] = $ev['start']['local'];
-			}
-			if (isset($ev['end']) && !empty($ev['end'])) {
-				$ev['end_time'] = $ev['end']['local'];
-			}
-			$result = $this -> processDates($result, $ev);
-
-			if (!empty($result)) {
-				foreach ($result as $field => $val) {
-					$eventObj -> $field = $val;
+			if (empty($eventObj -> start_date) || empty($eventObj -> end_date)) {
+				$result = [];
+				if (isset($ev['start']) && !empty($ev['start'])) {
+					$ev['start_time'] = $ev['start']['local'];
 				}
-				$eventObj -> setShardById($eventObj -> id);
-				if (!$eventObj -> update()) {
-					print_r($eventObj -> id . ": ooops, dates not updated\n\r");
+				if (isset($ev['end']) && !empty($ev['end'])) {
+					$ev['end_time'] = $ev['end']['local'];
 				}
-				$this -> addToIndex($eventObj);
+				$result = $this -> processDates($result, $ev);
+	
+				if (!empty($result)) {
+					foreach ($result as $field => $val) {
+						$eventObj -> $field = $val;
+					}
+					$eventObj -> setShardById($eventObj -> id);
+					if (!$eventObj -> update()) {
+						print_r($eventObj -> id . ": ooops, dates not updated\n\r");
+					}
+					$this -> addToIndex($eventObj);
+				}
 			}
 		}
 	}

@@ -43,6 +43,7 @@ class Eventbrite extends Base
 			  			-> setEntityId('search')
 			  			-> setFilter('venue.city', $city)
 			  			-> setFilter('since_id', $lastId)
+			  			-> setFilter('expand', 'venue')
 			  			-> setFilter('sort_by', 'id')
 			  			-> setFilter('start_date.range_start', date('Y-m-d\TH:i:s\Z'))
 			  			-> getData();

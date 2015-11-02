@@ -37,7 +37,7 @@ abstract class Base
 	protected $curlPageId		= 0;
 	protected $curlMaxPerPage	= 50;
 	protected $curlMaxObjects	= 500;  
-	protected $curlPaginate		= true;
+	protected $curlPaginate	= true;
 	
 	protected $curlOpts = [
 		CURLOPT_RETURNTRANSFER => true,
@@ -66,11 +66,15 @@ abstract class Base
 			do  {
 				$this -> curlPageId++;
 				$data = $this -> makeRequest();
-				foreach ($data[$this -> curlEntity] as $val) {
-					$result[] = $val;	
-				}
-				if (count($data[$this -> curlEntity]) < $this -> curlMaxPerPage) {
-					$this -> curlPageId = $requests;
+				if ($data) {
+					foreach ($data[$this -> curlEntity] as $val) {
+						$result[] = $val;	
+					}
+					if (count($data[$this -> curlEntity]) < $this -> curlMaxPerPage) {
+						$this -> curlPageId = $requests;
+					}
+				} else {
+					break;
 				}
 			} while($this -> curlPageId != $requests);
 		} else {
@@ -100,6 +104,7 @@ abstract class Base
 			$respData = get_object_vars(json_decode($jsonData));
 		} else {
 			print_r($respInfo);
+			$respData = false;
 			
 			return false;
 		}
@@ -220,5 +225,6 @@ abstract class Base
 				}
 			}
 		}
+		//print_r($this -> curlUrl . "\n\r"); die();
 	}
 }
