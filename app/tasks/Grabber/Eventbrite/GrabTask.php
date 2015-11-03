@@ -10,8 +10,7 @@ use \Vendor\Eventbrite\Eventbrite,
 
 class GrabTask extends \Phalcon\CLI\Task
 {
-	const MAX_RATE_LIMIT	= 3000;
-	const BATCH_SIZE		= 50;
+	const MAX_RATE_LIMIT	= 5000;
 	
 	protected $ebrite;
 	protected $queue;
@@ -40,6 +39,8 @@ class GrabTask extends \Phalcon\CLI\Task
 
 		$existed = Grabber::find(['grabber = "eventbrite"']);
 		if ($existed) {
+			$requests = 0;
+			
 			foreach ($existed as $item) {
 print_r($item -> value . "\n\r");
 				$events = $this -> ebrite -> getEventsByCity($item -> value, 

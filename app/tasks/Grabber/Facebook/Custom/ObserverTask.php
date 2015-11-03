@@ -6,7 +6,7 @@ use \Models\Cron;
 
 class ObserverTask extends \Phalcon\CLI\Task
 {
-	const SLEEP_INTERRUPTED 	= 1800;
+	const SLEEP_INTERRUPTED 	= 900;
 	const SLEEP_EXECUTED 		= 86400;
 	
 	
@@ -23,8 +23,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > self::SLEEP_EXECUTED)) 
 			{
 				$maxTime = time() - 1300;
-				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime,
-										 	 'order' => 'id DESC']);
+				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime, 'order' => 'id DESC']);
 				
 				if ($taskUser) {
 						if (!$taskCustom || $taskCustom -> state == Cron::STATE_EXECUTED) {
@@ -59,22 +58,34 @@ class ObserverTask extends \Phalcon\CLI\Task
 	public function observedataAction() 
 	{
 		while (true) {
-			$tasks = Cron::find('state IN (' . Cron::STATE_PENDING . ', ' . Cron::STATE_HANDLING . ') AND name  = "' . Cron::FB_BY_ID_TASK_NAME . '"');
-			if ($tasks) {
-				foreach ($tasks as $task) {
-					$args = unserialize($task -> parameters);
-			        $task -> state = Cron::STATE_HANDLING;
-			        $task -> update();
+			$taskCustom = Cron::findFirst('state IN (' . Cron::STATE_INTERRUPTED . ', ' . Cron::STATE_PENDING . ') AND name  = "' . Cron::FB_BY_ID_TASK_NAME . '"');
+			
+			if ($taskCustom && ($taskCustom -> state == Cron::STATE_PENDING
+				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > self::SLEEP_INTERRUPTED)
+				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > self::SLEEP_EXECUTED))) 
+			{
+				$maxTime = time() - 1300;
+				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime, 'order' => 'id DESC']);
+				
+				if ($taskUser) {
+					$taskCustom -> member_id = $taskUser -> member_id;
+					$taskCustom -> parameters = $taskUser -> parameters;
+					$taskCustom -> state = Cron::STATE_HANDLING;
+					$taskCustom -> hash = time();
+					$taskCustom -> update();
+					
+					$args = unserialize($taskCustom -> parameters);
 			        
 	        		$this -> console -> handle(['task' => 'Tasks\Facebook\Custom\Grab',
 						        				'action' => 'harvestdata',
-						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $task -> id]]);
+						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $taskCustom -> id]]);
 				}
 			} 
 			sleep(1);
 		}
 	}
 
+	
 	public function testrabbitAction()
 	{
 		$this -> console -> handle(['task' => 'harvester', 

@@ -26,8 +26,8 @@ class GrabTask extends \Phalcon\CLI\Task
 	const READ_SOURCE_DATABASE		= 3;
 	const READ_EXTRACTED_FILE		= 4;
 	
-	const MAX_FB_QUERIES_ID			= 100;
-	const MAX_FB_QUERIES_DATA		= 200;
+	const MAX_FB_QUERIES_ID			= 300;
+	const MAX_FB_QUERIES_DATA		= 300;
 	
 	
 	protected $fbGraphEnabled		= false;
@@ -73,7 +73,7 @@ class GrabTask extends \Phalcon\CLI\Task
 				$lastFetch -> update();
 			
 				$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
-				print_r("\n\rInterrupted by query limit, app session is going on\n\n");
+print_r("\n\r" . date('H:i Y-m-d') . "\n\rInterrupted by query limit, app session is going on\n\n");
 				die();
 			}
 			
@@ -81,7 +81,7 @@ class GrabTask extends \Phalcon\CLI\Task
 			$until = strtotime('+2 month');
 			
 			$request = $this -> searchIdQuery . 'q=' . $query . '&since=' . $since . '&until=' . $until. '&access_token=' . $args[0];
-			
+print_r("....." . $query . "\n\r");			
  			try {
  				$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 				$data = $request -> execute() -> getGraphObject() -> asArray();
@@ -151,55 +151,51 @@ class GrabTask extends \Phalcon\CLI\Task
 	}
 	
 	
-	
 	public function harvestdataAction(array $args)
 	{
 		$this -> initQueue('harvester');
 		$this -> initGraph();
 		$this -> sourceType = self::READ_EXTRACTED_FILE;
-		
-		$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
-		$queries = $this -> parseIds($lastFetch);
-		
-		if (!empty($queries)) {
-			$queriesCounter = 0;
-			
-			foreach($queries as $index => $query) {
-				$queriesCounter++;
-				
-				if ($queriesCounter > self::MAX_FB_QUERIES_DATA) {
-					$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
-					$lastFetch -> last_id = $index;
-					$lastFetch -> value = $query;
-					$lastFetch -> update();
-						
-					$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
-					print_r("\n\rInterrupted by query limit, app session is going on\n\n");
-					die();
-				}
-				$request = $this -> searchDataQuery . $query . '?access_token=' . $args[0] . '&' . $this -> searchDataFields;
-			
-				try {
-					$request = new FacebookRequest($this -> fbSession, 'GET', $request);
-					$event = $request -> execute() -> getGraphObject() -> asArray();
-
-					if (isset($event['owner'])) {
-						$event['creator'] = $event['owner'] -> id;
-					}
-					if (!empty($event)) {
-						if (isset($event['cover'])) {
-							$event['pic_cover'] = $event['cover'];
-						}
-						$ev['eid'] = $event['id']; 
-						$this -> publishToBroker($event, $args, 'custom');
-					}
-				} catch (FacebookRequestException $ex) {
-					print_r($ex -> getMessage() . "\n\r");	
-				}
 	
-			}
-		}
+		$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
+		$queriesCounter = 0;
 		
+		$source = fopen($this -> config -> facebook -> idSourceFile, 'r');
+		fseek($source, $lastFetch -> last_id);
+		while (!feof($source)) {
+			$query = fgets($source);
+			$lastFetch -> last_id = ftell($source);
+			$queriesCounter++;
+			
+			if ($queriesCounter > self::MAX_FB_QUERIES_DATA) {
+				$lastFetch -> value = $query;
+				$lastFetch -> update();
+				$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
+print_r("\n\r" . date('H:i Y-m-d') . "\n\rInterrupted by query limit, app session is going on\n\n");
+				die();
+			}
+			$request = $this -> searchDataQuery . trim($query) . '?access_token=' . $args[0] . '&' . $this -> searchDataFields;
+print_r("....." . $query . "\n\r");
+			try {
+				$request = new FacebookRequest($this -> fbSession, 'GET', $request);
+				$event = $request -> execute() -> getGraphObject() -> asArray();
+
+				if (isset($event['owner'])) {
+					$event['creator'] = $event['owner'] -> id;
+				}
+				if (!empty($event)) {
+					if (isset($event['cover'])) {
+						$event['pic_cover'] = $event['cover'];
+					}
+					$ev['eid'] = $event['id'];
+					$this -> publishToBroker($event, $args, 'custom');
+				}
+			} catch (FacebookRequestException $ex) {
+				print_r($ex -> getMessage() . "\n\r");
+			}
+					
+		}
+die();
 		$this -> closeTask($args[3]);
 	}
 
@@ -254,38 +250,19 @@ class GrabTask extends \Phalcon\CLI\Task
 		$qSource = file_get_contents($this -> config -> facebook -> querySourceFile);
 		
 		if (strlen($qSource) > 0) {
-			$source = explode(';', $qSource);
+			$source = explode(PHP_EOL, trim($qSource));
+
 			if ($lastFetch) $offsetFetch = $lastFetch -> last_id;
 			
-			$queries = array_slice($source, $offsetFetch, count($source), true); 
-			foreach ($queries as $q) {
+			$queries = array_slice($source, $offsetFetch, count($source), true);
+
+			foreach ($queries as $key => $q) {
 				if (strlen($q) > 0) {
-					$result[] = trim($q);
+					$result[$key] = trim($q);
 				}
 			}
 		}
 		
-		return $result;
-	}
-	
-	
-	protected function parseIds($lastFetch = false)
-	{
-		$result = [];
-		$source = [];
-		$offsetFetch = 0;
-		
-		if ($lastFetch) $offsetFetch = $lastFetch -> last_id;
-		$fp = fopen($this -> config -> facebook -> idSourceFile, 'r');
-		while (($data = fgetcsv($fp)) !== false) {
-			$source[] = $data[0];
-		}
-		fclose($fp);
-		
-		if (!empty($source)) {
-			$result = array_slice($source, $offsetFetch, count($source), true);
-		}
-		 
 		return $result;
 	}
 	

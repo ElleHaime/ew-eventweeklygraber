@@ -173,6 +173,8 @@ abstract class Base
 	public function clearFilters()
 	{
 		$this -> curlArgs = [];
+		$this -> curlPageId = 0;
+		
 		return $this;
 	}
 	
@@ -225,6 +227,6 @@ abstract class Base
 				}
 			}
 		}
-		//print_r($this -> curlUrl . "\n\r"); die();
+		print_r("\n\r" . $this -> curlUrl . "\n\r"); 
 	}
 }
