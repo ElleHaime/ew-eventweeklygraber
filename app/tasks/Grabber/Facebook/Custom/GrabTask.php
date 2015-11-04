@@ -171,6 +171,7 @@ print_r("....." . $query . "\n\r");
 				$lastFetch -> value = $query;
 				$lastFetch -> update();
 				$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
+				fclose($source);
 print_r("\n\r" . date('H:i Y-m-d') . "\n\rInterrupted by query limit, app session is going on\n\n");
 				die();
 			}
@@ -193,9 +194,11 @@ print_r("....." . $query . "\n\r");
 			} catch (FacebookRequestException $ex) {
 				print_r($ex -> getMessage() . "\n\r");
 			}
-					
 		}
-die();
+		fclose($source);
+		$source = fopen($this -> config -> facebook -> idSourceFile, 'w+');
+		fclose($source);
+		
 		$this -> closeTask($args[3]);
 	}
 
