@@ -41,7 +41,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	protected $queries				= [];
 	protected $lastSearchIndex		= 0;
 	
-// 	protected $searchIdTypes 		= ['tag', 'keyword', 'location', 'venue'];
+// 	protected $searchIdTypes 		= ['tag', 'keyword', 'location'];
 	protected $searchIdTypes 		= ['tag', 'keyword'];
 	protected $searchIdQuery 		= '/search?type=event&fields=id&';
 	protected $searchDataQuery 	= '/';
@@ -78,7 +78,7 @@ print_r("\n\r" . date('H:i Y-m-d') . "\n\rInterrupted by query limit, app sessio
 			}
 			
 			$since = time();
-			$until = strtotime('+2 month');
+			$until = strtotime('+6 month');
 			
 			$request = $this -> searchIdQuery . 'q=' . $query . '&since=' . $since . '&until=' . $until. '&access_token=' . $args[0];
 print_r("....." . $query . "\n\r");			
@@ -199,6 +199,10 @@ print_r("....." . $query . "\n\r");
 		$source = fopen($this -> config -> facebook -> idSourceFile, 'w+');
 		fclose($source);
 		
+		$lastFetch -> value = 'Dublin';
+		$lastFetch -> last_id = 0;
+		$lastFetch -> update();
+		
 		$this -> closeTask($args[3]);
 	}
 
@@ -219,10 +223,6 @@ print_r("....." . $query . "\n\r");
 // 						 $this -> queries = $this -> getLocations($lastFetch -> last_id);
 // 						 $this -> lastSearchIndex = 2;
 // 					 break;
-// 				case $this -> searchIdTypes[3]:
-// 						 $this -> queries = $this -> getVenues($lastFetch -> last_id);
-// 						 $this -> lastSearchIndex = 3;
-// 					 break; 
 				default:
 					$this -> queries = $this -> getTags($lastFetch -> last_id);
 					$this -> lastSearchIndex = 0;

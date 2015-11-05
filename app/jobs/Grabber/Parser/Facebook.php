@@ -155,46 +155,48 @@ print_r("ooooooops, not saved\n\r");
         } else {
 print_r($eventObj -> fb_uid . " exists already with venue " . $eventObj -> venue_id . " and location " . $eventObj -> location_id . "\n\r");
 
-			// check is event has appropriate venue fb_uid and update if not
-			if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE || $msg['type'] == Cron::FB_CREATOR_TASK_TYPE) {
+			if ($this -> config -> fixMode -> facebookEventLocation) {			
+				// check is event has appropriate venue fb_uid and update if not
+				if ($msg['type'] == Cron::FB_CREATOR_VENUE_TASK_TYPE || $msg['type'] == Cron::FB_CREATOR_TASK_TYPE) {
 print_r($ev['fb_creator_uid'] . " venue for existenz\n\r");
-
-				if (isset($ev['location']) && !isset($ev['venue'])) {
-					$ev['venue'] = $ev['location'];
-				}
-				
-				// check and fix location if not exists
-				if (isset($ev['venue']['latitude']) && empty($eventObj -> location_id)) {
-					$locations = new Location();
-					$locExists = $locations -> createOnChange($ev['venue']);
-					
-print_r("try to create for existenz\n\r");
-					if ($locExists) {
-print_r("ready, location " . $locExists -> id. " found for existenz\n\r");						
-						if ($eventObjNew = (new Event()) -> transferEventBetweenShards($eventObj, $locExists -> id)) {
-print_r("existenz old id " . $eventObj -> id . "\n\r");							
-							$eventObj = $eventObjNew;
-print_r("existenz new id " . $eventObj -> id . "\n\r");
-						} 
-                	}
-				}
-				
-				// check and fix venue
-				if (isset($ev['venue']['id'])) {
-					$venueId = Venue::findFirst(['fb_uid = "' . $ev['venue']['id'] . '"']);
-print_r("found venue for existenz with id " . $venueId -> id . "\n\r");					
-					if ($venueId) {
-						$eventObj -> setShardById($eventObj -> id);
-						$eventObj -> venue_id = $venueId -> id;
-						if (!$eventObj -> update()) {
-							print_r($ev['fb_creator_uid'] . ": ooops, venue not updated\n\r");
-						}
+	
+					if (isset($ev['location']) && !isset($ev['venue'])) {
+						$ev['venue'] = $ev['location'];
 					}
-				} else {
-					print_r($ev['fb_creator_uid'] . ": no venue in existenz\n\r");
+					
+					// check and fix location if not exists
+					if (isset($ev['venue']['latitude']) && empty($eventObj -> location_id)) {
+						$locations = new Location();
+						$locExists = $locations -> createOnChange($ev['venue']);
+						
+print_r("try to create for existenz\n\r");
+						if ($locExists) {
+print_r("ready, location " . $locExists -> id. " found for existenz\n\r");						
+							if ($eventObjNew = (new Event()) -> transferEventBetweenShards($eventObj, $locExists -> id)) {
+print_r("existenz old id " . $eventObj -> id . "\n\r");							
+								$eventObj = $eventObjNew;
+print_r("existenz new id " . $eventObj -> id . "\n\r");
+							} 
+	                	}
+					}
+					
+					// check and fix venue
+					if (isset($ev['venue']['id'])) {
+						$venueId = Venue::findFirst(['fb_uid = "' . $ev['venue']['id'] . '"']);
+print_r("found venue for existenz with id " . $venueId -> id . "\n\r");					
+						if ($venueId) {
+							$eventObj -> setShardById($eventObj -> id);
+							$eventObj -> venue_id = $venueId -> id;
+							if (!$eventObj -> update()) {
+								print_r($ev['fb_creator_uid'] . ": ooops, venue not updated\n\r");
+							}
+						}
+					} else {
+						print_r($ev['fb_creator_uid'] . ": no venue in existenz\n\r");
+					}
 				}
-			}
-			$this -> addToIndex($eventObj);			
+				$this -> addToIndex($eventObj);
+			}			
         }
         
         $newEventCreated = $eventObj;
