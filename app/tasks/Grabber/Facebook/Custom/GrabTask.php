@@ -41,7 +41,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	protected $queries				= [];
 	protected $lastSearchIndex		= 0;
 	
-// 	protected $searchIdTypes 		= ['tag', 'keyword', 'location', 'venue'];
+// 	protected $searchIdTypes 		= ['tag', 'keyword', 'location'];
 	protected $searchIdTypes 		= ['tag', 'keyword'];
 	protected $searchIdQuery 		= '/search?type=event&fields=id&';
 	protected $searchDataQuery 	= '/';
@@ -114,7 +114,7 @@ print_r("....." . $query . "\n\r");
 						$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
 						break;
 				}
-				print_r("failed");				
+				print_r("\n\r" . date('H:i Y-m-d') . " :: failed.\n\rStatus: " . $ex -> getMessage() . "\n\r");				
 				die();
 			}
 		}
@@ -147,7 +147,8 @@ print_r("....." . $query . "\n\r");
 			$this -> initDataGrab($args);			
 		}
 		
-		print_r("done\n\r");
+		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest IDs done\n\r");
+		die();
 	}
 	
 	
@@ -219,10 +220,6 @@ print_r("....." . $query . "\n\r");
 // 						 $this -> queries = $this -> getLocations($lastFetch -> last_id);
 // 						 $this -> lastSearchIndex = 2;
 // 					 break;
-// 				case $this -> searchIdTypes[3]:
-// 						 $this -> queries = $this -> getVenues($lastFetch -> last_id);
-// 						 $this -> lastSearchIndex = 3;
-// 					 break; 
 				default:
 					$this -> queries = $this -> getTags($lastFetch -> last_id);
 					$this -> lastSearchIndex = 0;
