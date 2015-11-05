@@ -114,7 +114,7 @@ print_r("....." . $query . "\n\r");
 						$this -> updateTask($args[3], Cron::STATE_INTERRUPTED);
 						break;
 				}
-				print_r("failed");				
+				print_r("\n\r" . date('H:i Y-m-d') . " :: failed.\n\rStatus: " . $ex -> getMessage() . "\n\r");				
 				die();
 			}
 		}
@@ -147,7 +147,8 @@ print_r("....." . $query . "\n\r");
 			$this -> initDataGrab($args);			
 		}
 		
-		print_r("done\n\r");
+		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest IDs done\n\r");
+		die();
 	}
 	
 	

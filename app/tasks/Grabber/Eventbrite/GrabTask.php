@@ -59,6 +59,7 @@ print_r($item -> value . "\n\r");
 			}
 		}
 print_r("done\n\r");
+die();
 	}
 
 	

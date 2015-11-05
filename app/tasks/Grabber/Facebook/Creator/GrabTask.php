@@ -59,6 +59,7 @@ class GrabTask extends \Phalcon\CLI\Task
 // 	}
 	
 	
+	// fix venues with location_id = 0 and events with location_id = 0 from those venues
 	public function harvestAction(array $args)
 	{
 		$this -> initQueue('harvester');
@@ -91,16 +92,17 @@ print_r("\n\r");
 		}
 	
 		$this -> closeTask($args[3]);
-		print_r("done\n\r");
+		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest all venues with location 0 done\n\r");
+		die();
 	}
 	
 
-	
 	public function harvestVenueAction($args = false)
 	{
 		$this -> initQueue('harvester');
 		$this -> initGraph();
-		$this -> setGraphSimpleAccessToken();
+		//$this -> setGraphSimpleAccessToken();
+		$this -> fbAppAccessToken = $args[0];
 		$this -> resultType = Cron::FB_CREATOR_VENUE_TASK_TYPE;
 
 		$creators = (new Venue()) -> getCreators();
@@ -110,7 +112,9 @@ print_r("\n\r");
 				$this -> harvestEventsAction($val -> fb_uid, $args);
 			}
 		}
-print_r("done\n\r");
+		$this -> closeTask($args[3]);
+		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest all venues done\n\r");
+		die();
 	}
 	
 	
