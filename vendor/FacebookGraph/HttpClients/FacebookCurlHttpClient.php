@@ -163,10 +163,11 @@ class FacebookCurlHttpClient implements FacebookHttpable
   {
     $options = array(
       CURLOPT_URL            => $url,
-      CURLOPT_CONNECTTIMEOUT => 10,
-      CURLOPT_TIMEOUT        => 60,
+      CURLOPT_CONNECTTIMEOUT => 120,
+      CURLOPT_TIMEOUT        => 120,
       CURLOPT_RETURNTRANSFER => true, // Follow 301 redirects
       CURLOPT_HEADER         => true, // Enable header processing
+      CURLOPT_IPRESOLVE		 => CURL_IPRESOLVE_V4
     );
 
     if ($method !== "GET") {

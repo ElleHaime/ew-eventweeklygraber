@@ -20,99 +20,24 @@ class GrabTask extends \Phalcon\CLI\Task
 	protected $queueCreators;
 	
 	protected $searchDataFields	= 'fields=id,owner,start_time,end_time,name,location,cover,venue,description,ticket_uri';
-	protected $searchQueryLimit	= '100';
 	protected $resultType 			= Cron::FB_CREATOR_TASK_TYPE;
-	
-	
-// 	public function harvestAction(array $args)
-// 	{
-// 		$this -> initQueue('harvester');
-// 		$this -> initQueue('harvesterCreators', 'queueCreators');
-// 		$this -> initGraph();
-// 		$this -> setGraphSimpleAccessToken();
-		
-// 		$creators = (new Event()) -> getCreators();
 
-// 		if (!empty($creators)) {
-// 			foreach ($creators as $val) {
-// 				// get page info
-// 				$query = '/' . $val;
-// //print_r($query . "\n\r");				
-// 				try {
-// 					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
-// 					$data = $request -> execute() -> getGraphObject() -> asArray();
-// //print_r($data);
-// //print_r("\n\r");
-// 					if (!empty($data)) {
-// 						$this -> publishToPageBroker($data);
-// 					} 
-// 				} catch (FacebookRequestException $ex) {
-// 					print_r($ex -> getMessage() . "\n\r");
-// 				}	
-				
-// 				$this -> harvestEventsAction($val);
-// 			} 
-// 		}
-		
-// 		$this -> closeTask($args[3]);
-// print_r("done\n\r");
-// 	}
-	
-	
-	// fix venues with location_id = 0 and events with location_id = 0 from those venues
-	public function harvestAction(array $args)
-	{
-		$this -> initQueue('harvester');
-		$this -> initQueue('harvesterCreators', 'queueCreators');
-		$this -> initGraph();
-		//$this -> setGraphSimpleAccessToken();
-		$this -> fbAppAccessToken = $args[0];
-	
-		$creators = (new Venue()) -> getCreators(0);
-	
-		if (!empty($creators)) {
-			foreach ($creators as $val) {
-				// get page info
-				$query = '/' . $val -> fb_uid . '?access_token=' . $this -> fbAppAccessToken;
-				//print_r($query . "\n\r");
-				try {
-					$request = new FacebookRequest($this -> fbSession, 'GET', $query);
-					$data = $request -> execute() -> getGraphObject() -> asArray();
-print_r($data['name']);
-print_r("\n\r");
-					if (!empty($data)) {
-						$this -> publishToPageBroker($data);
-					}
-				} catch (FacebookRequestException $ex) {
-					print_r($ex -> getMessage() . "\n\r");
-				}
-	
-				$this -> harvestEventsAction($val -> fb_uid, $args);
-			}
-		}
-	
-		$this -> closeTask($args[3]);
-		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest all venues with location 0 done\n\r");
-		die();
-	}
-	
 
-	public function harvestVenueAction($args = false)
+	public function harvestVenueAction(array $args)
 	{
 		$this -> initQueue('harvester');
 		$this -> initGraph();
-		//$this -> setGraphSimpleAccessToken();
 		$this -> fbAppAccessToken = $args[0];
 		$this -> resultType = Cron::FB_CREATOR_VENUE_TASK_TYPE;
 
 		$creators = (new Venue()) -> getCreators();
-		
+
 		if (!empty($creators)) {
 			foreach ($creators as $val) {
 				$this -> harvestEventsAction($val -> fb_uid, $args);
 			}
 		}
-		$this -> closeTask($args[3]);
+		$this -> killTask($args[3]);
 		print_r("\n\r" . date('H:i Y-m-d') . " :: harvest all venues done\n\r");
 		die();
 	}
@@ -144,14 +69,14 @@ print_r(".");
 			$error = json_decode($ex -> getRawResponse());
 			switch($error -> error -> code) {
 				case 100:
-					print_r("\n\rUnsupported request for " . $creatorUid. "\n\r");
+					print_r("\n\rProblem for " . $creatorUid. "\n\r");
 					// unsupported get request, m.b. user access token required
 					$fp = fopen($this -> config -> facebook -> unsupportedSourceFile, 'a');
 					fputcsv($fp, [$creatorUid . ';']);
 					fclose($fp);
 					break;
 			}
-			print_r($ex -> getMessage() . "\n\r");
+			//print_r($ex -> getMessage() . "\n\r");
 		}
 //print_r("\n\r\n\r");		
 		return;

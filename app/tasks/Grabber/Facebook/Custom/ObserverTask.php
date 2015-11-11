@@ -6,10 +6,6 @@ use \Models\Cron;
 
 class ObserverTask extends \Phalcon\CLI\Task
 {
-	const SLEEP_INTERRUPTED 	= 900;
-	const SLEEP_EXECUTED 		= 86400;
-	
-	
 	public function observeidAction() 
 	{
 		while (true) {
@@ -19,8 +15,8 @@ class ObserverTask extends \Phalcon\CLI\Task
 			
 			if (!$taskCustom 
 				|| $taskCustom -> state == Cron::STATE_PENDING
-				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > self::SLEEP_INTERRUPTED)
-				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > self::SLEEP_EXECUTED)) 
+				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > Cron::SLEEP_INTERRUPTED)
+				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > Cron::SLEEP_EXECUTED)) 
 			{
 				$maxTime = time() - 1300;
 				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime, 'order' => 'id DESC']);
@@ -50,7 +46,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 				}
 			}
 			
-			sleep(60);
+			sleep(Cron::SLEEP_PAUSE);
 		}
 	}
 	
@@ -61,8 +57,8 @@ class ObserverTask extends \Phalcon\CLI\Task
 			$taskCustom = Cron::findFirst('state IN (' . Cron::STATE_INTERRUPTED . ', ' . Cron::STATE_PENDING . ') AND name  = "' . Cron::FB_BY_ID_TASK_NAME . '"');
 			
 			if ($taskCustom && ($taskCustom -> state == Cron::STATE_PENDING
-				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > self::SLEEP_INTERRUPTED)
-				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > self::SLEEP_EXECUTED))) 
+				|| ($taskCustom -> state == Cron::STATE_INTERRUPTED && (time() - $taskCustom -> hash) > Cron::SLEEP_INTERRUPTED)
+				|| ($taskCustom -> state == Cron::STATE_EXECUTED && (time() - $taskCustom -> hash) > Cron::SLEEP_EXECUTED))) 
 			{
 				$maxTime = time() - 1300;
 				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime, 'order' => 'id DESC']);
@@ -81,23 +77,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 						        				'params' => [$args['user_token'], $args['user_fb_uid'], $args['member_id'], $taskCustom -> id]]);
 				}
 			} 
-			sleep(1);
+			sleep(Cron::SLEEP_PAUSE);
 		}
 	}
-
-	
-	public function testrabbitAction()
-	{
-		$this -> console -> handle(['task' => 'harvester', 
-									'action' => 'test',
-									'params' => []]);
-	}
-
-	public function testAction(array $args)
-	{
-		echo sprintf('Token is %s', $args[0]) . PHP_EOL;
-		echo sprintf('AccId is %s', $args[1]) . PHP_EOL;
-		echo "\n\n";
-	}
-
 }

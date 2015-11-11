@@ -128,4 +128,11 @@ trait Grabable
 		$task -> state = Cron::STATE_EXECUTED;
 		$task -> update();		
 	}
+	
+	
+	public function killTask($arg)
+	{
+		$task = Cron::findFirst($arg);
+		$task -> delete();
+	}
 }

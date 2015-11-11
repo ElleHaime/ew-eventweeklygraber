@@ -4,10 +4,14 @@ namespace Models;
 
 class Cron extends \Library\Model
 {
-	const STATE_PENDING 	= 0;
-	const STATE_HANDLING 	= 1;
-	const STATE_EXECUTED 	= 2;
-	const STATE_INTERRUPTED = 3;
+	const STATE_PENDING 					= 0;
+	const STATE_HANDLING 					= 1;
+	const STATE_EXECUTED 					= 2;
+	const STATE_INTERRUPTED 				= 3;
+	
+	const SLEEP_INTERRUPTED 				= 900;
+	const SLEEP_EXECUTED 					= 86400;
+	const SLEEP_PAUSE	 					= 1800;
 
 	const FB_TASK_NAME 						= 'extract_facebook_events';
 	const FB_GET_ID_TASK_NAME 				= 'extract_custom_facebook_events_id';

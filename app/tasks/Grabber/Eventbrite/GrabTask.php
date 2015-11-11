@@ -12,8 +12,12 @@ class GrabTask extends \Phalcon\CLI\Task
 {
 	const MAX_RATE_LIMIT	= 5000;
 	
+	const GRAB_TYPE_CITY 	= 'city';
+	const GRAB_TYPE_COUNTRY	= 'country';
+	
 	protected $ebrite;
 	protected $queue;
+	protected $resultType;
 
 	
 	public function init()
@@ -33,32 +37,43 @@ class GrabTask extends \Phalcon\CLI\Task
 	}
 	
 	
-	public function harvestAction()
+	public function harvestAction(array $arg)
 	{
 		$this -> init();
+		if (!empty($arg) && isset($arg['resultType'])) {
+			$this -> resultType = $arg['resultType'];
+		} else {
+			$this -> resultType = self::GRAB_TYPE_CITY;
+		}
 
-		$existed = Grabber::find(['grabber = "eventbrite"']);
+		$existed = Grabber::find(['grabber = "eventbrite" and type = "' . $this -> resultType . '"']);
 		if ($existed) {
 			$requests = 0;
 			
 			foreach ($existed as $item) {
 print_r($item -> value . "\n\r");
-				$events = $this -> ebrite -> getEventsByCity($item -> value, 
-															 $item -> last_id);
+
+				$this -> resultType == self::GRAB_TYPE_CITY ? $value = $item -> value : $value = 'IE';
+				$events = $this -> ebrite -> getEventsByLocation($item -> value, 
+															 	 $item -> last_id, 
+																 $this -> resultType);
+
 				if ($events) {
 					$lastId = $item -> last_id;
 					foreach ($events as $ev) {
 						$item -> last_id = $ev -> id;
 						$item -> update();
 						
-						$ev -> location_id = $item -> param;
+						if ($this -> resultType == self::GRAB_TYPE_CITY) {		
+							$ev -> location_id = $item -> param;
+						}
 						$this -> publishToBroker($ev);
 						$lastId = $ev -> id;
 					}
-				}				
+				}					
 			}
 		}
-print_r("done\n\r");
+print_r("\n\r" . date('H:i Y-m-d') . " :: harvert Eventbrite by " . $this -> resultType . " done\n\r");
 die();
 	}
 

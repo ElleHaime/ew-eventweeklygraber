@@ -27,7 +27,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	const READ_EXTRACTED_FILE		= 4;
 	
 	const MAX_FB_QUERIES_ID			= 300;
-	const MAX_FB_QUERIES_DATA		= 300;
+	const MAX_FB_QUERIES_DATA		= 1000;
 	
 	
 	protected $fbGraphEnabled		= false;
@@ -139,7 +139,6 @@ print_r("....." . $query . "\n\r");
 				$this -> initDataGrab($args);
 			}
 		} else {
-			$lastFetch = Grabber::findFirst('grabber = "facebook" AND type = ' . $this -> sourceType);
 			$lastFetch -> value = 'Dublin';
 			$lastFetch -> last_id = 0;
 			$lastFetch -> update();

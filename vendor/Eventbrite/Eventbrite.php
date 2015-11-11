@@ -34,14 +34,14 @@ class Eventbrite extends Base
 		return $result;
 	}
 	
-	public function getEventsByCity($city, $lastId)
+	public function getEventsByLocation($location, $lastId, $locationType = 'city')
 	{
 		$this -> clearFilters();
 		
 		$result = $this -> setTokenType(parent::TOKEN_TYPE_PERSONAL)
 			  			-> setEntity('events')
 			  			-> setEntityId('search')
-			  			-> setFilter('venue.city', $city)
+			  			-> setFilter('venue.' . $locationType, $location)
 			  			-> setFilter('since_id', $lastId)
 			  			-> setFilter('expand', 'venue')
 			  			-> setFilter('sort_by', 'id')
