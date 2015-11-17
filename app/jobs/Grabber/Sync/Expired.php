@@ -5,7 +5,7 @@ namespace Jobs\Grabber\Sync;
 class Expired
 {
 	public $di;
-	protected $batchSize = 200;
+	protected $batchSize = 500;
 	
 	
 	public function __construct(\Phalcon\DI $dependencyInjector)
@@ -18,7 +18,6 @@ class Expired
 	{
 		$shards = (new \Models\Event()) -> getAvailableShards();
 		$finishDate = date('Y-m-d H:i:s');
-		//$finishDate = '2015-08-20 00:00:00';
 		
 		foreach ($shards as $cri) {
 			$events = (new \Models\Event()) -> setShard($cri);
@@ -38,6 +37,7 @@ print_r("\n\r" . $events -> getShardTable() . ": " . $expiredTotal . " events\n\
 									   -> addQueryLimits($this -> batchSize, $offset)
 									   -> selectRecords();
 					$expCount = count($expired);
+print_r("batch: " . $expCount . " events\n\r");
 					if ($expired) {
 						foreach ($expired as $eventObj) {
 							print_r(".");
@@ -48,7 +48,7 @@ print_r("\n\r" . $events -> getShardTable() . ": " . $expiredTotal . " events\n\
 
 							$eventObj -> archivePhalc();
 						}
-						$offset += $this -> batchSize;
+						//$offset += $this -> batchSize;
 					}
 $mem_usage = memory_get_usage();
 echo "\n\rUse memory ".round($mem_usage/1048576,2)." megabytes\n";

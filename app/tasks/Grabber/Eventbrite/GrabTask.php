@@ -37,7 +37,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	}
 	
 	
-	public function harvestAction(array $arg)
+	public function harvestAction(array $arg = array())
 	{
 		$this -> init();
 		if (!empty($arg) && isset($arg['resultType'])) {
@@ -46,12 +46,13 @@ class GrabTask extends \Phalcon\CLI\Task
 			$this -> resultType = self::GRAB_TYPE_CITY;
 		}
 
-		$existed = Grabber::find(['grabber = "eventbrite" and type = "' . $this -> resultType . '"']);
+		//$existed = Grabber::find(['grabber = "eventbrite" and type = "' . $this -> resultType . '"']);
+		$existed = Grabber::find(['grabber = "eventbrite"']);
 		if ($existed) {
 			$requests = 0;
 			
 			foreach ($existed as $item) {
-print_r($item -> value . "\n\r");
+print_r("\n\r" . $item -> value);
 
 				$this -> resultType == self::GRAB_TYPE_CITY ? $value = $item -> value : $value = 'IE';
 				$events = $this -> ebrite -> getEventsByLocation($item -> value, 

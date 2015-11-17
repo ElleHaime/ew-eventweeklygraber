@@ -36,7 +36,7 @@ abstract class Base
 	protected $curlArgs 		= [];
 	protected $curlPageId		= 0;
 	protected $curlMaxPerPage	= 50;
-	protected $curlMaxObjects	= 500;  
+	protected $curlMaxObjects	= 1000;  
 	protected $curlPaginate	= true;
 	
 	protected $curlOpts = [

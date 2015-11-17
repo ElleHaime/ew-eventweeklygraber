@@ -100,34 +100,6 @@ class Event extends \Library\Model
 		return $result;
 	}
 	
-	
-	public function archive()
-	{
-		// move: event_image, event_site, event_tag, event_category
-		unset($this -> memberlike);
-		unset($this -> memberpart);
-		unset($this -> memberfriendpart);
-		
- 		$archive = new \Models\EventArchive();
- 		$archive -> assign(['event' => serialize($this),
- 							'archived' => date('Y-m-d H:i:s')]);
-		if ($archive -> save()) {
- 			(new \Models\Featured) -> deleteEventFeatured($this -> id);
- 			(new \Models\EventRating) -> deleteEventRating($this -> id);
-			(new \Models\EventLike) -> deleteEventLiked($this -> id);
- 			(new \Models\EventMember) -> deleteEventJoined($this -> id);
- 			(new \Models\EventMemberFriend) -> deleteEventFriend($this -> id);
-			
-			(new \Models\EventTag) -> deleteEventTag($this);
-			(new \Models\EventCategory) -> deleteEventCategory($this);
-			
-			$this -> delete();
-		}		
-		
-		return;		
-	}
-	
-	
 	public function archivePhalc($needArchive = true)
 	{
 		// move: event_image, event_site, event_tag, event_category
@@ -219,7 +191,7 @@ print_r("... save category...\n\r");
 		$indexer = new \Models\Event\Search\Indexer($grid);
 		$indexer -> setDi($this -> getDi());
 		if (!$indexer -> deleteData($eventObj -> id)) {
-			print_r("ooooooops, did not deleted from index\n\r");
+			print_r("ooooooops, wasn't deleted from index\n\r");
 		}
 		
 		$eventObj -> setShardById($eventObj -> id);
