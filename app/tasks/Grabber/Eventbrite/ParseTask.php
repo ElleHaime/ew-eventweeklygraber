@@ -32,8 +32,8 @@ class ParseTask extends \Phalcon\CLI\Task
                 $t = new \Jobs\Grabber\Parser\Eventbrite($this -> getDi());
                 $t -> run($job);
             } else {
-            	print_r(date('H:i:s d-m-Y') . " :: no items in queue\n\r");
-            	sleep(3600);
+            	print_r("\n\r" . date('H:i:s d-m-Y') . " :: no items in queue\n\r");
+            	die();
             }
        	} 
 	}

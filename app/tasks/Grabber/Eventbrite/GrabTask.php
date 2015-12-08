@@ -74,7 +74,7 @@ print_r("\n\r" . $item -> value);
 				}					
 			}
 		}
-print_r("\n\r" . date('H:i Y-m-d') . " :: harvert Eventbrite by " . $this -> resultType . " done\n\r");
+print_r("\n\r" . date('H:i Y-m-d') . " :: harvesrt Eventbrite by " . $this -> resultType . " done\n\r");
 die();
 	}
 
