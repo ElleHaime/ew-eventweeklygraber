@@ -8,7 +8,7 @@ class GenerateTask extends \Phalcon\CLI\Task
 {
 	public function generateAction() 
 	{
-		$job = new \Jobs\Seo\Sitemap\Generator($this -> getDi());
+		$job = new \Jobs\Seo\Generator($this -> getDi());
 		$job -> run();
 	}
 }

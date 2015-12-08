@@ -124,7 +124,7 @@ class EventSearch extends Grid
         	'searchLogo' => new Field\Standart('Logo', 'logo'),
         	'searchCompound' => new Field\Compound('bububu', 'bububu', [
                 'compoundTag' => new Field\Join("Tags", "\Models\Event\Model\Tag", false, null, ["\Models\Event\Model\EventTag", "\Models\Event\Model\Tag"]),
-        		'compoundCategory' => new Field\Join("Category", "\Models\Event\Model\Category", false, null, ["\Models\Event\Model\ventCategory", "\Models\Event\Model\Category"]),
+        		'compoundCategory' => new Field\Join("Category", "\Models\Event\Model\Category", false, null, ["\Models\Event\Model\EventCategory", "\Models\Event\Model\Category"]),
         		'compoundTitle' => new Field\Name("Name", 'name', Criteria::CRITERIA_LIKE)
             ]),
             'searchCompoundUser' => new Field\Compound('bububu2', 'bububu2', [
