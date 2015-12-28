@@ -108,7 +108,7 @@ print_r("......." . $this -> getCurrentFile() . "\n\r");
 	    $this -> getWriter() -> startElement('sitemapindex');
 	    $this -> getWriter() -> writeAttribute('xmlns', self::SM_SCHEMA);
 		
-		for ($index = 0; $index <= $this -> getSitemapItem(); $index++) {
+		for ($index = 0; $index < $this -> getSitemapItem(); $index++) {
 			$this -> getWriter() -> startElement('sitemap');
 			$this -> getWriter() -> writeElement('loc', $this -> getUrlSitemap() . '/' . self::SM_DEFAULT_NAME . self::SM_FILENAME_SEP . $index . self::SM_EXT);
 			$this -> getWriter() -> writeElement('lastmod', date('Y-m-d'));
