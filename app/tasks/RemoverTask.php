@@ -23,4 +23,11 @@ class RemoverTask extends \Phalcon\CLI\Task
 		$job = new \Jobs\Grabber\Clean\Events($this -> getDi());
 		$job -> runIncorrectLocations();
 	}
+	
+	
+	public function removeEventsPastImagesAction()
+	{
+		$job = new \Jobs\Grabber\Clean\EventImages($this -> getDi());
+		$job -> run();
+	}
 }

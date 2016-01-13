@@ -120,4 +120,10 @@ class Event extends Grid
         //$tag = $this->_filter->getFieldByKey('tag');
         //$tag->category = "\Models\Event\Model\Category";
     }
+    
+    
+    public function getParams()
+    {
+    	return $this -> _params;
+    }
 }

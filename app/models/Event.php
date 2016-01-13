@@ -204,4 +204,19 @@ print_r("... old events removed ...\n\r");
 	public function setCache()
 	{
 	}
+	
+	
+	public function beforeDelete()
+	{
+		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> id;
+print_r($imgPath . "\n\r");		
+		if (is_dir($imgPath)) {
+			foreach(scandir($imgPath) as $file) {
+				if ('.' === $file || '..' === $file) continue;
+				is_dir($imgPath . '/' . $file) ? rmdir($imgPath . '/' . $file) : unlink($imgPath . '/' . $file);
+		    }
+		    
+		    rmdir($imgPath);
+		}
+	}
 }

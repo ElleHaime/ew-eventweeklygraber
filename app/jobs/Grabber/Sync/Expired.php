@@ -48,7 +48,6 @@ print_r("batch: " . $expCount . " events\n\r");
 
 							$eventObj -> archivePhalc();
 						}
-						//$offset += $this -> batchSize;
 					}
 $mem_usage = memory_get_usage();
 echo "\n\rUse memory ".round($mem_usage/1048576,2)." megabytes\n";
