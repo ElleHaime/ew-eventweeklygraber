@@ -32,7 +32,7 @@ class ParseTask extends \Phalcon\CLI\Task
                 $t = new \Jobs\Grabber\Parser\FacebookPage($this -> getDi());
                 $t -> run($job);
             } else {
-            	print_r("No items in queue\n\r");
+            //	print_r("No items in queue\n\r");
             	sleep(2);
             }
        	}

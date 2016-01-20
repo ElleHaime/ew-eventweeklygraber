@@ -10,7 +10,7 @@ class Sitemap
 	const SM_FILENAME_SEP			= '-';
 	const SM_DEFAULT_NAME			= 'sitemap';
 	const SM_EXT 					= '.xml';
-	const SM_ITEM_PER_FILE			= 50000;
+	const SM_ITEM_PER_FILE			= 10000;
 	const SM_FILESIZE				= 10485760;
 	const SM_DEFAULT_PRIORITY 		= 0.5;
 	const SM_DEFAULT_CHANGE_FREQ 	= 'daily';
