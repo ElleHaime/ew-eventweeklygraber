@@ -24,10 +24,13 @@ class EventImages
 			if ('.' === $f || '..' === $f) continue;
 
 			$e = (new Event()) -> setShardById($f);
-			$exists = $e::findFirst($f);
+			$exists = $e -> strictSqlQuery()
+							-> addQueryCondition('id="' . $f . '"')
+							-> addQueryFetchStyle('\Models\Event')
+							-> selectRecords();
 			if (!$exists) {
 				$this -> deleteRec($this -> di -> get('config') -> application -> uploadDir . $f); 				
-			}
+			} 
 		}
 		
 		print_r("done\n\r"); die();
