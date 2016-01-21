@@ -17,17 +17,28 @@ class EventImages
 	
 	public function run()
 	{
+		$cfg = ['host' => $this -> di -> get('config') -> database -> host,
+				'username' => $this -> di -> get('config') -> database -> username,
+				'password' => $this -> di -> get('config') -> database -> password,
+				'dbname' => $this -> di -> get('config') -> database -> dbname];
+		$conn = new \Phalcon\Db\Adapter\Pdo\Mysql($cfg);
+		
 		$dirs = scandir($this -> di -> get('config') -> application -> uploadDir);
 
 		foreach ($dirs as $f) {
-			print_r(".");
 			if ('.' === $f || '..' === $f) continue;
+			$exists = false;
+			
+			$shardId = explode('_', $f)[1];
+			$result =  $conn -> query("SELECT criteria FROM shard_mapper_event where id = ?", [$shardId]);
 
-			$e = (new Event()) -> setShardById($f);
-			$exists = $e -> strictSqlQuery()
-							-> addQueryCondition('id="' . $f . '"')
-							-> addQueryFetchStyle('\Models\Event')
-							-> selectRecords();
+			if ($result -> fetch()['criteria']) {
+				$e = (new Event()) -> setShardById($f);
+				$exists = $e -> strictSqlQuery()
+								-> addQueryCondition('id="' . $f . '"')
+								-> addQueryFetchStyle('\Models\Event')
+								-> selectRecords();
+			} 
 			if (!$exists) {
 				$this -> deleteRec($this -> di -> get('config') -> application -> uploadDir . $f); 				
 			} 
