@@ -15,8 +15,7 @@ vendor/ruflin
 vendor/tieste
 vendor/composer/*
 vendor/autoload.php
-source/facebook/id.txt
-source/facebook/query.txt
+source/facebook/*
 composer.lock
 .idea/*
 .externalToolBuilders/*
