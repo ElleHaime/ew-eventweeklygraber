@@ -46,21 +46,23 @@ class GrabTask extends \Phalcon\CLI\Task
 	protected function harvestEventsAction($creatorUid, $args)
 	{
 		$query = '/' . $creatorUid . '/events?' . $this -> searchDataFields . '&access_token=' . $this -> fbAppAccessToken . '&limit=100';
-print_r(".");
 		try {
 			$request = new FacebookRequest($this -> fbSession, 'GET', $query);
 			$data = $request -> execute() -> getGraphObject() -> asArray();
 		
 			if (!empty($data['data'])) {
 				foreach ($data['data'] as $event) {
-					if (!Event::checkExpirationDate($event -> start_time)) {
-						return;
-					}				
+					if (!Event::checkExpirationDate($event -> start_time) || $this -> checkInIndex($event -> id)) continue;
+
+// 					$eventObj =  (new \Models\Event()) -> existsInShardsBySourceId($event -> eid, 'fb');
+// 					if($eventObj) continue;
+					
 					$event -> fb_creator_uid = $creatorUid;
 					if (isset($event -> cover))  {
 						$event -> pic_cover = $event -> cover;
 					}
-//print_r($event -> name . "\n\r");					
+//print_r($event -> name . "\n\r");		
+					print_r(".");			
 					$this -> publishToBroker($event, $args, $this -> resultType);
 				}
 			}
@@ -69,7 +71,7 @@ print_r(".");
 			$error = json_decode($ex -> getRawResponse());
 			switch($error -> error -> code) {
 				case 100:
-					print_r("\n\rProblem for " . $creatorUid. "\n\r");
+					//print_r("\n\rProblem for " . $creatorUid. "\n\r");
 					// unsupported get request, m.b. user access token required
 					$fp = fopen($this -> config -> facebook -> unsupportedSourceFile, 'a');
 					fputcsv($fp, [$creatorUid . ';']);

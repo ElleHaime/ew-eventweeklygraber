@@ -30,7 +30,7 @@ class EventImages
 			$exists = false;
 			
 			$shardId = explode('_', $f)[1];
-			$result =  $conn -> query("SELECT criteria FROM shard_mapper_event where id = ?", [$shardId]);
+			$result =  $conn -> query("SELECT tblname FROM shard_mapper_event where id = ?", [$shardId]);
 
 			if ($result -> fetch()['criteria']) {
 				$e = (new Event()) -> setShardById($f);

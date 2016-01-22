@@ -94,6 +94,19 @@ trait Grabable
        	
         $this -> queue -> publish(serialize($data));
 	}
+	
+	
+	public function checkInIndex($eid, $type = 'fb')
+	{
+		$grid = new \Models\Event\Grid\Search\EventSearch(['search' . ucfirst($type) . 'Uid' => $eid], $this -> getDI(), null, ['adapter' => 'dbMaster']);
+		$results = $grid -> getData();
+	
+		if (empty($results['data'])) {
+			return false;
+		}
+		
+		return true;
+	}
     
     
 	public function getState()

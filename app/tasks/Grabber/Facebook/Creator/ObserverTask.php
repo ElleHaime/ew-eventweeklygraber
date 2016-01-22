@@ -17,7 +17,7 @@ class ObserverTask extends \Phalcon\CLI\Task
 					|| ($task -> state == Cron::STATE_INTERRUPTED && (time() - $task -> hash) > Cron::SLEEP_INTERRUPTED)
 					|| ($task -> state == Cron::STATE_EXECUTED && (time() - $task -> hash) > Cron::SLEEP_EXECUTED))
 			{
-				$maxTime = time() - 300;
+				$maxTime = time() - 1000;
 				$taskUser = Cron::findFirst(['name  = "' . Cron::FB_TASK_NAME . '" AND hash > ' . $maxTime,
 				 							'order' => 'id DESC']);
 		

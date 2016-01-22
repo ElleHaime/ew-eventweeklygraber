@@ -104,6 +104,7 @@ class EventSearch extends Grid
                 'id'          	=> Criteria::CRITERIA_EQ,
                 'description'   => Criteria::CRITERIA_BEGINS,
             	'member'		=> Criteria::CRITERIA_EQ,
+            	'fb_uid'		=> Criteria::CRITERIA_EQ
             ], null, 280, null, 255, false),
             'searchLocationField' => new Field\Join("Location", "\Models\Event\Model\Location"),
             'searchCategory' => new Field\Join("Category", "\Models\Event\Model\Category", false, null, ["\Models\Event\Model\EventCategory", "\Models\Event\Model\Category"]),
@@ -113,6 +114,7 @@ class EventSearch extends Grid
             'searchMember' => new Field\Standart('MemberId', 'member_id', null, Criteria::CRITERIA_EQ),
             'searchDesc' => new Field\Standart("Desc", "description"),
             'searchTag' => new Field\Join("Tags", "\Models\Event\Model\Tag", false, null, ["\Models\Event\Model\EventTag", "\Models\Event\Model\Tag"]),
+        	'searchFbUid' => new Field\Standart('FB uid', 'fb_uid'),
         		
 			'searchStartDate' => new Field\Date('Event start', 'start_date', null, Criteria::CRITERIA_MORE),
         	'searchEndDate' => new Field\Date('Event end', 'end_date', null, Criteria::CRITERIA_LESS),

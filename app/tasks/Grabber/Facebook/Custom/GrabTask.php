@@ -91,6 +91,7 @@ print_r("....." . $query . "\n\r");
 
 					$fp = fopen($this -> config -> facebook -> idSourceFile, 'a');
 					foreach ($data['data'] as $event) {
+						if ($this -> checkInIndex($event -> id)) continue;
 						fputcsv($fp, [$event -> id]);
 					}
 					fclose($fp);
