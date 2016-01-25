@@ -25,7 +25,7 @@ class GrabTask extends \Phalcon\CLI\Task
 
 	public function harvestVenueAction(array $args)
 	{
-		$this -> initQueue('harvester');
+		$this -> initQueue('harvesterJob');
 		$this -> initGraph();
 		$this -> fbAppAccessToken = $args[0];
 		$this -> resultType = Cron::FB_CREATOR_VENUE_TASK_TYPE;

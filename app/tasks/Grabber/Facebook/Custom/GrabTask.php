@@ -154,7 +154,7 @@ print_r("....." . $query . "\n\r");
 	
 	public function harvestdataAction(array $args)
 	{
-		$this -> initQueue('harvester');
+		$this -> initQueue('harvesterJob');
 		$this -> initGraph();
 		$this -> sourceType = self::READ_EXTRACTED_FILE;
 	
