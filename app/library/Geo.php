@@ -55,10 +55,14 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 					} else {
 						foreach ($result -> results as $key => $scope) {
 							if ($this -> isInGeometry($coordinates['latitude'], $coordinates['longitude'], $scope -> geometry -> viewport)) {
-								$localityScope = $scope;
-								$baseType = 'locality';
-								
-								break;
+								foreach ($scope -> address_components as $area) {
+									if (in_array('locality', $area -> types) && $area -> long_name == $coordinates['city']) {
+										$localityScope = $scope;
+										$baseType = 'locality';
+										
+										break;
+									}
+								}
 							}
 						}
 					}							

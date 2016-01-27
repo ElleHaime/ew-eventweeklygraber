@@ -7,6 +7,7 @@ use \Vendor\Facebook\Extractor,
 	\Vendor\FacebookGraph\FacebookRequest,
 	\Vendor\FacebookGraph\FacebookRequestException,
 	\Queue\Producer\Producer,
+	\Queue\Consumer\Consumer,
 	\Models\Cron;
 
 

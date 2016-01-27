@@ -134,9 +134,9 @@ trait Helper
 	    		print_r("ooooooops, not saved to index\n\r");
 	    	}
 //     	} else {
-    		if (!$indexer -> updateData($eventObj -> id)) {
-    			print_r("ooooooops, not updated in index\n\r");
-    		}
+//     		if (!$indexer -> updateData($eventObj -> id)) {
+//     			print_r("ooooooops, not updated in index\n\r");
+//     		}
 //     	}
     	
     	return;

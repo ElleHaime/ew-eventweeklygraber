@@ -73,12 +73,14 @@ class GrabTask extends \Phalcon\CLI\Task
 				case 100:
 					//print_r("\n\rProblem for " . $creatorUid. "\n\r");
 					// unsupported get request, m.b. user access token required
-					$fp = fopen($this -> config -> facebook -> unsupportedSourceFile, 'a');
-					fputcsv($fp, [$creatorUid . ';']);
-					fclose($fp);
+						$fp = fopen($this -> config -> facebook -> unsupportedSourceFile, 'a');
+						fputcsv($fp, [$creatorUid . ';']);
+						fclose($fp);
+					break;
+				default:
+						print_r($ex -> getMessage() . "\n\r");
 					break;
 			}
-			//print_r($ex -> getMessage() . "\n\r");
 		}
 //print_r("\n\r\n\r");		
 		return;

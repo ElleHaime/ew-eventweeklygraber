@@ -16,8 +16,8 @@ class ParseTask extends \Phalcon\CLI\Task
 	
 	public function listenAction()
 	{
-		$this -> initQueue('harvester', 'queueUser');
-		$this -> initQueue('harvesterJob', 'queueJob');
+		$this -> initListener('harvester', 'queueUser');
+		$this -> initListener('harvesterJob', 'queueJob');
 		
 		while (true) {
 			$job = $this -> queueUser -> getItem();
