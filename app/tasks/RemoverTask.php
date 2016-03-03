@@ -10,6 +10,11 @@ class RemoverTask extends \Phalcon\CLI\Task
 		$job -> run();
 	}
 	
+	public function removeLocationsDuplicatesAction()
+	{
+		$job = new \Jobs\Grabber\Sync\Location($this -> getDi());
+		$job -> run();
+	}
 	
 	public function removeEventsAction()
 	{
@@ -30,4 +35,5 @@ class RemoverTask extends \Phalcon\CLI\Task
 		$job = new \Jobs\Grabber\Clean\EventImages($this -> getDi());
 		$job -> run();
 	}
+
 }

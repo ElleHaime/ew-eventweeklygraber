@@ -10,6 +10,7 @@ class Location extends \Library\Model
 	public $state;
 	public $country;
 	public $alias;
+	public $search_alias;
 	public $latitude;
 	public $longitude;
 	public $latitudeMin;
