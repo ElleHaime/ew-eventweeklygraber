@@ -100,6 +100,21 @@ class Event extends \Library\Model
 		return $result;
 	}
 	
+	
+	public function getNumByCriteria($criteriaId)
+	{
+		$eNumber = 0;
+		
+		$events = (new \Models\Event()) -> setShardByCriteria($criteriaId);
+		$eventExists = $events -> strictSqlQuery()
+								-> addQueryCondition('location_id=' . $criteriaId)
+								-> selectCount();
+		if ($eventExists) $eNumber = $eventExists;
+		
+		return $eNumber;
+	}
+	
+	
 	public function archivePhalc($needArchive = true)
 	{
 		// move: event_image, event_site, event_tag, event_category
@@ -183,9 +198,8 @@ print_r("... save category...\n\r");
 		$indexer = new \Models\Event\Search\Indexer($grid);
 		$indexer -> setDi($this -> getDi());
 		if (!$indexer -> addData($eventObjNew -> id)) {
-			print_r("ooooooops, did not deleted from index\n\r");
+			print_r("ooooooops, did not added to index\n\r");
 		}
-		
 		
 		$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> getDi(), null, ['adapter' => 'dbMaster']);
 		$indexer = new \Models\Event\Search\Indexer($grid);
@@ -200,7 +214,7 @@ print_r("... old events removed ...\n\r");
 		return $eventObjNew;
 	}
 
-	
+
 	public function setCache()
 	{
 	}
@@ -209,7 +223,7 @@ print_r("... old events removed ...\n\r");
 	public function beforeDelete()
 	{
 		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> id;
-print_r($imgPath . "\n\r");		
+//print_r($imgPath . "\n\r");		
 		if (is_dir($imgPath)) {
 			foreach(scandir($imgPath) as $file) {
 				if ('.' === $file || '..' === $file) continue;

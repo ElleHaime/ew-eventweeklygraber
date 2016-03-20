@@ -171,5 +171,18 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 			$result = true;
 		
 		return $result;
-	} 
+	}
+
+	public function makeRequest($city, $state, $country)
+	{
+		$queryParams = ['locality:' . urlencode($city), 'country:' . urlencode($country), 'administrative_area:' . urlencode($state)];
+		$url = $this -> _apiUrl . 'components=' . implode('|', $queryParams);
+		$result = json_decode(file_get_contents($url));
+		
+		if ($result -> status == 'OK' && count($result -> results) > 0) {
+			return $result -> results;
+		} else {
+			return false;
+		}
+	}
 }

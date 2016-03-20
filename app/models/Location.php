@@ -19,6 +19,8 @@ class Location extends \Library\Model
 	public $longitudeMax;
 	public $parent_id = 0;
 
+	
+	
 	public function initialize()
 	{
 		parent::initialize();		
@@ -130,5 +132,23 @@ class Location extends \Library\Model
 		}
 	
 		return $isLocationExists;
-	} 
+	}
+
+	
+	
+	public function beforeDelete()
+	{
+		$source = (new \Models\Event()) -> setShardByCriteria($this -> id);
+		$events = $source::find('location_id = ' .$this -> id);
+		foreach ($events as $eventObj) {
+			$grid = new \Models\Event\Grid\Search\Event(['location' => $this -> id], $this -> getDI(), null, ['adapter' => 'dbMaster']);
+			$indexer = new \Models\Event\Search\Indexer($grid);
+			$indexer -> setDi($this -> getDI());
+			$indexer -> deleteData($eventObj -> id);
+				
+			$eventObj -> archivePhalc(false);
+		}
+		$this -> modelsManager -> executeQuery('DELETE FROM Models\ShardMapperEvent WHERE criteria = ' . $this -> id);
+	}
+	
 }

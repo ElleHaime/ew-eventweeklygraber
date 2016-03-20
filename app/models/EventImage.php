@@ -27,4 +27,13 @@ print_r($imgPath . "\n\r");
 			unlink($imgPath);			
 		}
 	}
+	
+	
+	public function transferBetweenShards($relationName, $oldObject, $parentId)
+	{
+		$uploadDir = $this -> getDi() -> get('config') -> application -> uploadDir;
+		if (is_dir($uploadDir . $oldObject -> id)) rename($uploadDir . $oldObject -> id, $uploadDir . $parentId);
+		
+		parent::transferBetweenShards($relationName, $oldObject, $parentId);
+	}
 }
