@@ -13,7 +13,7 @@ class EventRating extends \Library\Model
 	{
 		parent::initialize();
 				
-        $this -> belongsTo('event_id', '\Objects\Event', 'id', array('alias' => 'event_rating'));
+        $this -> belongsTo('event_id', '\Models\Event', 'id', array('alias' => 'event_rating'));
 	}
 	
 	public function deleteEventRating($eventId)

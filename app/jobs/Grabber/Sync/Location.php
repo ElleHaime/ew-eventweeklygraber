@@ -3,7 +3,8 @@
 namespace Jobs\Grabber\Sync;
 
 use Models\Location as LocationModule,
-	Models\Event;
+	Models\Event,
+	Library\Utils\SlugUri as _Slug;
 
 
 class Location
@@ -28,13 +29,17 @@ class Location
 			$loc -> delete();
 		}
 		
-		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location group by city order by city limit 230", $this -> di);
+		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location group by city order by city limit 5000", $this -> di);
 		$locations = $query -> execute();
 		
 		foreach ($locations as $loc) {
-			$items = LocationModule::find(['city = "' . $loc -> city . '"']);
-// var_dump($items -> toArray());
-// die();
+print_r("\n\r\n\r\n\r" . $loc -> city);
+			$model = new LocationModule();
+			$items = new \Phalcon\Mvc\Model\Resultset\Simple(null, $model, 
+						$model -> getReadConnection() -> query("SELECT * FROM location WHERE city = x'" . bin2hex($loc -> city). "'"));
+
+print_r(" : " . $items -> count());
+				
 			foreach ($items as $loc) {
 				$locHash = hash('md5', trim($loc -> city) . trim($loc -> state) . trim($loc -> country));
 				$this -> locScope[$locHash][] = $loc;							
@@ -42,28 +47,34 @@ class Location
 
 			foreach ($this -> locScope as $hash => $scope) {
 				$baseLocation = $this -> getMaxLocation($scope);
-print_r("\n\r");				
-print_r($baseLocation -> id . ' : ' . $baseLocation -> city . ' : ' . $baseLocation -> state . ' : ' .  $baseLocation -> country);
-						
+print_r("\n\r" . $baseLocation -> id . ' : ' . $baseLocation -> city . ' : ' . $baseLocation -> state . ' : ' .  $baseLocation -> country);
 				foreach ($scope as $sc) {
 					if ($sc -> id != $baseLocation -> id) {
 						$this -> transferEventsToMaxLocation($baseLocation -> id, $sc);
 						$sc -> delete();
 					}
 				}
-				$baseLocation -> search_alias = strtolower(preg_replace("/['\s]+/", '-', $baseLocation -> city));
-
+				
 				if ($apiResult = $this -> di -> get('geo') -> makeRequest($baseLocation -> city, $baseLocation -> state, $baseLocation -> country)) {
-					$baseLocation -> latitudeMax = number_format($apiResult[0] -> geometry -> viewport -> northeast -> lat, 8);
-					$baseLocation -> latitudeMin = number_format($apiResult[0] -> geometry -> viewport -> southwest -> lat, 8);
-					$baseLocation -> longitudeMax = number_format($apiResult[0] -> geometry -> viewport -> northeast -> lng, 8);
-					$baseLocation -> longitudeMin = number_format($apiResult[0] -> geometry -> viewport -> southwest -> lng, 8);
-//var_dump($baseLocation -> toArray()); die();					
+					$baseLocation -> latitudeMax = number_format($apiResult['geometry'] -> northeast -> lat, 8);
+					$baseLocation -> latitudeMin = number_format($apiResult['geometry'] -> southwest -> lat, 8);
+					$baseLocation -> longitudeMax = number_format($apiResult['geometry'] -> northeast -> lng, 8);
+					$baseLocation -> longitudeMin = number_format($apiResult['geometry'] -> southwest -> lng, 8);
+					$baseLocation -> city = $apiResult['locality'] -> long_name;
+					$baseLocation -> alias = $apiResult['locality'] -> long_name;
+					$baseLocation -> place_id = $apiResult['place_id'];
+					$baseLocation -> search_alias = _Slug::slug($baseLocation -> city);
+
+// var_dump($baseLocation -> toArray()); 
 					$baseLocation -> update();
+print_r("\n\rupdated with id " . $baseLocation -> id);					
 				} else {
+print_r("\n\rdeleted with id " . $baseLocation -> id); 
 					$baseLocation -> delete();
 				}
 			}
+				
+			$this -> locScope = [];
 		}
 print_r("\n\rdone\n\r");		
 die();	
@@ -97,7 +108,7 @@ die();
 		
 		if ($eToMove) {
 			foreach ($eToMove as $eventObj) {
-				$newEventObj = (new Event()) -> transferEventBetweenShards($eventObj, $baseLocation -> id);
+				$newEventObj = (new Event()) -> transferEventBetweenShards($eventObj, $baseLocation);
 			}
 		}	
 		

@@ -11,13 +11,14 @@ class Location extends \Library\Model
 	public $country;
 	public $alias;
 	public $search_alias;
+	public $place_id;
 	public $latitude;
 	public $longitude;
 	public $latitudeMin;
 	public $longitudeMin;
 	public $latitudeMax;
 	public $longitudeMax;
-	public $parent_id = 0;
+	
 
 	
 	
@@ -44,7 +45,8 @@ class Location extends \Library\Model
 						'latMax' => $loc -> latitudeMax,
 						'lonMax' => $loc -> longitudeMax,
 						'city' => $loc -> city,
-						'country' => $loc -> country);
+						'country' => $loc -> country,
+						'place_id' => $loc -> place_id);
 			}
 		}
 //		$this -> cacheData -> save('locations', $locationsCache);
@@ -66,15 +68,19 @@ class Location extends \Library\Model
 		}
 		$query = [];
 
-		if (isset($argument['longitude']) && isset($argument['latitude'])) {
-			$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'];
-			$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
-			$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
-			$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
-		} 
-		if (isset($argument['city']) && isset($argument['country'])) {
-			$query[] = 'city LIKE "%' . trim($argument['city']) . '%"';
-			$query[] = 'country LIKE "%' . trim($argument['country']) . '%"';
+		if (isset($argument['place_id'])) {
+			$query[] = 'place_id = "' .  $argument['place_id'] . '"';
+		} else {
+			if (isset($argument['longitude']) && isset($argument['latitude'])) {
+				$query[] = 'longitudeMin <= ' .  (float)$argument['longitude'];
+				$query[] = (float)$argument['longitude'] . ' <= longitudeMax';
+				$query[] = 'latitudeMin <= ' .  (float)$argument['latitude'];
+				$query[] = (float)$argument['latitude'] . ' <= latitudeMax';
+			} 
+			if (isset($argument['city']) && isset($argument['country'])) {
+				$query[] = 'city LIKE "%' . trim($argument['city']) . '%"';
+				$query[] = 'country LIKE "%' . trim($argument['country']) . '%"';
+			}
 		}
 
 		$query = implode(' and ', $query);

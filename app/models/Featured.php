@@ -12,6 +12,8 @@ class Featured extends \Library\Model
 	public $priority;
 	public $location_id;
 	
+	public $searchObjectType;
+	
 	
 	public function deleteEventFeatured($eventId)
 	{
@@ -23,14 +25,14 @@ class Featured extends \Library\Model
 	
 	public function transferInShards($relationName, $oldObject, $parentId)
 	{
-		if ($current = $oldObject -> $relationName) {
+		$current = self::find('object_type = "' . $relationName . '" and object_id = "' . $oldObject -> id .'"');
 	
-			foreach ($current as $obj) {
-				$obj -> object_id = $parentId;
-				$obj -> update();
-			}
+		foreach ($current as $obj) {
+			$obj -> object_id = $parentId;
+			$obj -> update();
 		}
 	
 		return;
 	}
+
 }

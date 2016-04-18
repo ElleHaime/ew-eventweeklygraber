@@ -21,7 +21,7 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 								'administrative_area_level_1',
 								'country'];
 	protected $_errors		= [];
-	protected $_apiUrl 	= 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&language=en&';
+	protected $_apiUrl 	= 'http://maps.googleapis.com/maps/api/geocode/json?language=en&';
 	
 	
 	public function getLocation($coordinates = array())
@@ -39,11 +39,12 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 		
 			if (!empty($coordinates['city']) && !empty($coordinates['country'])) 
 			{
-				$queryParams = ['locality:' . urlencode($coordinates['city']), 'country:' . urlencode($coordinates['country'])];
+				$queryParams = ['locality:' . urlencode(trim($coordinates['city'], "'")), 'country:' . urlencode($coordinates['country'])];
 				$url = $this -> _apiUrl . 'components=' . implode('|', $queryParams);
 				$result = json_decode(file_get_contents($url));
 // print_r($url);
 // print_r("\n\r");
+// die();
 // print_r($result);
 // print_r("\n\r");
 				if ($result -> status == 'OK' && count($result -> results) > 0) 
@@ -69,7 +70,7 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 				} 			
 			} 
 			
-			if (empty($localityScope)) 
+			if (empty($localityScope) && isset($coordinates['latitude']) && isset($coordinates['longitude'])) 
 			{
 				$queryParams = $this -> _buildQuery($coordinates['latitude'], $coordinates['longitude']);
 				$url = $this -> _apiUrl . $queryParams;
@@ -157,10 +158,12 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 		return implode("&", $result);
 	}
 
+	
 	public function getErrors()
 	{
 		return $this -> _errors;
 	}
+	
 	
 	protected function isInGeometry($lat, $lng, $geometry) 
 	{
@@ -173,16 +176,30 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 		return $result;
 	}
 
-	public function makeRequest($city, $state, $country)
+	
+	public function makeRequest($city, $state, $country, $formatted = true)
 	{
-		$queryParams = ['locality:' . urlencode($city), 'country:' . urlencode($country), 'administrative_area:' . urlencode($state)];
+		$data = false; 
+		
+		$queryParams = ['locality:' . urlencode(trim($city, "'")), 'country:' . urlencode($country), 'administrative_area:' . urlencode($state)];
 		$url = $this -> _apiUrl . 'components=' . implode('|', $queryParams);
 		$result = json_decode(file_get_contents($url));
 		
 		if ($result -> status == 'OK' && count($result -> results) > 0) {
-			return $result -> results;
-		} else {
-			return false;
+			if ($formatted) {
+				foreach ($result -> results[0] -> address_components as $area) {
+					if (in_array('locality', $area -> types)) {
+						$data['locality'] = $area;
+						break;
+					}
+				}
+				$data['geometry'] = $result -> results[0] -> geometry -> viewport;
+				$data['place_id'] = $result -> results[0] -> place_id;
+			} else {
+				$data = $result -> results;
+			}
 		}
+		 
+		return $data;
 	}
 }

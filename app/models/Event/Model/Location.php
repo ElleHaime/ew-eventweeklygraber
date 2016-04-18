@@ -70,9 +70,9 @@ class Location extends \Engine\Mvc\Model
      
     /**
      *
-     * @var integer
+     * @var string
      */
-    public $parent_id;
+    public $place_id;
      
     /**
      *

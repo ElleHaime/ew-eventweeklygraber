@@ -7,3 +7,22 @@ DEST_USER='eventprod'
 
 echo $(date +'%F %T') ': starting synchronization images with' $DEST_HOST
 rsync --progress --stats --partial --ignore-errors --ignore-existing -rp $TARGET_DIR $DEST_USER@$DEST_HOST:$DEST_DIR
+
+
+
+
+
+
+
+#!/bin/bash
+
+DEST_DIR='/home/eventcron/www/EventWeeklyGraber/upload/event/'
+TARGET_DIR='/home/eventprod/www/EventWeekly/public/upload/img/event'
+DEST_HOST='172.31.33.64'
+DEST_USER='eventcron'
+
+echo $(date +'%F %T') ': starting synchronization images with' $DEST_HOST
+rsync --progress --stats --partial --ignore-errors --ignore-existing -rp $TARGET_DIR $DEST_USER@$DEST_HOST:$DEST_DIR
+
+
+

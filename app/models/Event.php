@@ -181,7 +181,7 @@ class Event extends \Library\Model
 			
 			return false;
 		}
-print_r("... saved to new shard...\n\r");
+print_r("\n\r... saved to new shard...\n\r");
 		(new \Models\EventImage()) -> transferBetweenShards('image', $eventObj, $eventObjNew -> id);
 print_r("... save image...\n\r");		
 		(new \Models\EventTag()) -> transferBetweenShards('event_tag', $eventObj, $eventObjNew -> id);
@@ -189,10 +189,15 @@ print_r("... save tag...\n\r");
 		(new \Models\EventCategory()) -> transferBetweenShards('event_category', $eventObj, $eventObjNew -> id);
 print_r("... save category...\n\r");		
 		(new \Models\EventMember()) -> transferInShards('memberpart', $eventObj, $eventObjNew -> id);
+print_r("... save memberpart...\n\r");
 		(new \Models\EventMemberFriend()) -> transferInShards('memberfriendpart', $eventObj, $eventObjNew -> id);
+print_r("... save memberfrindpart...\n\r");		
 		(new \Models\EventLike()) -> transferInShards('memberlike', $eventObj, $eventObjNew -> id);
-		(new \Models\EventRating()) -> transferInShards('event_rating',$eventObj, $eventObjNew -> id);
-		(new \Models\Featured()) -> transferInShards('event_featured', $eventObj, $eventObjNew -> id);
+print_r("... save memberlike...\n\r");
+		(new \Models\EventRating()) -> transferInShards('event_rating', $eventObj, $eventObjNew -> id);
+print_r("... save rating...\n\r");		
+		(new \Models\Featured()) -> transferInShards(\Models\Featured::EVENT_OBJECT_TYPE, $eventObj, $eventObjNew -> id);
+print_r("... save featured...\n\r");
 
 		$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObjNew -> location_id], $this -> getDi(), null, ['adapter' => 'dbMaster']);
 		$indexer = new \Models\Event\Search\Indexer($grid);
