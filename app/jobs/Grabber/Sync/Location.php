@@ -29,7 +29,7 @@ class Location
 			$loc -> delete();
 		}
 		
-		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location group by city order by city limit 5000", $this -> di);
+		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' and city > 'Dubbo' group by city order by city limit 1", $this -> di);
 		$locations = $query -> execute();
 		
 		foreach ($locations as $loc) {
@@ -48,13 +48,15 @@ print_r(" : " . $items -> count());
 			foreach ($this -> locScope as $hash => $scope) {
 				$baseLocation = $this -> getMaxLocation($scope);
 print_r("\n\r" . $baseLocation -> id . ' : ' . $baseLocation -> city . ' : ' . $baseLocation -> state . ' : ' .  $baseLocation -> country);
+
 				foreach ($scope as $sc) {
 					if ($sc -> id != $baseLocation -> id) {
-						$this -> transferEventsToMaxLocation($baseLocation -> id, $sc);
-						$sc -> delete();
+print_r("\n\r" . $sc -> id );
+//						$this -> transferEventsToMaxLocation($baseLocation -> id, $sc);
+//						$sc -> delete();
 					}
 				}
-				
+	
 				if ($apiResult = $this -> di -> get('geo') -> makeRequest($baseLocation -> city, $baseLocation -> state, $baseLocation -> country)) {
 					$baseLocation -> latitudeMax = number_format($apiResult['geometry'] -> northeast -> lat, 8);
 					$baseLocation -> latitudeMin = number_format($apiResult['geometry'] -> southwest -> lat, 8);
@@ -65,11 +67,11 @@ print_r("\n\r" . $baseLocation -> id . ' : ' . $baseLocation -> city . ' : ' . $
 					$baseLocation -> place_id = $apiResult['place_id'];
 					$baseLocation -> search_alias = _Slug::slug($baseLocation -> city);
 
-// var_dump($baseLocation -> toArray()); 
+var_dump($baseLocation -> toArray()); 
 					$baseLocation -> update();
-print_r("\n\rupdated with id " . $baseLocation -> id);					
+print_r("\n\rupdated with id " . $baseLocation -> id); die();					
 				} else {
-print_r("\n\rdeleted with id " . $baseLocation -> id); 
+print_r("\n\rdeleted with id " . $baseLocation -> id); die();
 					$baseLocation -> delete();
 				}
 			}
