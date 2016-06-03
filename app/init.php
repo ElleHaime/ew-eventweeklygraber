@@ -31,6 +31,8 @@ $di -> set('loader', [
 				 		'Tasks\Facebook\User' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/User',
 				 		'Tasks\Facebook\Custom' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Custom',
 						'Tasks\Facebook\Creator' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Creator',
+						'Tasks\Facebook\Category' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Category',
+						'Tasks\Facebook\Venue' => APPLICATION_PATH . '/app/tasks/Grabber/Facebook/Venue',
 						'Tasks\Categorization' => APPLICATION_PATH . '/app/tasks/Categorization',
 						'Tasks\Synchronization' => APPLICATION_PATH . '/app/tasks/Synchronization',
 						'Tasks\Seo' => APPLICATION_PATH . '/app/tasks/Seo',

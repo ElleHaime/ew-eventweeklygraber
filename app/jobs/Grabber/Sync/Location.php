@@ -28,8 +28,10 @@ class Location
 		foreach ($locations as $id => $loc) {
 			$loc -> delete();
 		}
-		
-		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' and city > 'Dubbo' group by city order by city limit 1", $this -> di);
+// print_r("\n\rdone\n\r\n\r");
+// die();		
+		//$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' and city > 'Dubbo' group by city order by city limit 1", $this -> di);
+		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' group by city order by id limit 100", $this -> di);
 		$locations = $query -> execute();
 		
 		foreach ($locations as $loc) {
@@ -52,8 +54,8 @@ print_r("\n\r" . $baseLocation -> id . ' : ' . $baseLocation -> city . ' : ' . $
 				foreach ($scope as $sc) {
 					if ($sc -> id != $baseLocation -> id) {
 print_r("\n\r" . $sc -> id );
-//						$this -> transferEventsToMaxLocation($baseLocation -> id, $sc);
-//						$sc -> delete();
+						$this -> transferEventsToMaxLocation($baseLocation -> id, $sc);
+						$sc -> delete();
 					}
 				}
 	
@@ -69,9 +71,9 @@ print_r("\n\r" . $sc -> id );
 
 var_dump($baseLocation -> toArray()); 
 					$baseLocation -> update();
-print_r("\n\rupdated with id " . $baseLocation -> id); die();					
+print_r("\n\rupdated with id " . $baseLocation -> id); //die();					
 				} else {
-print_r("\n\rdeleted with id " . $baseLocation -> id); die();
+print_r("\n\rdeleted with id " . $baseLocation -> id); //die();
 					$baseLocation -> delete();
 				}
 			}

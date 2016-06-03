@@ -7,14 +7,21 @@ class Venue extends \Library\Model
 {
 	public $id;
 	public $fb_uid;
+	public $fb_username;
 	public $eb_uid;
 	public $eb_url;
 	public $location_id;
 	public $name;
 	public $address;	
-	public $coordinates;
+	public $site;
 	public $latitude;  	
 	public $longitude;
+	public $intro;
+	public $description;
+	public $worktime;
+	public $phone;
+	public $email;
+	public $transit;
 
 
 	public function initialize()
@@ -42,6 +49,26 @@ class Venue extends \Library\Model
 		return $creators;
 	}
 
+	
+	public function beforeDelete()
+	{
+		// update events
+		$obj = (new \Models\Event()) -> setShardByCriteria($this -> location_id);
+		$events = $obj::find('venue_id = ' . $this -> id);
+		foreach ($events as $e) {
+			$e -> setShardByCriteria($e -> location_id);
+			$e -> venue_id = null;
+			$e -> update();
+			
+			$grid = new \Models\Event\Grid\Search\Event(['location' => $e -> location_id], $this -> getDI(), null, ['adapter' => 'dbMaster']);
+			$indexer = new \Models\Event\Search\Indexer($grid);
+			$indexer -> setDi($this -> getDI());
+			$indexer -> updateData($e -> id);
+		}
+		
+		return;
+	}
+	
 	
 	public function setCache()
 	{

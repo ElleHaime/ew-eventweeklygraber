@@ -7,13 +7,16 @@ use Models\EventTag,
 	Models\Event,
 	Models\Cron,
 	Models\Venue,
-	Models\Location;
+	Models\Location,
+	Queue\Producer\Producer;
 
 class Facebook
 {
 	use \Jobs\Grabber\Parser\Helper;
+	use \Tasks\Facebook\Grabable;
 		
 	protected $_di;
+	protected $queue;
 
 
 	public function __construct(\Phalcon\DI $dependencyInjector)
@@ -22,9 +25,12 @@ class Facebook
         $this->_di = $dependencyInjector;
 	}
 
+	
 	public function run(\AMQPEnvelope $data)
 	{
 		error_reporting(E_ALL & ~E_NOTICE);
+		
+		$this -> initQueue('harvesterVenues');
 		
 		$msg = unserialize($data -> getBody());
 		$ev = $msg['item'];
@@ -100,11 +106,8 @@ print_r("type: " . $msg['type'] . "\n\r");
                 				$result['address'] = $ev['location'];
                 			}
                 		} else {
-                			if (isset($locExists -> latitudeMin) && isset($locExists -> latitudeMax) &&
-                					isset($locExists -> longitudeMin) && isset($locExists -> longitudeMax)) {
-                				$result['latitude'] = ($locExists -> latitudeMin + $locExists -> latitudeMax) / 2;
-                				$result['longitude'] = ($locExists -> longitudeMin + $locExists -> longitudeMax) / 2;
-                			}
+                			$result['latitude'] = $locExists -> getCenterLat();
+                			$result['longitude'] = $locExists -> getCenterLng();
                 		}
                 	}
                 }
@@ -123,15 +126,17 @@ print_r("type: " . $msg['type'] . "\n\r");
                     if ($venueObj -> save()) {
 	                    $result['venue_id'] = $venueObj -> id;
 	                    $result['address'] = $venueObj -> address;
+	                    
+	                    $this -> queue -> publish(serialize([$venueObj -> id => $venueObj -> fb_uid]));
                     }
                 }
             }
 	
             if (is_array($result['address'])) {
                 $result['address'] = '';
+            	$result['location_id'] = 0;
             }
             if (empty($result['location_id']) || is_null($result['location_id'])) {
-            	$result['location_id'] = 0;
             }
 print_r("location id: " . $result['location_id'] . "\n\r");	
             $eventObj = (new \Models\Event())-> setShardByCriteria($result['location_id']);
@@ -264,5 +269,11 @@ print_r("id to index " . $e -> id . "\n\r");
 		}
 		
 		return;
+	}
+	
+	
+	public function publishToVenueBroker()
+	{
+		
 	}
 }

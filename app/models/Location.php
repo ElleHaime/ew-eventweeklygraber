@@ -157,4 +157,23 @@ class Location extends \Library\Model
 		$this -> modelsManager -> executeQuery('DELETE FROM Models\ShardMapperEvent WHERE criteria = ' . $this -> id);
 	}
 	
+	
+	public function getCenterLat()
+	{
+		if (isset($this -> latitudeMin) && isset($this -> latitudeMax)) {
+			return ($this -> latitudeMin + $this -> latitudeMax)/2;
+		} else {
+			return null;
+		}
+	}
+	
+	
+	public function getCenterLng()
+	{
+		if (isset($this -> longitudeMin) && isset($this -> longitudeMax)) {
+			return ($this -> longitudeMin + $this -> longitudeMax)/2;
+		} else {
+			return null;
+		}
+	}
 }
