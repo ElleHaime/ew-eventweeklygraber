@@ -115,7 +115,7 @@ print_r("\n\r" . $ev['name']['text'] . "\n\r");
 			if ($eventObj -> save() != false) {
 print_r($eventObj -> id . "\n\r");
 print_r($eventObj -> eb_uid . "\n\r");				
-				$this -> categorize($eventObj);
+				$this -> categorizeObject($eventObj -> id, [$eventObj -> name, $eventObj -> description], 'event');
 
 				if (isset($ev['logo']) && !empty($ev['logo'])) {
                     $this -> saveEventImage('eb', $ev['logo']['url'], $eventObj);

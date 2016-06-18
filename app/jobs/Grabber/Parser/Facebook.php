@@ -53,7 +53,7 @@ print_r("type: " . $msg['type'] . "\n\r");
             $result['fb_uid'] = $ev['eid'];
             $result['deleted'] = "0";
             $result['fb_creator_uid'] = $ev['fb_creator_uid'];
-            $result['description'] = preg_replace('/<a[^>]*>((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.#?=-]*)*\/?)<\/a>/ui', '<a href="$1" target="_blank">$1</a>', $ev['description']);
+            $result['description'] = $this -> prepareText($ev['description']);
             $result['name'] = $ev['name'];
             $result['address'] = '';
 	            
@@ -145,7 +145,7 @@ print_r($eventObj -> name . " | " . $eventObj -> start_date);
 print_r("\n\r");	
             if ($eventObj -> save() != false) {
 print_r($eventObj -> id . " saved\n\r");
-				$this -> categorize($eventObj);
+				$this -> categorizeObject($eventObj -> id, [$eventObj -> name, $eventObj -> description], 'event');
 	            	 
                 if (isset($ev['pic_big']) && !empty($ev['pic_big'])) {
                     $this -> saveEventImage('fb', $ev['pic_big'], $eventObj);

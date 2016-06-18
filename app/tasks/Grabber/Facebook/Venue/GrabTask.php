@@ -56,7 +56,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> initVendors();
 	
-		$venues = Venue::find(['fb_uid is not null limit 500']);
+		$venues = Venue::find(['fb_uid is not null limit 200']);
 		foreach ($venues as $venueObj) {
 			$this -> harvestAction($venueObj -> toArray());	
 		}
@@ -68,40 +68,55 @@ class GrabTask extends \Phalcon\CLI\Task
 	
 	public function harvestAction($item, $args = [])
 	{
-		// get venue info
-		//$request = '/' . $item['fb_uid'] . '&access_token=' . $args[0];
 		$request = '/' . $item['fb_uid'] . '?access_token=' . $this -> fbAppAccessToken;
-print_r("\n\r" . $request . "\n\r");
+
 		try {
 			$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 			$venue = $request -> execute() -> getGraphObject() -> asArray();
 // print_r($venue); die();
 			if (!empty($venue)) {
 				if ($venue['is_community_page'] != 1) {
+					// get logo
+					$logoRequest = '/' . $item['fb_uid'] . '/picture?access_token=' . $this -> fbAppAccessToken;
+					$logoRequest = new FacebookRequest($this -> fbSession, 'GET', $logoRequest);
+print_r($logoRequest -> execute() -> getGraphObject());
+					$venue['logo'] = $logoRequest -> execute() -> getGraphObject() -> asArray();
+print_r($venue['logo']); die();					
 					// get uploaded photos
-					//$photosRequest = '/' . $item['fb_uid'] . '/photos?type=uploaded&fields=images&limit=' . $this -> photosLimit . '&access_token=' . $args[0];
 					$photosRequest = '/' . $item['fb_uid'] . '/photos?type=uploaded&fields=images&limit=' . $this -> photosLimit . '&access_token=' . $this -> fbAppAccessToken;
 					$photosRequest = new FacebookRequest($this -> fbSession, 'GET', $photosRequest);
-					$photos = $photosRequest -> execute() -> getGraphObject() -> asArray();
-					
-					if (!empty($photos)) {
-						$venue['photos'] = $photos;
-					}
+					$venue['photos'] = $photosRequest -> execute() -> getGraphObject() -> asArray();
+
 					$this -> publishToVenuesBroker($venue, $args);
 				} else {
-// 					print_r($item['id'] . ": " . $venue['name'] . "\n\r"); 
-// 					$object = Venue::findFirst($item['id']);
-// 					$object -> delete();
+					print_r($item['id'] . " : " . $item['fb_uid'] . " : " . $venue['name'] . "\n\r"); 
+					$object = Venue::findFirst($item['id']);
+					$object -> delete();
 				}
 			}
 			
 		} catch(FacebookRequestException $ex) {
-			$error = json_decode($ex -> getRawResponse());
-			print_r("\n\r" . $ex -> getMessage() . "\n\r");
-// 			die();
+			$error = $ex -> getCode();
+			switch ($error) {
+				case 100:
+					// Object does not exist, cannot be loaded due to missing permissions, or does not support this operation 
+						$object = Venue::findFirst($item['id']);
+ 						$object -> delete();
+					break;
+					
+				case 21:
+					// Page was migrated
+						$fp = fopen($this -> config -> facebook -> migratedSourceFile, 'a');
+						fputcsv($fp, [$item['id']]);
+						fclose($fp);
+					break;
+					
+				default:
+					print_r("...." . $item['fb_uid'] . " :: \n\r" . $ex -> getMessage() . "\n\r");
+			}
 		}
 	}
-	
+	 
 	
 	protected function publishToVenuesBroker($venue, $args = [])
 	{

@@ -4,13 +4,11 @@ namespace Jobs\Grabber\Parser;
 
 use Models\VenueTag,
 	Models\VenueCategory,
-	Models\VenueClassifier,
-	Models\Tag,
-	Models\Venue,
+	Models\VenueImage,
 	Models\Cron,
 	Models\Venue,
-	Models\Location,
-	Models\Classifier;
+	Models\Location;
+
 
 class FacebookVenue
 {
@@ -30,9 +28,73 @@ class FacebookVenue
 	{
 		$msg = unserialize($data -> getBody());
 		$venue = $msg['item'];
+		$vObject = Venue::findFirst('fb_uid = "' . $venue['id'] . '"');
+print_r($venue); die();		
+
+		if (isset($venue['category_list'])) $this -> parseCategories($vObject -> id, $venue['category_list']);
+		if (isset($venue['hours'])) $vObject -> worktime = $this -> parseWorkingHours($venue['hours']);
+		if (isset($venue['about'])) $vObject -> intro = $this -> prepareText($venue['about']);
+		if (isset($venue['description'])) $vObject -> description = $this -> prepareText($venue['description']);
+		if (isset($venue['phone'])) $vObject -> phone = $venue['phone'];
+		if (isset($venue['website'])) $vObject -> site = $venue['website'];
+		if (isset($venue['username'])) $vObject -> fb_username = $venue['username'];
+		if (isset($venue['price_range'])) $vObject -> pricerange = $venue['price_range'];
+		if (isset($venue['logo'])) $vObject -> logo = $this -> getImageName($venue['logo']['url'], $venue['name']);
+ 		if (isset($venue['cover'])) $this -> saveVenueImage('fb', $venue['cover']['url'], $vObject, 'cover');
+		if (isset($venue['photos'])) $this -> parsePhotos($vObject, $venue['photos']);
 		
-print_r($venue); die();
+		$vObject -> save();
+	}
+	
+	
+	
+	private function parseWorkingHours($arg)
+	{
+		$result = $diff = $list = [];
 		
-		die();
+		foreach ($arg as $key => $val) {
+			$day = explode('_', $key);
+			$result[$day[2]][$val][] = $day[0];
+		}
+
+		foreach ($result['open'] as $mkey => $mval) {
+			foreach ($result['close'] as $skey => $sval) {
+				$days = array_intersect($mval, $sval);
+				if (!empty($days)) {
+					$diff['open'][ucfirst($days[0]) . '-' . ucfirst($days[count($days)-1])] = $mkey;
+					$diff['close'][ucfirst($days[0]) . '-' . ucfirst($days[count($days)-1])] = $skey;
+				}
+			}	
+		}
+		
+		foreach ($diff['open'] as $key => $val) {
+			$days = explode('-', $key);
+			$days[0] == $days[1] ? $days = $days[0] : $days = $key;
+			$list[$days] = $val . '-' . $diff['close'][$key];
+		}
+		
+		return serialize($list);
+	} 
+	
+	
+	
+	private function parseCategories($venueId, $params = [])
+	{
+		$result = [];
+		
+		foreach ($params as $key => $val) {
+			$result[] = $val['name'];
+		}
+		$this -> categorizeObject($venueId, $result, 'venue');
+		
+		return;
+	}
+	
+	
+	private function parsePhotos($venueId, $params = [])
+	{
+		foreach ($params as $key => $val) {
+			
+		}
 	}
 }
