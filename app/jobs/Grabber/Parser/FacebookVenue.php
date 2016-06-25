@@ -29,7 +29,7 @@ class FacebookVenue
 		$msg = unserialize($data -> getBody());
 		$venue = $msg['item'];
 		$vObject = Venue::findFirst('fb_uid = "' . $venue['id'] . '"');
-print_r($venue); die();		
+		
 
 		if (isset($venue['category_list'])) $this -> parseCategories($vObject -> id, $venue['category_list']);
 		if (isset($venue['hours'])) $vObject -> worktime = $this -> parseWorkingHours($venue['hours']);
@@ -38,14 +38,21 @@ print_r($venue); die();
 		if (isset($venue['phone'])) $vObject -> phone = $venue['phone'];
 		if (isset($venue['website'])) $vObject -> site = $venue['website'];
 		if (isset($venue['username'])) $vObject -> fb_username = $venue['username'];
+		if (isset($venue['link'])) $vObject -> fb_url = $venue['link'];
 		if (isset($venue['price_range'])) $vObject -> pricerange = $venue['price_range'];
-		if (isset($venue['logo'])) $vObject -> logo = $this -> getImageName($venue['logo']['url'], $venue['name']);
- 		if (isset($venue['cover'])) $this -> saveVenueImage('fb', $venue['cover']['url'], $vObject, 'cover');
-		if (isset($venue['photos'])) $this -> parsePhotos($vObject, $venue['photos']);
-		
+ 		if (isset($venue['cover'])) $this -> saveVenueImage('fb', $venue['cover'] -> source, $vObject, 'cover');
+		if (isset($venue['photos'])) $this -> parsePhotos($vObject, $venue['photos']['data']);
+		if (isset($venue['restaurant_services'])) $vObject -> services = serialize($venue['restaurant_services']);
+		if (isset($venue['restaurant_specialties'])) $vObject -> specialties = serialize($venue['restaurant_specialties']);
+		if (isset($venue['payment_options'])) $vObject -> payment = $this -> parseBoolean($venue['payment_options']);
+		if (isset($venue['parking'])) $vObject -> parking = $this -> parseBoolean($venue['parking']);
+		if (isset($venue['logo'])) {
+			$vObject -> logo = $this -> getImageName($venue['logo'], $venue['name']);
+			$this -> saveVenueImage('fb', $venue['logo'], $vObject);
+		}
+print_r($vObject -> id . "::" . $vObject -> fb_uid . "::" . $vObject -> fb_username . "\n\r");		
 		$vObject -> save();
 	}
-	
 	
 	
 	private function parseWorkingHours($arg)
@@ -60,7 +67,9 @@ print_r($venue); die();
 		foreach ($result['open'] as $mkey => $mval) {
 			foreach ($result['close'] as $skey => $sval) {
 				$days = array_intersect($mval, $sval);
+
 				if (!empty($days)) {
+					$days = array_values($days);
 					$diff['open'][ucfirst($days[0]) . '-' . ucfirst($days[count($days)-1])] = $mkey;
 					$diff['close'][ucfirst($days[0]) . '-' . ucfirst($days[count($days)-1])] = $skey;
 				}
@@ -83,7 +92,7 @@ print_r($venue); die();
 		$result = [];
 		
 		foreach ($params as $key => $val) {
-			$result[] = $val['name'];
+			$result[] = $val -> name;
 		}
 		$this -> categorizeObject($venueId, $result, 'venue');
 		
@@ -91,10 +100,29 @@ print_r($venue); die();
 	}
 	
 	
-	private function parsePhotos($venueId, $params = [])
+	private function parsePhotos($venueObject, $params = [])
 	{
+		if (!empty($params)) {
+			foreach ($params as $key => $val) {
+				$this -> saveVenueImage('fb', $val -> images[0] -> source, $venueObject, 'gallery');
+			}
+		}
+		
+		return;
+	}
+	
+	
+	private function parseBoolean($params = [])
+	{
+		$result = [];
 		foreach ($params as $key => $val) {
-			
+			if ($val == 1) $result[$key] = $val;
+		}
+		
+		if (empty($result))  {
+			return null;
+		} else {
+			return serialize($result);
 		}
 	}
 }

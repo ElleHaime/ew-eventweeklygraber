@@ -11,4 +11,10 @@ class SyncTask extends \Phalcon\CLI\Task
 		$job = new \Jobs\Grabber\Sync\Expired($this -> getDi());
 		$job -> run();
 	}
+	
+	public function moveImagesAction()
+	{
+		$job = new \Jobs\Grabber\Sync\EventImages($this -> getDi());
+		$job -> run();
+	}
 }

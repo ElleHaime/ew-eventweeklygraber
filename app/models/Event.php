@@ -228,7 +228,17 @@ print_r("... old events removed ...\n\r");
 	public function beforeDelete()
 	{
 		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> id;
-//print_r($imgPath . "\n\r");		
+		
+		if (is_null($this -> start_date)) {
+			$destDir = $this -> di -> get('config') -> application -> uploadDir -> eventReserveDir . 'undated/' . $this -> id;
+		} else {
+			$destDir = $this -> di -> get('config') -> application -> uploadDir -> eventReserveDir
+							. date('Y', strtotime($this -> start_date)) . '/'
+							. date('m', strtotime($this -> start_date)) . '/'
+							. date('d', strtotime($this -> start_date)) . '/'
+							. $this -> id;
+		}
+		
 		if (is_dir($imgPath)) {
 			foreach(scandir($imgPath) as $file) {
 				if ('.' === $file || '..' === $file) continue;

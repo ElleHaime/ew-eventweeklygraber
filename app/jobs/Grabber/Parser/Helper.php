@@ -3,19 +3,21 @@
 namespace Jobs\Grabber\Parser;
 
 use Models\EventImage,
-	 Models\VenueImage,
-	 Models\EventTag,
-	 Models\EventCategory,
-	 Models\Category,
-	 Models\Tag,
-	 Library\Utils\SlugUri;
+	Models\EventTag,
+	Models\EventCategory,
+	Models\VenueImage,
+	Models\VenueTag,
+	Models\VenueCategory,
+	Models\Category,
+	Models\Tag,
+	Library\Utils\SlugUri;
 
 
 trait Helper
 {
-	public function saveVenueImage($parser = 'fb', $source, \Models\Venue $venue, $imgType = null, $width = false, $height = false)
+	public function saveVenueImage($parser = 'fb', $source, \Models\Venue $venue, $imgType = 'logo', $width = false, $height = false)
 	{
-		$img = $this -> loadImage($source, $venue);
+		$img = $this -> loadImage($source, $venue, $parser, 'venue', $imgType);
 		
 		$images = new VenueImage();
 		$images -> assign(['venue_id' => $venue -> id, 
@@ -27,7 +29,7 @@ trait Helper
 	
 	public function saveEventImage($parser = 'fb', $source, \Models\Event $event, $imgType = null, $width = false, $height = false)
 	{
-        $img = $this -> loadImage($source, $event);
+        $img = $this -> loadImage($source, $event, $parser, 'event', $imgType);
         
         $images = new EventImage();
         $images -> setShardById($event -> id);
@@ -43,13 +45,7 @@ trait Helper
     	$prop = $parser . '_uid';
     	
     	if ($parser == 'fb') {
-//     		$ext = explode('.', $source);
-//     		if (strpos(end($ext), '?')) {
-//     			$img = $parser . '_' . $object -> $prop . '.' . substr(end($ext), 0, strpos(end($ext), '?'));
-//     		} else {
-//     			$img = $parser . '_' . $object -> $prop . '.' . end($ext);
-//     		}
-    		$img = $this -> getImageName($source['url'], $object -> name, $imgType);
+    		$img = $this -> getImageName($source, $object -> name, $imgType);
     	} else {
     		$img = $object -> logo;
     	}
@@ -59,12 +55,25 @@ trait Helper
     	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
     	$content = curl_exec($ch);
     	
-    	if (is_null($imgType)) {
-    		$fDir = $this -> config -> application -> uploadDir -> $objType . $object -> id;
-    		$fPath = $this -> config -> application -> uploadDir -> $objType . $object -> id . '/' . $img;
+    	if ($objType == 'event') {
+    		if(!empty($object -> start_date)) { 
+    			$objDatesName = date('Y', strtotime($object -> start_date)) . '/' 
+    							. date('m', strtotime($object -> start_date)) . '/' 
+    							. date('d', strtotime($object -> start_date));
+    		} else {
+    			$objDatesName = 'undated';
+    		} 
+    		$mainDir = $this -> config -> application -> uploadDir -> $objType . $objDatesName . '/' . $object -> id;
     	} else {
-    		$fDir = $this -> config -> application -> uploadDir -> $objType . $object -> id . '/' . $imgType;
-    		$fPath = $this -> config -> application -> uploadDir -> $objType . $object -> id . '/' . $imgType . '/' . $img;
+    		$mainDir = $this -> config -> application -> uploadDir -> $objType . $object -> location_id . '/' . $object -> id;
+    	}
+    	
+    	if (is_null($imgType) || $imgType == 'logo') {
+    		$fDir = $mainDir;
+    		$fPath = $mainDir . '/' . $img;
+    	} else {
+    		$fDir = $mainDir . '/' . $imgType;
+    		$fPath = $mainDir . '/' . $imgType . '/' . $img;
     	}
     	
     	if ($content) {

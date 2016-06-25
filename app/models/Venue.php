@@ -22,6 +22,11 @@ class Venue extends \Library\Model
 	public $phone;
 	public $email;
 	public $transit;
+	public $pricerange;
+	public $services;
+	public $specialties;
+	public $payment;
+	public $parking;
 
 
 	public function initialize()

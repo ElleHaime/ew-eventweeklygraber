@@ -56,8 +56,9 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> initVendors();
 	
-		$venues = Venue::find(['fb_uid is not null limit 200']);
+		$venues = Venue::find(['fb_uid is not null and fb_username is null limit 5000']);
 		foreach ($venues as $venueObj) {
+print_r($venueObj -> id . "::" . $venueObj -> fb_uid . "\n\r");			
 			$this -> harvestAction($venueObj -> toArray());	
 		}
 		
@@ -73,19 +74,24 @@ class GrabTask extends \Phalcon\CLI\Task
 		try {
 			$request = new FacebookRequest($this -> fbSession, 'GET', $request);
 			$venue = $request -> execute() -> getGraphObject() -> asArray();
-// print_r($venue); die();
+
 			if (!empty($venue)) {
 				if ($venue['is_community_page'] != 1) {
 					// get logo
-					$logoRequest = '/' . $item['fb_uid'] . '/picture?access_token=' . $this -> fbAppAccessToken;
+					$logoRequest = '/' . $item['fb_uid'] . '/photos?type=profile&fields=images&limit=1&access_token=' . $this -> fbAppAccessToken;
 					$logoRequest = new FacebookRequest($this -> fbSession, 'GET', $logoRequest);
-print_r($logoRequest -> execute() -> getGraphObject());
-					$venue['logo'] = $logoRequest -> execute() -> getGraphObject() -> asArray();
-print_r($venue['logo']); die();					
+					$logoImages = $logoRequest -> execute() -> getGraphObject() -> asArray();
+					if (!empty($logoImages)) {
+						$venue['logo'] = $logoImages['data'][0] -> images[0] -> source; 
+					}
+
 					// get uploaded photos
 					$photosRequest = '/' . $item['fb_uid'] . '/photos?type=uploaded&fields=images&limit=' . $this -> photosLimit . '&access_token=' . $this -> fbAppAccessToken;
 					$photosRequest = new FacebookRequest($this -> fbSession, 'GET', $photosRequest);
-					$venue['photos'] = $photosRequest -> execute() -> getGraphObject() -> asArray();
+					$photosImages = $photosRequest -> execute() -> getGraphObject() -> asArray();
+					if (!empty($photosImages)) {
+						$venue['photos'] = $photosImages;
+					}
 
 					$this -> publishToVenuesBroker($venue, $args);
 				} else {

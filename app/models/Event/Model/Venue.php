@@ -80,6 +80,72 @@ class Venue extends \Engine\Mvc\Model
     public $longitude;
 
     /**
+     *
+     * @var string
+     */
+    public $intro;
+    
+    /**
+     *
+     * @var string
+     */
+    public $description;
+    
+    /**
+     *
+     * @var string
+     */
+    public $worktime;
+    
+    /**
+     *
+     * @var string
+     */
+    public $phone;
+    
+    /**
+     *
+     * @var string
+     */
+    public $email;
+    
+    /**
+     *
+     * @var string
+     */
+    public $transit;
+    
+    /**
+     *
+     * @var string
+     */
+    public $pricerange;
+    
+    /**
+     *
+     * @var string
+     */
+    public $services;
+    
+    /**
+     *
+     * @var string
+     */
+    public $specialties;
+    
+    /**
+     *
+     * @var string
+     */
+    public $payment;
+    
+    /**
+     *
+     * @var string
+     */
+    public $parking;
+
+    /**
      * Initialize method for model.
      */
     public function initialize()
