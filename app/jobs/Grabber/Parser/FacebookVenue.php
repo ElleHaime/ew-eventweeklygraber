@@ -50,8 +50,10 @@ class FacebookVenue
 			$vObject -> logo = $this -> getImageName($venue['logo'], $venue['name']);
 			$this -> saveVenueImage('fb', $venue['logo'], $vObject);
 		}
+		
 print_r($vObject -> id . "::" . $vObject -> fb_uid . "::" . $vObject -> fb_username . "\n\r");		
 		$vObject -> save();
+		
 	}
 	
 	

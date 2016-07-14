@@ -56,7 +56,7 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> initVendors();
 	
-		$venues = Venue::find(['fb_uid is not null and fb_username is null limit 5000']);
+		$venues = Venue::find(['fb_uid is not null and fb_username is null and location_id = 1 limit 500']);
 		foreach ($venues as $venueObj) {
 print_r($venueObj -> id . "::" . $venueObj -> fb_uid . "\n\r");			
 			$this -> harvestAction($venueObj -> toArray());	

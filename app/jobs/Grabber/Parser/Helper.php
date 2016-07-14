@@ -49,7 +49,9 @@ trait Helper
     	} else {
     		$img = $object -> logo;
     	}
-    	
+// print_r("\n\r");
+// print_r($img);
+   	
     	$ch = curl_init($source);
     	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -68,6 +70,10 @@ trait Helper
     		$mainDir = $this -> config -> application -> uploadDir -> $objType . $object -> location_id . '/' . $object -> id;
     	}
     	
+// print_r("\n\r");
+// print_r($mainDir);
+
+    	 
     	if (is_null($imgType) || $imgType == 'logo') {
     		$fDir = $mainDir;
     		$fPath = $mainDir . '/' . $img;
@@ -75,6 +81,8 @@ trait Helper
     		$fDir = $mainDir . '/' . $imgType;
     		$fPath = $mainDir . '/' . $imgType . '/' . $img;
     	}
+// print_r("\n\r");
+// print_r($fPath);
     	
     	if ($content) {
     		if (!is_dir($fDir)) mkdir($fDir, 0777, true);

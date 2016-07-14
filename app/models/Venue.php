@@ -14,6 +14,7 @@ class Venue extends \Library\Model
 	public $name;
 	public $address;	
 	public $site;
+	public $logo;
 	public $latitude;  	
 	public $longitude;
 	public $intro;
