@@ -9,6 +9,7 @@ use \Vendor\FacebookGraph\FacebookSession,
 	\Queue\Consumer\Consumer,
 	\Models\Cron,
 	\Models\Venue,
+	\Models\Location,
 	\Models\Event;
 	
 class GrabTask extends \Phalcon\CLI\Task
@@ -56,10 +57,13 @@ class GrabTask extends \Phalcon\CLI\Task
 	{
 		$this -> initVendors();
 	
-		$venues = Venue::find(['fb_uid is not null and fb_username is null and location_id = 1 limit 500']);
-		foreach ($venues as $venueObj) {
+		$locations = Venue::find();
+		foreach ($locations as $locObject) { 
+			$venues = Venue::find(['fb_uid is not null and fb_username is null and location_id = ' . $locObject -> id]);
+			foreach ($venues as $venueObj) {
 print_r($venueObj -> id . "::" . $venueObj -> fb_uid . "\n\r");			
-			$this -> harvestAction($venueObj -> toArray());	
+				$this -> harvestAction($venueObj -> toArray());	
+			}
 		}
 		
 		print_r("\n\rdone\n\r");
