@@ -189,15 +189,16 @@ trait Helper
     }
     
     
-    public function addToIndex($eventObj)
+    public function addToIndex($obj, $gridType = 'event')
     {
-    	$grid = new \Models\Event\Grid\Search\Event(['location' => $eventObj -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
+    	$gridName = '\Models\Event\Grid\Search\\' . ucfirst($gridType);
+    	$grid = new $gridName(['location' => $obj -> location_id], $this -> _di, null, ['adapter' => 'dbMaster']);
     	
     	$indexer = new \Models\Event\Search\Indexer($grid);
     	$indexer -> setDi($this->_di);
     	
 //     	if (!$indexer -> existsData($eventObj -> id)) {
-	    	if (!$indexer -> addData($eventObj -> id)) {
+	    	if (!$indexer -> addData($obj -> id)) {
 	    		print_r("ooooooops, not saved to index\n\r");
 	    	}
 //     	} else {

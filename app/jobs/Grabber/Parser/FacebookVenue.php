@@ -51,8 +51,11 @@ class FacebookVenue
 			$this -> saveVenueImage('fb', $venue['logo'], $vObject);
 		}
 		
-print_r($vObject -> id . "::" . $vObject -> fb_uid . "::" . $vObject -> fb_username . "\n\r");		
-		$vObject -> save();
+print_r($vObject -> id . "::" . $vObject -> fb_uid . "::" . $vObject -> fb_username . "\n\r");
+		
+		if ($vObject -> save()) {
+			$this -> addToIndex($vObject, 'venue');
+		}
 		
 	}
 	
