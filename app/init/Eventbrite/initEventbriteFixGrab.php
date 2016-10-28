@@ -1,10 +1,10 @@
 <?php 
 
-require_once('init.php');
+require_once('../../init.php');
 
 try {
     $console -> handle(['task' => 'Tasks\Eventbrite\Grab',
-                        'action' => 'harvest']);	
+                        'action' => 'harvestIncorrect']);	
 } catch (\Phalcon\Exception $e) {
 	echo $e -> getMessage();
 }
