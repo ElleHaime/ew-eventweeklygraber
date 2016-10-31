@@ -52,5 +52,20 @@ class VenueCategory extends \Engine\Mvc\Model
         $this->belongsTo("venue_id", "\Models\Event\Model\Venue", "id", ['alias' => 'Venue']);
         $this->belongsTo("category_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
     }
+    
+    
+    public function getSearchSource()
+    {
+    	return 'venue_category';
+    }
      
+    
+    public function setShardByCriteria($criteria)
+    {
+    	$criteria = $this -> getSearchSource();
+    	$mngr = parent::getModelsManager();
+    	$mngr -> setModelSource($this, $criteria);
+    
+    	return;
+    }
 }

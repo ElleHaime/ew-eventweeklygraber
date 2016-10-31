@@ -52,5 +52,21 @@ class VenueTag extends \Engine\Mvc\Model
         $this->belongsTo("venue_id", "\Models\Event\Model\Venue", "id", ['alias' => 'Venue']);
         $this->belongsTo("tag_id", "\Models\Event\Model\Tag", "id", ['alias' => 'Tag']);
     }
+    
+
+    public function getSearchSource()
+    {
+    	return 'venue_tag';
+    }
+     
+    
+    public function setShardByCriteria($criteria)
+    {
+    	$criteria = $this -> getSearchSource();
+    	$mngr = parent::getModelsManager();
+    	$mngr -> setModelSource($this, $criteria);
+    
+    	return;
+    }
      
 }
