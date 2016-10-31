@@ -1,5 +1,4 @@
-<?php
-/**
+<?php /**
  * @namespace
  */
 namespace Models\Event\Model;
@@ -56,5 +55,6 @@ class Tag extends \Engine\Mvc\Model
     {
         $this->belongsTo("category_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
         $this->belongsTo("tag_id", "\Models\Event\Model\EventTag", "id", ['alias' => 'Event']);
+	$this->belongsTo("tag_id", "\Models\Event\Model\VenueTag", "id", ['alias' => 'Venue']);
     }
 }

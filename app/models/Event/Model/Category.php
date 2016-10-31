@@ -63,6 +63,7 @@ class Category extends \Engine\Mvc\Model
         $this->belongsTo("parent_id", "\Models\Event\Model\Category", "id", ['alias' => 'Category']);
         $this->belongsTo("id", "\Models\Event\Model\Tag", "category_id", ['alias' => 'Category']);
         $this->belongsTo("id", "\Models\Event\Model\EventCategory", "category_id", ['alias' => 'Event']);
+	$this->belongsTo("id", "\Models\Event\Models\VenueCategory", "category_id", ['alias' => 'Venue']);
     }
      
 }
