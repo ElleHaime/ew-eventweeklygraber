@@ -35,7 +35,9 @@ class Venue extends \Library\Model
 		parent::initialize();		
 		
 		$this -> belongsTo('location_id', '\Models\Location', 'id', array('alias' => 'location'));
-		$this -> hasOne('id', '\Models\Event', 'venue_id', array('alias' => 'event'));
+		$this -> hasMany('id', '\Models\Event', 'venue_id', array('alias' => 'event'));
+		$this -> hasMany('id', '\Models\VenueCategory', 'venue_id', array('alias' => 'venue_category'));
+		$this -> hasMany('id', '\Models\VenueTag', 'venue_id', array('alias' => 'venue_tag'));
 	}
 
 	

@@ -151,5 +151,7 @@ class Venue extends \Engine\Mvc\Model
     public function initialize()
     {
         $this->belongsTo("location_id", "\Models\Event\Model\Location", "id", ['alias' => 'Location']);
+        $this->belongsTo("id", "Models\Event\Model\VenueCategory", "venue_id", ['alias' => 'Category']);
+        $this->belongsTo("id", "Models\Event\Model\VenueTag", "venue_id", ['alias' => 'Tag']);
     }
 }
