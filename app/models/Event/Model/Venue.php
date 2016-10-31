@@ -160,4 +160,37 @@ class Venue extends \Engine\Mvc\Model
     {
 	return 'venue';
     }
+
+    public function onConstruct()
+    {
+    	$di = $this->getDI();
+    	$connections = (array) $di -> get('shardingConfig') -> connections;
+    	foreach($connections as $key => $options) {
+    		if (!isset($options -> port)) {
+    			$options -> port = 3306;
+    		}
+    		$di->set($key, function () use ($options) {
+    			$db = new \Phalcon\Db\Adapter\Pdo\Mysql([
+    					"host" => $options->host,
+    					"username" => $options->user,
+    					"password" => $options->password,
+    					"dbname" => $options->database,
+    					"port" => $options->port
+    			]);
+    
+    			return $db;
+    		});
+    	}
+    }
+    
+    
+    public function setShardByCriteria($criteria)
+    {
+    	$criteria = $this -> getSearchSource();
+    	$mngr = parent::getModelsManager();
+    	$mngr -> setModelSource($this, $criteria);
+    	 
+    	return;
+    }
+
 }
