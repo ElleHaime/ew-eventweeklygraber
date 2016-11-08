@@ -229,14 +229,16 @@ print_r("... old events removed ...\n\r");
 	{
 		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> id;
 		
-		if (is_null($this -> start_date)) {
-			$destDir = $this -> di -> get('config') -> application -> uploadDir -> eventReserveDir . 'undated/' . $this -> id;
-		} else {
-			$destDir = $this -> di -> get('config') -> application -> uploadDir -> eventReserveDir
-							. date('Y', strtotime($this -> start_date)) . '/'
-							. date('m', strtotime($this -> start_date)) . '/'
-							. date('d', strtotime($this -> start_date)) . '/'
-							. $this -> id;
+		if (!is_dir($imgPath)) {
+			if (is_null($this -> start_date)) {
+				$imgPath = $this -> di -> get('config') -> application -> uploadDir -> event . 'undated/' . $this -> id;
+			} else {
+				$imgPath = $this -> di -> get('config') -> application -> uploadDir -> event
+								. date('Y', strtotime($this -> start_date)) . '/'
+								. date('m', strtotime($this -> start_date)) . '/'
+								. date('d', strtotime($this -> start_date)) . '/'
+								. $this -> id;
+			}
 		}
 		
 		if (is_dir($imgPath)) {

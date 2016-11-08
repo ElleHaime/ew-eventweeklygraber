@@ -23,7 +23,7 @@ class EventImages
 				'dbname' => $this -> di -> get('config') -> database -> dbname];
 		$conn = new \Phalcon\Db\Adapter\Pdo\Mysql($cfg);
 		
-		$dirs = scandir($this -> di -> get('config') -> application -> uploadDir);
+		$dirs = scandir($this -> di -> get('config') -> application -> uploadDir -> event );
 
 		foreach ($dirs as $f) {
 			if ('.' === $f || '..' === $f) continue;
@@ -40,7 +40,7 @@ class EventImages
 								-> selectRecords();
 			} 
 			if (!$exists) {
-				$this -> deleteRec($this -> di -> get('config') -> application -> uploadDir . $f); 				
+				$this -> deleteRec($this -> di -> get('config') -> application -> uploadDir -> event . $f); 				
 			} 
 		}
 		

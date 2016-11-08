@@ -19,7 +19,7 @@ class VenueImage extends \Library\Model
 	
 	public function beforeDelete()
 	{
-		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> venue_id . '/' . $this -> type . '/' . $this -> image;
+		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir -> venue . $this -> venue_id . '/' . $this -> type . '/' . $this -> image;
 		if (file_exists($imgPath)) {
 print_r($imgPath . "\n\r");			
 			unlink($imgPath);			

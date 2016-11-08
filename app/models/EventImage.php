@@ -21,7 +21,7 @@ class EventImage extends \Library\Model
 	
 	public function beforeDelete()
 	{
-		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> event_id . '/' . $this -> type . '/' . $this -> image;
+		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir -> event . $this -> event_id . '/' . $this -> type . '/' . $this -> image;
 		if (file_exists($imgPath)) {
 print_r($imgPath . "\n\r");			
 			unlink($imgPath);			
@@ -31,7 +31,7 @@ print_r($imgPath . "\n\r");
 	
 	public function transferBetweenShards($relationName, $oldObject, $parentId)
 	{
-		$uploadDir = $this -> getDi() -> get('config') -> application -> uploadDir;
+		$uploadDir = $this -> getDi() -> get('config') -> application -> uploadDir -> event;
 		if (is_dir($uploadDir . $oldObject -> id)) rename($uploadDir . $oldObject -> id, $uploadDir . $parentId);
 		
 		parent::transferBetweenShards($relationName, $oldObject, $parentId);
