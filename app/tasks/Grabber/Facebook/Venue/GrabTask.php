@@ -90,7 +90,7 @@ print_r($venueObj -> id . "::" . $venueObj -> fb_uid . "\n\r");
 					}
 
 					// get uploaded photos
-					$photosRequest = '/' . $item['fb_uid'] . '/photos?type=uploaded&fields=images&limit=' . $this -> photosLimit . '&access_token=' . $this -> fbAppAccessToken;
+					$photosRequest = '/' . $item['fb_uid'] . '/photos?type=uploaded&fields=images&limit=' . $this -> config -> facebook -> venueGallerySize . '&access_token=' . $this -> fbAppAccessToken;
 					$photosRequest = new FacebookRequest($this -> fbSession, 'GET', $photosRequest);
 					$photosImages = $photosRequest -> execute() -> getGraphObject() -> asArray();
 					if (!empty($photosImages)) {
