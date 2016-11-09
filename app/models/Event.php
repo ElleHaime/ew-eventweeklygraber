@@ -227,13 +227,13 @@ print_r("... old events removed ...\n\r");
 	
 	public function beforeDelete()
 	{
-		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir . $this -> id;
+		$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir -> event . $this -> id;
 		
 		if (!is_dir($imgPath)) {
 			if (is_null($this -> start_date)) {
-				$imgPath = $this -> di -> get('config') -> application -> uploadDir -> event . 'undated/' . $this -> id;
+				$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir -> event . 'undated/' . $this -> id;
 			} else {
-				$imgPath = $this -> di -> get('config') -> application -> uploadDir -> event
+				$imgPath = $this -> getDi() -> get('config') -> application -> uploadDir -> event
 								. date('Y', strtotime($this -> start_date)) . '/'
 								. date('m', strtotime($this -> start_date)) . '/'
 								. date('d', strtotime($this -> start_date)) . '/'

@@ -185,21 +185,29 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 		$url = $this -> _apiUrl . 'components=' . implode('|', $queryParams);
 		$result = json_decode(file_get_contents($url));
 		
-		if ($result -> status == 'OK' && count($result -> results) > 0) {
-			if ($formatted) {
-				foreach ($result -> results[0] -> address_components as $area) {
-					if (in_array('locality', $area -> types)) {
-						$data['locality'] = $area;
-						break;
+		switch ($result -> status) {
+			case 'OK':
+					if (count($result -> results) > 0) {
+						if ($formatted) {
+							foreach ($result -> results[0] -> address_components as $area) {
+								if (in_array('locality', $area -> types)) {
+									$data['locality'] = $area;
+									break;
+								}
+							}
+							$data['geometry'] = $result -> results[0] -> geometry -> viewport;
+							$data['place_id'] = $result -> results[0] -> place_id;
+						} else {
+							$data = $result -> results;
+						}
 					}
-				}
-				$data['geometry'] = $result -> results[0] -> geometry -> viewport;
-				$data['place_id'] = $result -> results[0] -> place_id;
-			} else {
-				$data = $result -> results;
-			}
+				break;
+			
+			default:
+					throw new \Exception($result -> error_message);
+				break;
 		}
-		 
+		
 		return $data;
 	}
 }
