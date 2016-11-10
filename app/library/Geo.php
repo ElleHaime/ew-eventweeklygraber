@@ -202,6 +202,7 @@ class Geo extends \Phalcon\Mvc\User\Plugin
 						}
 					}
 				break;
+			case 'ZERO_RESULTS': break;
 			
 			default:
 					throw new \Exception($result -> error_message);

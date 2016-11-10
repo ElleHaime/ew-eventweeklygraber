@@ -31,7 +31,7 @@ class Location
 // print_r("\n\rdone\n\r\n\r");
 // die();		
 		//$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' and city > 'Dubbo' group by city order by city limit 1", $this -> di);
-		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' group by city order by id limit 100", $this -> di);
+		$query = new \Phalcon\Mvc\Model\Query("SELECT distinct(city) as city, id as id FROM Models\Location where place_id not like 'Ch%' group by city", $this -> di);
 		$locations = $query -> execute();
 		
 		foreach ($locations as $loc) {
